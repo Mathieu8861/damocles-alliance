@@ -10,7 +10,7 @@
 - **Type :** Site d'alliance (clone du site REN), gestion membres, PvP, percos, recyclages, forgemagie
 - **Dossier site :** `Création site Web/DAMOCLES/`
 - **URL prod :** à créer (Vercel)
-- **Git :** à créer (repo GitHub Mathieu8861) — **Branche :** master
+- **Git :** https://github.com/Mathieu8861/damocles-alliance (public) — **Branche :** master
 - **Statut projet :** 🟢 actif — duplication en cours
 
 ## Stack technique
