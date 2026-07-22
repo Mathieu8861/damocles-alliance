@@ -17,7 +17,8 @@
 - HTML/CSS/JS vanilla (identique REN : IIFE par page, event `ren:ready`, helpers `window.REN.*`)
 - Supabase (Postgres + Auth + RLS + Storage + Edge Functions) — **projet à créer** (voir INSTALLATION.md)
 - Déploiement : Vercel (projet à créer)
-- Fonts : Inter + Rajdhani, DA rouge (héritée de REN, à ajuster si besoin)
+- Fonts : Inter + Rajdhani
+- **DA violette** (23/07) : accent `#7d5ff7`, clair `#9678ff`, foncé `#6244d9` (variables CSS `--color-accent*`). Les rouges sémantiques (danger `#e84444`, défaites, suppressions, tag fix, cadre rubis) restent rouges volontairement
 
 ## Origine : duplication du site REN (22/07/2026)
 - Code cloné depuis `Création site Web/REN/` (commit `9cc4d5d`)
@@ -51,6 +52,7 @@
 ## Historique & Décisions
 - 22/07/2026 : choix du nom **Damoclès [SWRD]** (menace qui plane sur BCL). Leads : Rorschach, Lord, Pannah, Henrich, Big. Messages d'annonce Discord + MP de démarchage rédigés. Discord : duplication du serveur Renegats via modèle de serveur natif (Paramètres > Modèle de serveur, désactiver le mode Communauté le temps de créer le modèle)
 - 22/07/2026 : duplication du code REN → DAMOCLES (site + sql + edge function), rebrand Damoclès, SQL consolidé, checklist INSTALLATION.md
+- 23/07/2026 : bascule de la DA rouge → **violet #7d5ff7** (demande Mathieu). Variables accent + littéraux (sidebar, badges, glows, cadres, confettis, logo SVG). Rouges sémantiques conservés
 
 ## Prochaines étapes
 - [ ] Créer le projet Supabase + runner le SQL d'install

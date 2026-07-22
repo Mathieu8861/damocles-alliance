@@ -548,7 +548,7 @@
             var pvCls = pv > 0 ? 'recyc-pv--positive' : (pv < 0 ? 'recyc-pv--negative' : 'recyc-pv--neutral');
             var pvText = (pv >= 0 ? '+' : '') + fmt(pv);
             var isMe = m.user_id === userId;
-            html += '<tr' + (isMe ? ' style="background:rgba(219,41,41,0.06);"' : '') + '>'
+            html += '<tr' + (isMe ? ' style="background:rgba(125,95,247,0.08);"' : '') + '>'
                 + '<td><strong>' + rank + '</strong></td>'
                 + '<td><strong>' + esc(m.username || '?') + '</strong>' + (isMe ? ' <span class="text-muted" style="font-size:0.7rem;">(vous)</span>' : '') + '</td>'
                 + '<td class="recyc-num">' + fmt(m.nb_recyclages || 0) + '</td>'

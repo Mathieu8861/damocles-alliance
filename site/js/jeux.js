@@ -517,7 +517,7 @@
         if (!container) return;
 
         /* Confettis classiques */
-        var colors = ['#db2929', '#e84444', '#ffd700', '#ffffff', '#2ecc71', '#f39c12'];
+        var colors = ['#7d5ff7', '#9678ff', '#ffd700', '#ffffff', '#2ecc71', '#f39c12'];
         var count = 40;
 
         for (var i = 0; i < count; i++) {

@@ -309,7 +309,7 @@
     function launchConfetti() {
         var container = document.getElementById('confetti-container');
         if (!container) return;
-        var colors = ['#d4a017', '#ffd700', '#db2929', '#e84444', '#fff', '#f39c12'];
+        var colors = ['#d4a017', '#ffd700', '#7d5ff7', '#9678ff', '#fff', '#f39c12'];
         for (var i = 0; i < 50; i++) {
             var c = document.createElement('div');
             c.className = 'confetti';

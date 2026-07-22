@@ -9,11 +9,11 @@
   <!-- le fil (l'epee de Damocles est suspendue) -->
   <line x1="60" y1="0" x2="60" y2="13" stroke="#d8d8d8" stroke-width="1.6"/>
   <!-- pommeau -->
-  <circle cx="60" cy="18" r="5.2" fill="#db2929"/>
+  <circle cx="60" cy="18" r="5.2" fill="#7d5ff7"/>
   <!-- poignee -->
-  <rect x="57" y="22" width="6" height="13" rx="2" fill="#8a1f1f"/>
+  <rect x="57" y="22" width="6" height="13" rx="2" fill="#5636c9"/>
   <!-- garde -->
-  <rect x="41" y="35" width="38" height="6.5" rx="3.2" fill="#db2929"/>
+  <rect x="41" y="35" width="38" height="6.5" rx="3.2" fill="#7d5ff7"/>
   <!-- lame pointe vers le bas -->
   <path d="M54.5 41.5 L65.5 41.5 L61.8 100 L60 112 L58.2 100 Z" fill="url(#blade)"/>
   <!-- arete centrale -->
