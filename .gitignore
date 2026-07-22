@@ -14,3 +14,7 @@ Thumbs.db
 
 # Node (au cas ou)
 node_modules/
+
+# Secrets locaux (jamais commit)
+.env.local
+.env*

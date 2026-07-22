@@ -40,6 +40,9 @@
 ### Edge Functions (`supabase/functions/`)
 - `extract-runes` — vision IA screenshots FM. À déployer via Dashboard + secret `ANTHROPIC_API_KEY`
 
+## Secrets
+- Mot de passe BDD Postgres du projet Supabase : dans `.env.local` à la racine du dossier (gitignoré, jamais commit — le repo est public)
+
 ## Installation (résumé, détail dans INSTALLATION.md)
 1. Créer projet Supabase `alliance-damocles` (West EU) — ⚠️ limite 2 projets gratuits par organisation, créer une 2e org gratuite si besoin
 2. Runner `sql/000-INSTALL-DAMOCLES.sql` dans SQL Editor
