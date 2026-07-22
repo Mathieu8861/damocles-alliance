@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Recyclages</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <div class="mb-lg">
+            <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Recyclages</h1>
+            <p class="text-muted" style="font-size: 0.8125rem;">Saisis ton recyclage en collant le message du chat. Tes stats et le classement des zones sont accessibles via les onglets.</p>
+        </div>
+
+        <!-- =============== ONGLETS PRINCIPAUX =============== -->
+        <div class="tabs" id="recyc-tabs">
+            <button class="tabs__btn active" data-panel="saisir">Saisir</button>
+            <button class="tabs__btn" data-panel="mes-stats">Mes stats</button>
+            <button class="tabs__btn" data-panel="alliance">Alliance</button>
+        </div>
+
+        <!-- =============== PANEL : SAISIR =============== -->
+        <div class="recyc-panel" id="panel-saisir">
+
+            <!-- Mini bandeau perso (motivation) -->
+            <div class="recyc-mini-perso mb-lg" id="mini-perso">
+                <div class="recyc-mini-perso__msg">
+                    <span class="recyc-mini-perso__icon">🔥</span>
+                    <span>
+                        Tu as gagné <strong class="recyc-mini-perso__strong" id="mini-perso-pepites">0</strong> pépites
+                        en <strong class="recyc-mini-perso__strong" id="mini-perso-nb">0</strong> recyclage(s).
+                    </span>
+                </div>
+                <button type="button" class="recyc-mini-perso__link" data-goto-panel="mes-stats">Voir détails →</button>
+            </div>
+
+            <!-- Form -->
+            <section class="recyc-card mb-lg">
+                <h2 class="recyc-card__title">Nouveau recyclage</h2>
+
+                <form id="recyc-form" class="recyc-form" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="recyc-chat">Message du chat</label>
+                        <textarea
+                            id="recyc-chat"
+                            class="form-input recyc-form__textarea"
+                            rows="3"
+                            placeholder="[23:04] Les objets ont été recyclés. Vous avez obtenu 91 [Pépite] et 55 ont été ajoutées à la cagnotte de l'alliance."
+                        ></textarea>
+                        <small class="text-muted recyc-form__hint">Colle le message brut, les pépites seront détectées automatiquement.</small>
+                    </div>
+
+                    <div class="recyc-form__row">
+                        <div class="form-group">
+                            <label class="form-label" for="recyc-perso">Pépites perso</label>
+                            <input type="number" id="recyc-perso" class="form-input" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="recyc-alliance">Pépites alliance</label>
+                            <input type="number" id="recyc-alliance" class="form-input" min="0" placeholder="0">
+                        </div>
+                    </div>
+
+                    <!-- Toggle Zone / Donjon -->
+                    <div class="form-group">
+                        <label class="form-label">Type de spot</label>
+                        <div class="recyc-toggle" id="recyc-type-toggle" role="tablist">
+                            <button type="button" class="recyc-toggle__btn active" data-type="zone" role="tab" aria-selected="true">Zone</button>
+                            <button type="button" class="recyc-toggle__btn" data-type="dj" role="tab" aria-selected="false">Donjon</button>
+                        </div>
+                    </div>
+
+                    <div class="recyc-form__row">
+                        <div class="form-group">
+                            <label class="form-label" for="recyc-zone-search">Spot</label>
+                            <div class="ally-autocomplete" id="recyc-zone-wrap">
+                                <input type="text" id="recyc-zone-search" class="form-input ally-search" placeholder="Tape pour rechercher une zone..." autocomplete="off">
+                                <input type="hidden" id="recyc-zone" value="">
+                                <div class="ally-dropdown" id="recyc-zone-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="recyc-cout">
+                                Coût pose (pépites)
+                                <span class="recyc-form__auto" id="recyc-cout-auto"></span>
+                            </label>
+                            <input type="number" id="recyc-cout" class="form-input" min="0" placeholder="auto">
+                        </div>
+                    </div>
+
+                    <!-- Preuve (paste image) -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Preuve (facultatif)
+                            <span class="recyc-form__auto">Ctrl+V pour coller un screen</span>
+                        </label>
+                        <div class="recyc-preuve" id="recyc-preuve">
+                            <div class="recyc-preuve__drop" id="recyc-preuve-drop">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Colle un screenshot (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique pour parcourir</span>
+                                <input type="file" id="recyc-preuve-file" accept="image/*" style="display:none;">
+                            </div>
+                            <div class="recyc-preuve__preview" id="recyc-preuve-preview-wrap" style="display:none;">
+                                <img id="recyc-preuve-preview" src="" alt="Aperçu de la preuve">
+                                <div class="recyc-preuve__status" id="recyc-preuve-status">Uploading…</div>
+                                <button type="button" class="recyc-preuve__remove" id="recyc-preuve-remove" title="Retirer la preuve">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="recyc-preuve-url" value="">
+                    </div>
+
+                    <!-- Recap calcul -->
+                    <div class="recyc-recap" id="recyc-recap">
+                        <div class="recyc-recap__item">
+                            <span class="recyc-recap__label">Plus-value</span>
+                            <span class="recyc-recap__value" id="recyc-recap-pv">—</span>
+                        </div>
+                        <div class="recyc-recap__item">
+                            <span class="recyc-recap__label">Total alliance</span>
+                            <span class="recyc-recap__value" id="recyc-recap-tot">—</span>
+                        </div>
+                    </div>
+
+                    <div class="recyc-form__actions">
+                        <button type="button" class="btn btn--secondary" id="recyc-reset">Réinitialiser</button>
+                        <button type="submit" class="btn btn--primary" id="recyc-submit">Enregistrer</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <!-- =============== PANEL : MES STATS =============== -->
+        <div class="recyc-panel" id="panel-mes-stats" hidden>
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Mes stats</h2>
+                <div class="recyc-kpi-grid">
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Recyclages</span>
+                        <span class="recyc-kpi__value" id="kpi-mes-nb">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Pépites perso</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--green" id="kpi-mes-perso">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Pépites alliance</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--gold" id="kpi-mes-alliance">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Plus-value totale</span>
+                        <span class="recyc-kpi__value" id="kpi-mes-pv">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Moy. perso / tir</span>
+                        <span class="recyc-kpi__value" id="kpi-mes-moy">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Mon historique</h2>
+
+                <!-- Filtres -->
+                <div class="recyc-filters" id="filters-moi">
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-zone-moi">Zone</label>
+                        <select class="form-input" id="filter-zone-moi">
+                            <option value="">Toutes</option>
+                        </select>
+                    </div>
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-date-from-moi">Du</label>
+                        <input class="form-input" type="date" id="filter-date-from-moi">
+                    </div>
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-date-to-moi">Au</label>
+                        <input class="form-input" type="date" id="filter-date-to-moi">
+                    </div>
+                    <button type="button" class="btn btn--secondary btn--small" id="filter-reset-moi">Réinitialiser</button>
+                    <span class="recyc-filters__count" id="filter-count-moi"></span>
+                </div>
+
+                <div class="recyc-history" id="recyc-history-moi">
+                    <div class="loading"><div class="spinner"></div> Chargement...</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =============== PANEL : ALLIANCE =============== -->
+        <div class="recyc-panel" id="panel-alliance" hidden>
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Stats alliance</h2>
+                <div class="recyc-kpi-grid">
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Recyclages</span>
+                        <span class="recyc-kpi__value" id="kpi-alli-nb">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Recycleurs</span>
+                        <span class="recyc-kpi__value" id="kpi-alli-users">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Pépites perso (cumul)</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--green" id="kpi-alli-perso">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Cagnotte alliance</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--gold" id="kpi-alli-alliance">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Plus-value cumulée</span>
+                        <span class="recyc-kpi__value" id="kpi-alli-pv">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Classement membres <span class="text-muted" style="font-size:0.75rem;font-weight:400;">(par pépites alliance générées, depuis le début)</span></h2>
+                <div class="recyc-table-wrap">
+                    <table class="recyc-table recyc-table--sortable" id="classement-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th class="recyc-th-sort" data-sort="username">Membre</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="nb_recyclages">Recyclages</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_alliance">Pépites alliance</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_perso">Pépites perso</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_plus_value">Plus-value</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="moy_perso_par_tir">Moy/tir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classement-tbody">
+                            <tr><td colspan="7" class="text-muted text-center">Chargement…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Rentabilité par zone</h2>
+                <div class="recyc-table-wrap">
+                    <table class="recyc-table recyc-table--sortable" id="zones-table">
+                        <thead>
+                            <tr>
+                                <th class="recyc-th-sort" data-sort="zone_nom">Zone</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="niveau_zone">Niveau</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="cout_pepites_pose">Coût</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="nb_recyclages">Tirs</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_perso">Perso</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_alliance">Alliance</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="total_plus_value">Plus-value</th>
+                                <th class="recyc-num recyc-th-sort" data-sort="moy_perso_par_tir">Moy/tir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zones-tbody">
+                            <tr><td colspan="8" class="text-muted text-center">Chargement…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Historique alliance</h2>
+
+                <!-- Filtres -->
+                <div class="recyc-filters" id="filters-alliance">
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-zone-alliance">Zone</label>
+                        <select class="form-input" id="filter-zone-alliance">
+                            <option value="">Toutes</option>
+                        </select>
+                    </div>
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-date-from-alliance">Du</label>
+                        <input class="form-input" type="date" id="filter-date-from-alliance">
+                    </div>
+                    <div class="recyc-filters__group">
+                        <label class="recyc-filters__label" for="filter-date-to-alliance">Au</label>
+                        <input class="form-input" type="date" id="filter-date-to-alliance">
+                    </div>
+                    <button type="button" class="btn btn--secondary btn--small" id="filter-reset-alliance">Réinitialiser</button>
+                    <span class="recyc-filters__count" id="filter-count-alliance"></span>
+                </div>
+
+                <div class="recyc-history" id="recyc-history-alliance">
+                    <div class="loading"><div class="spinner"></div> Chargement...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/recyclages.js"></script>
+</body>
+</html>

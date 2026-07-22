@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Connexion</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-card__brand">
+                <img class="auth-card__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+                <h1 class="auth-card__title">DAMOCLÈS [SWRD]</h1>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form">
+                <div id="login-message" class="auth-message"></div>
+                <div class="form-group">
+                    <label class="form-label" for="login-username">Pseudo</label>
+                    <input type="text" id="login-username" class="form-input" placeholder="Votre pseudo Dofus" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Mot de passe</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="Mot de passe" required>
+                </div>
+                <button type="submit" class="btn btn--primary">Connexion</button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" class="hidden">
+                <div id="register-message" class="auth-message"></div>
+
+                <!-- Avatar upload -->
+                <div class="form-group" style="text-align:center;">
+                    <div class="avatar-upload" id="avatar-upload">
+                        <div class="avatar-upload__preview" id="avatar-preview">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <span class="avatar-upload__hint">Photo de profil</span>
+                        <input type="file" id="register-avatar" accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <!-- Pseudo + Mot de passe sur la meme ligne -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="register-username">Pseudo (en jeu)</label>
+                        <input type="text" id="register-username" class="form-input" placeholder="Votre pseudo Dofus" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" class="form-input" placeholder="Min. 6 caracteres" required minlength="6">
+                    </div>
+                </div>
+
+                <!-- Classe + Element sur la meme ligne -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="register-classe">Classe</label>
+                        <select id="register-classe" class="form-select">
+                            <option value="">Choisir...</option>
+                            <option value="Cra">Cra</option>
+                            <option value="Ecaflip">Ecaflip</option>
+                            <option value="Eliotrope">Eliotrope</option>
+                            <option value="Eniripsa">Eniripsa</option>
+                            <option value="Enutrof">Enutrof</option>
+                            <option value="Feca">Feca</option>
+                            <option value="Forge">Forge</option>
+                            <option value="Huppermage">Huppermage</option>
+                            <option value="Iop">Iop</option>
+                            <option value="Osamodas">Osamodas</option>
+                            <option value="Ouginak">Ouginak</option>
+                            <option value="Pandawa">Pandawa</option>
+                            <option value="Roublard">Roublard</option>
+                            <option value="Sacrieur">Sacrieur</option>
+                            <option value="Sadida">Sadida</option>
+                            <option value="Sram">Sram</option>
+                            <option value="Steamer">Steamer</option>
+                            <option value="Xelor">Xelor</option>
+                            <option value="Zobal">Zobal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="register-element">Element</label>
+                        <select id="register-element" class="form-select">
+                            <option value="">Choisir...</option>
+                            <option value="Terre">Terre</option>
+                            <option value="Feu">Feu</option>
+                            <option value="Eau">Eau</option>
+                            <option value="Air">Air</option>
+                            <option value="Multi">Multi</option>
+                            <option value="Do Pou">Do Pou</option>
+                            <option value="Do Cri">Do Cri</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dofusbook pleine largeur -->
+                <div class="form-group">
+                    <label class="form-label" for="register-dofusbook">Lien Dofusbook (optionnel)</label>
+                    <input type="url" id="register-dofusbook" class="form-input" placeholder="https://www.dofusbook.net/...">
+                </div>
+                <button type="submit" class="btn btn--primary">S'inscrire</button>
+            </form>
+
+            <!-- TOGGLE -->
+            <div class="auth-toggle">
+                <span id="toggle-to-register">Pas encore de compte ? <a href="#">S'inscrire</a></span>
+                <span id="toggle-to-login" class="hidden">Deja un compte ? <a href="#">Se connecter</a></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

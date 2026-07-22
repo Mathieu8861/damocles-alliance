@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Mon Profil</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+                
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <div class="mb-lg">
+            <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Mon Profil</h1>
+            <p class="text-muted" style="font-size: 0.8125rem;">Gerez vos informations et consultez vos statistiques</p>
+        </div>
+
+        <div class="profil-layout">
+            <!-- COLONNE GAUCHE : Formulaires -->
+            <div class="profil-layout__left">
+
+                <!-- Informations -->
+                <section class="profil-card mb-lg">
+                    <h2 class="dashboard-section__title">Informations</h2>
+                    <form id="profil-form">
+                        <div id="profil-message" class="auth-message"></div>
+
+                        <!-- Classe + Element -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profil-classe">Classe</label>
+                                <select id="profil-classe" class="form-select">
+                                    <option value="">Choisir...</option>
+                                    <option value="Cra">Cra</option>
+                                    <option value="Ecaflip">Ecaflip</option>
+                                    <option value="Eliotrope">Eliotrope</option>
+                                    <option value="Eniripsa">Eniripsa</option>
+                                    <option value="Enutrof">Enutrof</option>
+                                    <option value="Feca">Feca</option>
+                                    <option value="Forge">Forge</option>
+                                    <option value="Huppermage">Huppermage</option>
+                                    <option value="Iop">Iop</option>
+                                    <option value="Osamodas">Osamodas</option>
+                                    <option value="Ouginak">Ouginak</option>
+                                    <option value="Pandawa">Pandawa</option>
+                                    <option value="Roublard">Roublard</option>
+                                    <option value="Sacrieur">Sacrieur</option>
+                                    <option value="Sadida">Sadida</option>
+                                    <option value="Sram">Sram</option>
+                                    <option value="Steamer">Steamer</option>
+                                    <option value="Xelor">Xelor</option>
+                                    <option value="Zobal">Zobal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="profil-element">Element</label>
+                                <select id="profil-element" class="form-select">
+                                    <option value="">Choisir...</option>
+                                    <option value="Terre">Terre</option>
+                                    <option value="Feu">Feu</option>
+                                    <option value="Eau">Eau</option>
+                                    <option value="Air">Air</option>
+                                    <option value="Multi">Multi</option>
+                                    <option value="Do Pou">Do Pou</option>
+                                    <option value="Do Cri">Do Cri</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dofusbook URL -->
+                        <div class="form-group">
+                            <label class="form-label" for="profil-dofusbook">Lien Dofusbook</label>
+                            <input type="url" id="profil-dofusbook" class="form-input" placeholder="https://www.dofusbook.net/...">
+                        </div>
+
+                        <button type="submit" class="btn btn--primary" id="profil-save-btn">Sauvegarder</button>
+                    </form>
+                </section>
+
+                <!-- Mes Mules -->
+                <section class="profil-card mb-lg">
+                    <h2 class="dashboard-section__title">Mes Mules</h2>
+                    <p class="text-muted" style="font-size: 0.8125rem; margin-bottom: var(--spacing-md);">Vos personnages secondaires. Ils apparaitront dans les recherches et les formulaires de combat.</p>
+                    <div class="profil-mule-add">
+                        <input type="text" id="profil-mule-input" class="form-input" placeholder="Nom de la mule..." maxlength="30">
+                        <button type="button" class="btn btn--primary" id="profil-mule-add-btn">Ajouter</button>
+                    </div>
+                    <div class="profil-mules-list" id="profil-mules-list">
+                        <!-- Rempli par JS -->
+                    </div>
+                </section>
+
+                <!-- Changer le mot de passe -->
+                <section class="profil-card">
+                    <h2 class="dashboard-section__title">Changer le mot de passe</h2>
+                    <form id="password-form">
+                        <div id="password-message" class="auth-message"></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profil-new-password">Nouveau mot de passe</label>
+                                <input type="password" id="profil-new-password" class="form-input" placeholder="Min. 6 caracteres" minlength="6" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="profil-confirm-password">Confirmer</label>
+                                <input type="password" id="profil-confirm-password" class="form-input" placeholder="Confirmer le mot de passe" minlength="6" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn--secondary" id="password-save-btn">Modifier le mot de passe</button>
+                    </form>
+                </section>
+
+                <!-- Infos Joueur (lecture seule) -->
+                <section class="profil-card">
+                    <h2 class="dashboard-section__title">Infos Joueur</h2>
+                    <div class="profil-info-list" id="profil-infos">
+                        <div class="loading"><div class="spinner"></div> Chargement...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- COLONNE DROITE : Rang, Droits, Stats -->
+            <div class="profil-layout__right">
+                <section class="profil-card">
+                    <h2 class="dashboard-section__title">Mon Rang</h2>
+                    <input type="file" id="profil-avatar-input" accept="image/*" hidden>
+                    <div id="profil-rank">
+                        <div class="loading"><div class="spinner"></div> Chargement...</div>
+                    </div>
+                </section>
+
+                <!-- Droits de la semaine -->
+                <section class="profil-card profil-card--droits">
+                    <h2 class="dashboard-section__title">Droits de la semaine</h2>
+                    <div id="profil-droits">
+                        <div class="loading"><div class="spinner"></div> Chargement...</div>
+                    </div>
+                </section>
+
+                <!-- Boutique (achats + demandes) -->
+                <section class="profil-card" id="profil-boutique-section">
+                    <h2 class="dashboard-section__title">Boutique</h2>
+                    <div id="profil-achats-boutique"></div>
+                    <div id="profil-demandes-kamas"></div>
+                    <div id="profil-boutique-empty"></div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- Stats full-width sous les 2 colonnes -->
+        <section class="profil-card profil-card--stats" style="margin-top: var(--spacing-lg);">
+            <h2 class="dashboard-section__title">Mes Statistiques</h2>
+            <div class="profil-stats-grid" id="profil-stats">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/profil.js"></script>
+</body>
+</html>

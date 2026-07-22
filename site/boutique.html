@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Boutique</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+                
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <!-- En-tête avec solde -->
+        <div class="boutique-header">
+            <div>
+                <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Boutique</h1>
+                <p class="text-muted" style="font-size: 0.8125rem;">Dépensez vos jetons pour obtenir des ressources</p>
+            </div>
+            <div class="boutique-solde">
+                <span id="boutique-jetons">0</span> <img class="icon-inline" src="assets/images/jeton.png" alt="jetons">
+                <span style="margin:0 var(--spacing-sm);color:var(--color-text-muted);">|</span>
+                <span id="boutique-jetons-enutrosor">0</span> <img class="icon-inline" src="assets/images/kamatrix.png" alt="enutrosor">
+            </div>
+        </div>
+
+        <!-- Onglets Acheter / Vendre -->
+        <div class="boutique-tabs">
+            <button class="boutique-tab boutique-tab--active" data-tab="acheter">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                Acheter
+            </button>
+            <button class="boutique-tab" data-tab="echanger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                Echanger
+            </button>
+            <button class="boutique-tab" data-tab="vendre">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Vendre
+            </button>
+        </div>
+
+        <!-- Grille articles (Acheter) -->
+        <div class="boutique-tab-content" id="tab-acheter">
+            <div class="boutique-grid" id="boutique-grid">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+        </div>
+
+        <!-- Grille articles (Echanger) -->
+        <div class="boutique-tab-content" id="tab-echanger" style="display:none;">
+            <div style="background:rgba(243,156,18,0.08);border:1px solid rgba(243,156,18,0.2);border-radius:var(--radius-md);padding:var(--spacing-md);margin-bottom:var(--spacing-lg);display:flex;align-items:center;gap:var(--spacing-sm);">
+                <img src="assets/images/kamatrix.png" alt="kamatrix" style="width:32px;height:32px;">
+                <div>
+                    <strong style="color:var(--color-warning);">Echangez vos Kamatrix contre des Kamas</strong>
+                    <p class="text-muted" style="font-size:0.8rem;margin-top:2px;">Choisissez un pack ci-dessous. Apres validation par un admin, vous recevrez vos kamas en jeu.</p>
+                </div>
+            </div>
+            <div class="boutique-grid" id="boutique-grid-echanger">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+        </div>
+
+        <!-- Page Vendre (Coming soon) -->
+        <div class="boutique-tab-content" id="tab-vendre" style="display:none;">
+            <div style="text-align:center;padding:var(--spacing-2xl) var(--spacing-lg);">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" style="margin-bottom:var(--spacing-md);opacity:0.5;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <h2 style="font-family:var(--font-title);font-size:1.5rem;font-weight:700;color:var(--color-accent);margin-bottom:var(--spacing-sm);">COMING SOON</h2>
+                <p class="text-muted" style="max-width:400px;margin:0 auto;font-size:0.9rem;">Le marketplace arrive bientot ! Vous pourrez deposer vos propres annonces et echanger directement avec les autres membres de l'alliance.</p>
+            </div>
+        </div>
+
+        <!-- Mes achats -->
+        <div class="boutique-section">
+            <div class="boutique-section__title">Mes achats</div>
+            <div id="boutique-mes-achats">
+                <p class="text-muted">Aucun achat.</p>
+            </div>
+        </div>
+
+        <!-- Modal confirmation achat -->
+        <div class="modal-overlay" id="modal-achat">
+            <div class="modal boutique-modal">
+                <div class="boutique-modal__image" id="modal-achat-image"></div>
+                <div class="boutique-modal__nom" id="modal-achat-nom"></div>
+                <div class="boutique-modal__prix" id="modal-achat-prix"></div>
+                <div class="boutique-modal__solde" id="modal-achat-solde"></div>
+                <div class="boutique-modal__actions">
+                    <button class="btn btn--primary" id="modal-achat-confirm">Confirmer</button>
+                    <button class="btn btn--secondary" id="modal-achat-cancel">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/boutique.js"></script>
+</body>
+</html>

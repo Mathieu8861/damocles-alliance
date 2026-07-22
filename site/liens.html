@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Liens Utiles</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+                
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <div class="mb-lg">
+            <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Liens Utiles</h1>
+            <p class="text-muted" style="font-size: 0.8125rem;">Les outils et sites indispensables pour Dofus</p>
+        </div>
+
+        <div class="links-grid">
+
+            <a href="https://www.dofusbook.net/" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/dofusbook.jpg" alt="DofusBook">
+                <div class="link-card__body">
+                    <div class="link-card__name">DofusBook</div>
+                    <div class="link-card__desc">Création de builds, stuffs et simulateur de panoplies</div>
+                </div>
+            </a>
+
+            <a href="https://www.dofus.com/fr" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/dofus.jpg" alt="Dofus.com">
+                <div class="link-card__body">
+                    <div class="link-card__name">Dofus.com</div>
+                    <div class="link-card__desc">Site officiel du jeu, actualités et mises à jour</div>
+                </div>
+            </a>
+
+            <a href="https://www.dofuspourlesnoobs.com/" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/dofuspourlesnoobs.jpg" alt="Dofus Pour Les Noobs">
+                <div class="link-card__body">
+                    <div class="link-card__name">Dofus Pour Les Noobs</div>
+                    <div class="link-card__desc">Guides complets, quêtes, donjons et tutoriels</div>
+                </div>
+            </a>
+
+            <a href="https://dofus-map.com/" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/dofus-map.jpg" alt="Dofus Map">
+                <div class="link-card__body">
+                    <div class="link-card__name">Dofus Map</div>
+                    <div class="link-card__desc">Carte interactive du monde des Douze</div>
+                </div>
+            </a>
+
+            <a href="https://dofusdb.fr/fr/tools/treasure-hunt" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/dofusdb.jpg" alt="DofusDB">
+                <div class="link-card__body">
+                    <div class="link-card__name">DofusDB - Chasses au trésor</div>
+                    <div class="link-card__desc">Solveur de chasses au trésor et base de données</div>
+                </div>
+            </a>
+
+            <a href="https://www.twitch.tv/directory/category/dofus" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/twitch.jpg" alt="Twitch Dofus">
+                <div class="link-card__body">
+                    <div class="link-card__name">Twitch - Dofus</div>
+                    <div class="link-card__desc">Streams en direct de la communauté Dofus</div>
+                </div>
+            </a>
+
+            <a href="https://ganymede-app.com/" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/ganymede.jpg" alt="Ganymede">
+                <div class="link-card__body">
+                    <div class="link-card__name">Ganymede</div>
+                    <div class="link-card__desc">Application companion pour optimiser son gameplay</div>
+                </div>
+            </a>
+
+            <a href="https://www.metamob.fr/" target="_blank" rel="noopener" class="link-card">
+                <img class="link-card__preview" src="assets/images/Metamob.jpg" alt="Metamob">
+                <div class="link-card__body">
+                    <div class="link-card__name">Metamob</div>
+                    <div class="link-card__desc">Gestion et suivi de vos monstres à capturer</div>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- =============== ACCÈS MULES =============== -->
+        <div class="mb-lg" style="margin-top: var(--spacing-2xl);">
+            <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Accès mules — Quêtes débloquantes</h2>
+            <p class="text-muted" style="font-size: 0.8125rem;">Liste des ressources nécessaires pour débloquer l'accès aux principales zones avec une mule (utile pour multiplier les percepteurs).</p>
+        </div>
+
+        <div class="mules-grid">
+
+            <!-- OTOMAI : Le Nouveau Monde -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Île d'Otomaï · Étape 1</div>
+                        <div class="mule-card__title">Le Nouveau Monde</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/le-nouveau-monde.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 35</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Sufokia [15,28]</span>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×2</span> Miséricorde du Chafer d'Élite</li>
+                    <li><span class="mule-card__qty">×1</span> Gros Boulet</li>
+                    <li><span class="mule-card__qty">×1</span> Oreille de Foufayteur</li>
+                    <li><span class="mule-card__qty">×1</span> Huile de Sésame</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    95 458 XP · 1 905 K
+                </div>
+            </div>
+
+            <!-- OTOMAI : L'Île des Naufragés -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Île d'Otomaï · Étape 2</div>
+                        <div class="mule-card__title">L'Île des Naufragés</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/licircle-des-naufrageacutes.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 35</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Sufokia [15,28]</span>
+                    <span class="mule-card__pill mule-card__pill--prereq">Le Nouveau Monde requis</span>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×1</span> Tronc de Kokoko</li>
+                    <li><span class="mule-card__qty">×1</span> Tranche de Nodkoko</li>
+                    <li><span class="mule-card__qty">×1</span> Kokopaille</li>
+                    <li><span class="mule-card__qty">×1</span> Coffret maudit du Flib</li>
+                    <li><span class="mule-card__qty">×3</span> Combats (en groupe possible)</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    95 458 XP · 1 905 K
+                </div>
+            </div>
+
+            <!-- WABBIT -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Île des Wabbits</div>
+                        <div class="mule-card__title">Intrusion chez les Wabbits</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/intrusion-chez-les-wabbits.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 40</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Amakna - Le village [-2,-4]</span>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×1</span> Ailes de Scarafeuille Bleu</li>
+                    <li><span class="mule-card__qty">×1</span> Ailes de Scarafeuille Blanc</li>
+                    <li><span class="mule-card__qty">×1</span> Ailes de Scarafeuille Vert</li>
+                    <li><span class="mule-card__qty">×1</span> Ailes de Scarafeuille Rouge</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    127 134 XP · 2 380 K
+                </div>
+            </div>
+
+            <!-- MOON -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Île de Moon</div>
+                        <div class="mule-card__title">Partir un jour sans retour</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/partir-un-jour-sans-retour.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 50</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Clairière de Brouce Boulgoure [11,10]</span>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×1</span> Casque</li>
+                    <li><span class="mule-card__qty">×1</span> Ailes en bois</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    101 882 XP · 1 740 K · 2× Noix de Kokoko
+                </div>
+            </div>
+
+            <!-- PANDALA -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Pandala</div>
+                        <div class="mule-card__title">Le Réveil de Pandala</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/le-reveil-de-pandala.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×5</span> Laine de Boufton Noir</li>
+                    <li><span class="mule-card__qty">×50</span> Ortie</li>
+                </ul>
+            </div>
+
+            <!-- FORÊT MALÉFIQUE -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Forêt Maléfique</div>
+                        <div class="mule-card__title">Un pendule pour guider ses pas</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/un-pendule-pour-guider-ses-pas.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__section-title">Ressources</div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty">×1</span> Chaînes Brisées</li>
+                    <li><span class="mule-card__qty">×1</span> Ebonite</li>
+                    <li><span class="mule-card__qty">×1</span> Scalp de Bwork Archer</li>
+                </ul>
+            </div>
+
+            <!-- LA COLÈRE DES DIEUX (Épaves Silencieuses + Marches Magmatiques) -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Épaves Silencieuses + Marches Magmatiques</div>
+                        <div class="mule-card__title">La Colère des Dieux</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/la-colere-des-dieux.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 200</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Votre temple de classe</span>
+                    <span class="mule-card__pill mule-card__pill--prereq">Succès « L'armée des morts »</span>
+                </div>
+                <div class="mule-card__section-title">À prévoir</div>
+                <ul class="mule-card__resources">
+                    <li class="text-muted" style="font-style: italic;">Pas de ressources — quête à étapes (parler aux NPCs, parcourir le temple, La Voix des Douze, Prêtresse de Féca)</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    1 312 500 XP · 1× Égide de Féca
+                </div>
+            </div>
+
+            <!-- CROKUSKO -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Crokusko</div>
+                        <div class="mule-card__title">Perdu dans le temps</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/perdu-dans-le-temps.html" target="_blank" rel="noopener" title="Voir le guide Dofus Pour Les Noobs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <div class="mule-card__meta">
+                    <span class="mule-card__pill mule-card__pill--lvl">Niv. 200</span>
+                    <span class="mule-card__pill mule-card__pill--pos">Astrub [5,-18]</span>
+                </div>
+                <div class="mule-card__section-title">À prévoir</div>
+                <ul class="mule-card__resources">
+                    <li class="text-muted" style="font-style: italic;">Pas de ressources — 2 combats à prévoir (en groupe possible)</li>
+                </ul>
+                <div class="mule-card__rewards">
+                    <span class="mule-card__rewards-label">Récompenses :</span>
+                    2 625 000 XP · 43 980 K · 2× Œil de Crocodaille albinos
+                </div>
+            </div>
+
+        </div>
+
+        <!-- =============== SORTS COMMUNS =============== -->
+        <div class="mb-lg" style="margin-top: var(--spacing-2xl);">
+            <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Sorts communs — Priorités</h2>
+            <p class="text-muted" style="font-size: 0.8125rem;">Sorts communs à récupérer en priorité pour optimiser un personnage.
+                <a href="https://www.dofuspourlesnoobs.com/sorts-communs.html" target="_blank" rel="noopener" style="color: var(--color-info, #3b82f6); text-decoration: none; font-weight: 600;">
+                    Guide complet sur Dofus Pour Les Noobs →
+                </a>
+            </p>
+        </div>
+
+        <div class="mules-grid">
+
+            <!-- SORTS PRIORITAIRES -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Priorité absolue</div>
+                        <div class="mule-card__title">Sorts prioritaires</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/sorts-communs.html" target="_blank" rel="noopener" title="Voir le guide complet">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty mule-card__qty--priority">★</span> Flamiche</li>
+                    <li><span class="mule-card__qty mule-card__qty--priority">★</span> Libération</li>
+                    <li><span class="mule-card__qty mule-card__qty--priority">★</span> Maîtrise d'arme</li>
+                    <li><span class="mule-card__qty mule-card__qty--priority">★</span> Maîtrise des invocations</li>
+                </ul>
+            </div>
+
+            <!-- SORTS SECONDAIRES -->
+            <div class="mule-card">
+                <div class="mule-card__header">
+                    <div>
+                        <div class="mule-card__zone">Important · secondaire</div>
+                        <div class="mule-card__title">Sorts à prendre ensuite</div>
+                    </div>
+                    <a class="mule-card__quest" href="https://www.dofuspourlesnoobs.com/sorts-communs.html" target="_blank" rel="noopener" title="Voir le guide complet">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Guide
+                    </a>
+                </div>
+                <ul class="mule-card__resources">
+                    <li><span class="mule-card__qty mule-card__qty--secondary">◆</span> Cawotte</li>
+                    <li><span class="mule-card__qty mule-card__qty--secondary">◆</span> Foudroiement de Grunoble</li>
+                    <li><span class="mule-card__qty mule-card__qty--secondary">◆</span> Ebilition</li>
+                    <li><span class="mule-card__qty mule-card__qty--secondary">◆</span> Mantiscroc</li>
+                </ul>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>

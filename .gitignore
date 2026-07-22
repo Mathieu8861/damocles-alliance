@@ -1,0 +1,16 @@
+# Claude
+.claude/
+
+# Screenshots documentation
+/*.jpg
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node (au cas ou)
+node_modules/

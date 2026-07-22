@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Attaque</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+                
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <div class="combat-page-header">
+            <div class="combat-page-header__icon combat-page-header__icon--attaque">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            </div>
+            <div>
+                <h1 class="combat-page-header__title">Declarer une Attaque</h1>
+                <p class="combat-page-header__sub">Enregistrez le resultat d'une attaque PvP</p>
+            </div>
+        </div>
+
+        <div class="combat-form combat-form--attaque" id="combat-form">
+            <div class="combat-form__section combat-form__section--forces">
+                <div class="combat-form__force-block">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Vos Forces
+                    </div>
+                    <div class="combat-form__count" id="count-allies">
+                        <button class="count-btn active" data-value="1">1</button>
+                        <button class="count-btn" data-value="2">2</button>
+                        <button class="count-btn" data-value="3">3</button>
+                        <button class="count-btn" data-value="4">4</button>
+                        <button class="count-btn" data-value="5">5</button>
+                    </div>
+                    <div class="combat-form__allies" id="allies-list"></div>
+                </div>
+                <div class="combat-form__force-block">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Forces Ennemies
+                    </div>
+                    <div class="combat-form__count" id="count-ennemis">
+                        <button class="count-btn active" data-value="1">1</button>
+                        <button class="count-btn" data-value="2">2</button>
+                        <button class="count-btn" data-value="3">3</button>
+                        <button class="count-btn" data-value="4">4</button>
+                        <button class="count-btn" data-value="5">5</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="combat-form__row">
+                <div class="combat-form__section">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        Alliance ennemie
+                    </div>
+                    <select class="form-select" id="select-alliance">
+                        <option value="">Choisir une alliance</option>
+                    </select>
+                    <input class="form-input mt-sm" id="input-alliance-custom" type="text" placeholder="Tapez le nom de l'alliance..." style="display:none;">
+                </div>
+
+                <div class="combat-form__section">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        Resultat
+                    </div>
+                    <div class="combat-form__result">
+                        <button class="combat-result-btn combat-result-btn--victoire" id="btn-victoire">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Victoire</span>
+                        </button>
+                        <button class="combat-result-btn combat-result-btn--defaite" id="btn-defaite">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            <span>Defaite</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="combat-form__row" id="section-attaque-details" style="display:none;">
+                <div class="combat-form__section" id="section-commentaire">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Zone <span class="text-muted" style="font-size:0.75rem; font-weight:400;">(facultatif)</span>
+                    </div>
+                    <input class="form-input" id="input-commentaire" type="text" placeholder="Ex: Astrub, Bonta...">
+                </div>
+
+                <div class="combat-form__section" id="section-butin">
+                    <div class="combat-form__label">
+                        <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Butin (kamas)
+                    </div>
+                    <input class="form-input" id="input-butin" type="number" placeholder="Ex: 150000" min="0">
+                </div>
+            </div>
+
+            <button class="combat-form__submit combat-form__submit--attaque" id="btn-submit-combat">Enregistrer l'attaque</button>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/attaque.js"></script>
+</body>
+</html>

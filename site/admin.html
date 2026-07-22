@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ADMIN HEADER -->
+    <header class="admin-header">
+        <div class="admin-header__left">
+            <button class="admin-sidebar__toggle" id="admin-sidebar-toggle" aria-label="Menu admin">
+                <span></span><span></span><span></span>
+            </button>
+            <h1>PANNEAU ADMIN</h1>
+        </div>
+        <div class="admin-header__actions">
+            <a href="index.html" class="btn btn--secondary btn--small">Retour au site</a>
+            <button class="btn btn--danger btn--small" id="btn-logout">Deconnexion</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <div class="admin-sidebar__group">
+                <div class="admin-sidebar__group-title">Gestion</div>
+                <button class="admin-sidebar__btn active" data-tab="validation">Validation</button>
+                <button class="admin-sidebar__btn" data-tab="utilisateurs">Utilisateurs</button>
+                <button class="admin-sidebar__btn" data-tab="alliances">Alliances</button>
+                <button class="admin-sidebar__btn" data-tab="modules">Modules</button>
+            </div>
+            <div class="admin-sidebar__group">
+                <div class="admin-sidebar__group-title">PVP & Points</div>
+                <button class="admin-sidebar__btn" data-tab="bareme">Bareme</button>
+                <button class="admin-sidebar__btn" data-tab="builds">Builds</button>
+                <button class="admin-sidebar__btn" data-tab="cadres">Cadres</button>
+            </div>
+            <div class="admin-sidebar__group">
+                <div class="admin-sidebar__group-title">Jeux & Lots</div>
+                <button class="admin-sidebar__btn" data-tab="jeu-config">Configuration</button>
+                <button class="admin-sidebar__btn" data-tab="jeu-lots">Lots</button>
+                <button class="admin-sidebar__btn" data-tab="jeu-historique">Historique</button>
+                <button class="admin-sidebar__btn" data-tab="slot">Slot Machine</button>
+            </div>
+            <div class="admin-sidebar__group">
+                <div class="admin-sidebar__group-title">Economie</div>
+                <button class="admin-sidebar__btn" data-tab="board">Board Hebdo</button>
+                <button class="admin-sidebar__btn" data-tab="bareme-perco">Bareme Perco</button>
+                <button class="admin-sidebar__btn" data-tab="recyclages-hebdo">Recyclages hebdo</button>
+                <button class="admin-sidebar__btn" data-tab="zones-perco">Zones Recyclage</button>
+                <button class="admin-sidebar__btn" data-tab="boutique">Boutique</button>
+                <button class="admin-sidebar__btn" data-tab="demandes-kamas">Demandes Kamas</button>
+            </div>
+        </aside>
+
+        <!-- OVERLAY MOBILE -->
+        <div class="admin-sidebar__overlay" id="admin-sidebar-overlay"></div>
+
+        <!-- CONTENT -->
+        <div class="admin-content">
+            <div class="admin-panel" id="admin-content">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Forgemagie</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main">
+        <div class="mb-lg">
+            <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-xs);">Forgemagie</h1>
+            <p class="text-muted" style="font-size: 0.8125rem;">Suis tes sessions de FM : screen de tes runes au début, achats en cours de route, screen à la fin — le site calcule ce que tu as consommé et le coût en kamas.</p>
+        </div>
+
+        <!-- =============== ONGLETS =============== -->
+        <div class="tabs" id="fm-tabs">
+            <button class="tabs__btn active" data-panel="session">Session</button>
+            <button class="tabs__btn" data-panel="historique">Mes sessions</button>
+            <button class="tabs__btn" data-panel="alliance">Alliance</button>
+            <button class="tabs__btn" data-panel="runes">Runes &amp; prix</button>
+        </div>
+
+        <!-- =============== PANEL : SESSION =============== -->
+        <div class="fm-panel" id="panel-session">
+
+            <!-- ÉTAPE 1 : Nouvelle session (visible si aucune session en cours) -->
+            <section class="recyc-card mb-lg" id="fm-new-session" hidden>
+                <button type="button" class="btn btn--secondary btn--small" id="fm-back-to-session" hidden style="margin-bottom:var(--spacing-md);">← Revenir à la session en cours</button>
+
+                <!-- Guide première session -->
+                <details class="fm-guide" id="fm-guide" open>
+                    <summary>📖 Comment ça marche ?</summary>
+                    <ol>
+                        <li><strong>Screen de départ</strong> — ouvre ton atelier (Costumager) ou ton inventaire filtré sur les runes, prends un screen (<kbd>Win</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd>) et colle-le ici (<kbd>Ctrl</kbd>+<kbd>V</kbd>). L'IA compte tes runes automatiquement — vérifie la grille et corrige si besoin.</li>
+                        <li><strong>Runes invisibles</strong> — si tu comptes passer une rune qui n'apparaît pas sur le screen (exo Do Per So, Ga Pa…), ajoute-la avec « + Ajouter une rune » et ta quantité possédée.</li>
+                        <li><strong>Pendant la session</strong> — chaque achat HDV : colle la ligne du chat. Chaque concassage : déclare-le. Tout est sauvegardé automatiquement, tu peux fermer le site et revenir plus tard.</li>
+                        <li><strong>Plusieurs items en même temps</strong> — « ⏸ Changer d'item » met la session de côté ; reprends-la quand tu veux depuis « Mes sessions ».</li>
+                        <li><strong>Clôture</strong> — colle le screen de fin : le site calcule les runes consommées et le coût total en kamas. C'est le prix réel de ton FM 💸</li>
+                    </ol>
+                </details>
+
+                <h2 class="recyc-card__title">Nouvelle session</h2>
+
+                <div class="form-group">
+                    <label class="form-label" for="fm-titre">Item travaillé</label>
+                    <input type="text" id="fm-titre" class="form-input" maxlength="120" placeholder="Ex: Coiffe du Comte Harebourg — exo PA">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Screen de ton inventaire runes (départ)
+                        <span class="recyc-form__auto">Ctrl+V pour coller</span>
+                    </label>
+                    <div class="recyc-preuve">
+                        <div class="recyc-preuve__drop" id="fm-screen-avant-drop">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>Colle le screenshot de ton inventaire filtré sur les runes (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique pour parcourir</span>
+                            <input type="file" id="fm-screen-avant-file" accept="image/*" style="display:none;">
+                        </div>
+                        <div class="recyc-preuve__preview" id="fm-screen-avant-preview-wrap" style="display:none;">
+                            <img id="fm-screen-avant-preview" src="" alt="Inventaire avant">
+                            <div class="recyc-preuve__status" id="fm-screen-avant-status">Analyse en cours…</div>
+                            <button type="button" class="recyc-preuve__remove" id="fm-screen-avant-remove" title="Retirer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grille corrigeable des runes détectées -->
+                <div class="form-group" id="fm-grid-avant-wrap" hidden>
+                    <label class="form-label">
+                        Runes détectées — vérifie et corrige si besoin
+                        <span class="recyc-form__auto" id="fm-grid-avant-info"></span>
+                    </label>
+                    <div class="fm-grid" id="fm-grid-avant"></div>
+                    <button type="button" class="btn btn--secondary btn--small mt-sm" id="fm-grid-avant-add">+ Ajouter une rune</button>
+                    <div class="fm-pui-banner mt-sm" id="fm-pui-avant" hidden></div>
+                </div>
+
+                <div class="recyc-form__actions">
+                    <button type="button" class="btn btn--primary" id="fm-start-session" disabled>Démarrer la session</button>
+                </div>
+            </section>
+
+            <!-- ÉTAPE 2 : Session en cours -->
+            <section id="fm-current-session" hidden>
+
+                <div class="recyc-mini-perso mb-lg" style="flex-wrap:wrap;">
+                    <div class="recyc-mini-perso__msg">
+                        <span class="recyc-mini-perso__icon">⚒️</span>
+                        <span>
+                            Session en cours : <strong class="recyc-mini-perso__strong" id="fm-current-titre">—</strong>
+                            <span class="text-muted" style="font-size:0.8rem;" id="fm-current-date"></span>
+                        </span>
+                    </div>
+                    <div style="display:flex;gap:var(--spacing-sm);">
+                        <button type="button" class="btn btn--secondary btn--small" id="fm-switch-session" title="Mettre cette session de côté et travailler un autre item">⏸ Changer d'item</button>
+                        <button type="button" class="btn btn--danger btn--small" id="fm-abandon-session" title="Abandonner la session sans la comptabiliser">Abandonner ✕</button>
+                    </div>
+                    <div class="text-muted" style="flex-basis:100%;font-size:0.72rem;margin-top:2px;padding-left:28px;">
+                        💾 Sauvegarde automatique — stock, achats et concassages sont conservés. Tu peux quitter, changer d'item ou reprendre n'importe quelle session depuis « Mes sessions » : colle le screen de fin seulement au moment de clôturer.
+                    </div>
+                </div>
+
+                <!-- Stock (gauche) + Achats/Concassages (droite) -->
+                <div class="fm-session-layout mb-lg">
+                <section class="recyc-card fm-session-layout__main">
+                    <h2 class="recyc-card__title">Stock de départ <span class="text-muted" style="font-size:0.75rem;font-weight:400;">(+ achats en session)</span></h2>
+                    <div class="recyc-table-wrap">
+                        <table class="recyc-table">
+                            <thead>
+                                <tr>
+                                    <th>Rune</th>
+                                    <th class="recyc-num">Départ</th>
+                                    <th class="recyc-num">Achetées</th>
+                                    <th class="recyc-num">Concassage</th>
+                                    <th class="recyc-num">Total dispo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fm-stock-tbody">
+                                <tr><td colspan="5" class="text-muted text-center">Chargement…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="fm-session-layout__side">
+                <!-- Achats en session -->
+                <section class="recyc-card">
+                    <h2 class="recyc-card__title">Achats en cours de session</h2>
+                    <div class="form-group">
+                        <label class="form-label" for="fm-achat-paste">Colle la/les ligne(s) du chat d'achat</label>
+                        <textarea id="fm-achat-paste" class="form-input recyc-form__textarea" rows="3" placeholder="[21:58] 10 x [Rune Pa Ret Pme] (40 513 kamas)&#10;[21:58] 100 x [Rune Ret Pme] (122 484 kamas)"></textarea>
+                        <small class="text-muted recyc-form__hint">Plusieurs lignes possibles — quantité, rune et prix sont détectés par ligne. Corrige avant de valider.</small>
+                    </div>
+
+                    <!-- Lignes d'achat pré-remplies à valider -->
+                    <div id="fm-achat-pending" hidden></div>
+
+                    <!-- Liste des achats validés -->
+                    <div class="recyc-history" id="fm-achats-list" style="margin-top:var(--spacing-md);"></div>
+                </section>
+
+                <!-- Concassages -->
+                <section class="recyc-card">
+                    <h2 class="recyc-card__title">Concassages <span class="text-muted" style="font-size:0.75rem;font-weight:400;">(fusion de runes — 3 basiques → 1 Pa, 3 Pa → 1 Ra)</span></h2>
+                    <p class="text-muted" style="font-size:0.8rem;margin-bottom:var(--spacing-md);">Si tu fusionnes des runes au concasseur pendant la session, déclare-le ici : le stock s'ajuste et ces runes ne seront pas comptées comme consommées en FM.</p>
+
+                    <div class="fm-achat-row" id="fm-concassage-row">
+                        <div id="fm-conc-source-wrap"></div>
+                        <input type="number" class="form-input fm-grid__qty" id="fm-conc-qty-source" min="1" placeholder="Qté fusionnée" title="Quantité de runes sources passées au concasseur">
+                        <div class="fm-conc-arrow">→ <span id="fm-conc-cible-nom" class="text-muted">—</span></div>
+                        <input type="number" class="form-input fm-grid__qty" id="fm-conc-qty-cible" min="1" placeholder="Qté obtenue">
+                        <button type="button" class="btn btn--primary btn--small" id="fm-conc-validate">Valider</button>
+                    </div>
+
+                    <!-- Liste des concassages déclarés -->
+                    <div class="recyc-history" id="fm-concassages-list" style="margin-top:var(--spacing-md);"></div>
+                </section>
+
+                <!-- Clôture -->
+                <section class="recyc-card">
+                    <h2 class="recyc-card__title">Clôturer la session</h2>
+                    <div class="form-group">
+                        <label class="form-label">
+                            Screen de ton inventaire runes (fin de session)
+                            <span class="recyc-form__auto">Ctrl+V pour coller</span>
+                        </label>
+                        <div class="recyc-preuve">
+                            <div class="recyc-preuve__drop" id="fm-screen-apres-drop">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Colle le screenshot de fin (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique pour parcourir</span>
+                                <input type="file" id="fm-screen-apres-file" accept="image/*" style="display:none;">
+                            </div>
+                            <div class="recyc-preuve__preview" id="fm-screen-apres-preview-wrap" style="display:none;">
+                                <img id="fm-screen-apres-preview" src="" alt="Inventaire après">
+                                <div class="recyc-preuve__status" id="fm-screen-apres-status">Analyse en cours…</div>
+                                <button type="button" class="recyc-preuve__remove" id="fm-screen-apres-remove" title="Retirer">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grille de clôture : qty après corrigeable + delta live -->
+                    <div class="form-group" id="fm-grid-apres-wrap" hidden>
+                        <label class="form-label">
+                            Quantités de fin — vérifie et corrige
+                            <span class="recyc-form__auto" id="fm-grid-apres-info"></span>
+                        </label>
+                        <div class="recyc-table-wrap">
+                            <table class="recyc-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rune</th>
+                                        <th class="recyc-num">Dispo (départ + achats)</th>
+                                        <th class="recyc-num">Fin</th>
+                                        <th class="recyc-num">Consommé</th>
+                                        <th class="recyc-num">Coût (kamas)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fm-grid-apres"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" style="text-align:right;font-weight:700;">Total</td>
+                                        <td class="recyc-num" id="fm-total-conso" style="font-weight:700;">0</td>
+                                        <td class="recyc-num" id="fm-total-cout" style="font-weight:700;color:var(--color-warning);">0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="fm-pui-banner mt-sm" id="fm-pui-apres" hidden></div>
+
+                        <!-- Ajout d'une rune absente des screens (ex: rune exo passée à la main) -->
+                        <div id="fm-apres-extra" style="margin-top:var(--spacing-sm);" hidden>
+                            <div class="fm-achat-row" id="fm-apres-extra-row"></div>
+                        </div>
+                        <button type="button" class="btn btn--secondary btn--small mt-sm" id="fm-apres-add">+ Ajouter une rune manquante</button>
+                    </div>
+
+                    <div class="recyc-form__actions">
+                        <button type="button" class="btn btn--primary" id="fm-close-session" disabled>Valider la clôture</button>
+                    </div>
+                </section>
+                </div><!-- /fm-session-layout__side -->
+                </div><!-- /fm-session-layout -->
+            </section>
+
+            <!-- ÉTAPE 3 : Résumé post-clôture -->
+            <section class="recyc-card mb-lg" id="fm-summary" hidden>
+                <h2 class="recyc-card__title">Session terminée ✓</h2>
+                <div class="recyc-kpi-grid mb-lg">
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Runes consommées</span>
+                        <span class="recyc-kpi__value" id="fm-summary-runes">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Coût total</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--gold" id="fm-summary-cout">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Dont achats en session</span>
+                        <span class="recyc-kpi__value" id="fm-summary-achats">0</span>
+                    </div>
+                    <div class="recyc-kpi" id="fm-summary-pui-wrap" hidden>
+                        <span class="recyc-kpi__label">Pui de l'item</span>
+                        <span class="recyc-kpi__value" id="fm-summary-pui">—</span>
+                    </div>
+                </div>
+                <div class="recyc-table-wrap" id="fm-summary-detail"></div>
+                <div class="recyc-form__actions">
+                    <button type="button" class="btn btn--primary" id="fm-summary-new">Nouvelle session</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- =============== PANEL : MES SESSIONS =============== -->
+        <div class="fm-panel" id="panel-historique" hidden>
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Mes stats FM</h2>
+                <div class="recyc-kpi-grid">
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Sessions terminées</span>
+                        <span class="recyc-kpi__value" id="fm-kpi-sessions">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Runes consommées</span>
+                        <span class="recyc-kpi__value" id="fm-kpi-runes">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Kamas investis</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--gold" id="fm-kpi-kamas">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <div class="recyc-history__header">
+                    <h2 class="recyc-section-title" style="margin:0;">Historique</h2>
+                    <select class="form-input" id="fm-sessions-sort" style="max-width:220px;">
+                        <option value="recent">Plus récentes</option>
+                        <option value="cout-desc">Coût décroissant</option>
+                        <option value="cout-asc">Coût croissant</option>
+                        <option value="runes-desc">Runes consommées</option>
+                    </select>
+                </div>
+                <div class="fm-sessions-grid" id="fm-sessions-list">
+                    <div class="loading"><div class="spinner"></div> Chargement...</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal détail session FM -->
+        <div class="fm-modal" id="fm-session-modal" hidden>
+            <div class="fm-modal__card">
+                <button type="button" class="fm-modal__close" id="fm-modal-close" title="Fermer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <div id="fm-modal-content">
+                    <div class="loading"><div class="spinner"></div> Chargement...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =============== PANEL : ALLIANCE =============== -->
+        <div class="fm-panel" id="panel-alliance" hidden>
+            <section class="mb-lg">
+                <h2 class="recyc-section-title">Stats FM de l'alliance</h2>
+                <div class="recyc-kpi-grid">
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">FMeurs actifs</span>
+                        <span class="recyc-kpi__value" id="fm-alli-fmeurs">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Sessions terminées</span>
+                        <span class="recyc-kpi__value" id="fm-alli-sessions">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Runes consommées</span>
+                        <span class="recyc-kpi__value" id="fm-alli-runes">0</span>
+                    </div>
+                    <div class="recyc-kpi">
+                        <span class="recyc-kpi__label">Kamas investis</span>
+                        <span class="recyc-kpi__value recyc-kpi__value--gold" id="fm-alli-kamas">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-lg">
+                <div class="recyc-history__header">
+                    <h2 class="recyc-section-title" style="margin:0;">Sessions de l'alliance</h2>
+                    <select class="form-input" id="fm-alli-sort" style="max-width:220px;">
+                        <option value="recent">Plus récentes</option>
+                        <option value="cout-desc">Coût décroissant</option>
+                        <option value="cout-asc">Coût croissant</option>
+                        <option value="runes-desc">Runes consommées</option>
+                    </select>
+                </div>
+                <div class="fm-sessions-grid" id="fm-alli-list">
+                    <div class="loading"><div class="spinner"></div> Chargement...</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =============== PANEL : RUNES & PRIX =============== -->
+        <div class="fm-panel" id="panel-runes" hidden>
+            <section class="mb-lg">
+                <div class="recyc-history__header">
+                    <h2 class="recyc-section-title" style="margin:0;">Catalogue des runes <span class="text-muted" style="font-size:0.75rem;font-weight:400;">(poids = pui)</span></h2>
+                    <button type="button" class="btn btn--primary btn--small" id="fm-runes-save" style="display:none;">Sauvegarder les prix</button>
+                </div>
+                <div class="form-group" style="max-width:320px;">
+                    <input type="text" id="fm-runes-search" class="form-input" placeholder="Filtrer les runes...">
+                </div>
+                <div class="recyc-table-wrap">
+                    <table class="recyc-table">
+                        <thead>
+                            <tr>
+                                <th>Rune</th>
+                                <th>Caractéristique</th>
+                                <th class="recyc-num">Bonus</th>
+                                <th class="recyc-num">Poids (pui)</th>
+                                <th class="recyc-num">Prix (kamas)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fm-runes-tbody">
+                            <tr><td colspan="5" class="text-muted text-center">Chargement…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script src="js/fm.js"></script>
+</body>
+</html>

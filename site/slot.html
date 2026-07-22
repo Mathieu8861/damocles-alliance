@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Machine a Sous</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__brand">
+                <img class="header__logo" src="assets/images/logo-damocles.svg" alt="Logo Damoclès">
+            </div>
+
+            <div class="header__user">
+                <a href="admin.html" class="header__icon" id="nav-admin-link" title="Admin" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+                </a>
+                <span class="header__username" id="nav-username"></span>
+                <button class="header__icon" id="btn-logout" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Navigation principale"></aside>
+
+    <main class="main main--jeux main--slot-bg">
+        <div class="mb-lg">
+            <div style="display:flex;align-items:center;gap:var(--spacing-sm);">
+                <h1 style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: 0;">Machine a Sous du Dieu Enutrof</h1>
+                <button class="slot-rules-btn" id="btn-slot-rules" title="Regles du jeu">?</button>
+            </div>
+            <p class="text-muted" style="font-size: 0.8125rem;">Misez vos jetons et tentez de decrocher le jackpot</p>
+        </div>
+
+        <div class="slot-page-layout">
+
+            <!-- Gauche : Contrôles -->
+            <div class="slot-left-column">
+                <div class="slot-sidebar slot-sidebar--left">
+                    <div class="slot-sidebar__block">
+                        <div class="slot-sidebar__title">Mise</div>
+                        <div class="slot-mise-selector" style="justify-content:center;">
+                            <button class="slot-mise-btn" id="mise-down">-</button>
+                            <span class="slot-mise-value" id="mise-value">5</span>
+                            <img class="icon-inline" src="assets/images/jeton.png" alt="jetons">
+                            <button class="slot-mise-btn" id="mise-up">+</button>
+                        </div>
+                    </div>
+                    <div class="slot-sidebar__block">
+                        <div class="slot-sidebar__title">Jetons (classiques)</div>
+                        <div class="slot-sidebar__value">
+                            <span id="slot-jetons-global">0</span>
+                            <img class="icon-inline" src="assets/images/jeton.png" alt="jetons">
+                        </div>
+                    </div>
+                    <div class="slot-sidebar__block">
+                        <div class="slot-sidebar__title">Kamatrix</div>
+                        <div class="slot-sidebar__value slot-sidebar__value--enutrosor">
+                            <span id="slot-solde">0</span>
+                            <img class="icon-inline" src="assets/images/kamatrix.png" alt="enutrosor">
+                        </div>
+                    </div>
+                </div>
+                <div class="slot-sidebar slot-sidebar--left">
+                    <div class="slot-sidebar__block slot-convert">
+                        <div class="slot-sidebar__title">Convertir</div>
+                        <div class="slot-convert__body">
+                            <div class="slot-convert__row">
+                                <img src="assets/images/kamatrix.png" alt="kamatrix" class="slot-convert__icon">
+                                <input class="form-input slot-convert__input" id="convert-amount" type="number" min="2" step="2" placeholder="0">
+                            </div>
+                            <div class="slot-convert__arrow">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                            </div>
+                            <div class="slot-convert__row slot-convert__row--result">
+                                <img src="assets/images/jeton.png" alt="jetons" class="slot-convert__icon">
+                                <span class="slot-convert__preview" id="convert-preview">0</span>
+                            </div>
+                            <span class="text-muted" style="font-size:0.7rem;text-align:center;display:block;">Taux : 100 Kamatrix = 75 jetons (-25%)</span>
+                            <button class="btn btn--primary btn--small slot-convert__btn" id="btn-convert-kamatrix">Convertir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Centre : Machine -->
+            <div class="slot-page-center">
+                <div class="slotm">
+                    <div class="slotm__body">
+                        <div class="slotm__header">
+                            <span class="slotm__header-text">Enutrof</span>
+                        </div>
+                        <div class="slotm__inner">
+                            <div class="slotm__top">
+                                <div class="slotm__light slotm__light--1"></div>
+                                <div class="slotm__light slotm__light--2"></div>
+                                <div class="slotm__light slotm__light--3"></div>
+                                <div class="slotm__light slotm__light--1"></div>
+                                <div class="slotm__light slotm__light--2"></div>
+                            </div>
+                            <div class="slotm__display">
+                                <div class="slotm__reel-window">
+                                    <div class="slotm__reel" id="reel-0"></div>
+                                </div>
+                                <div class="slotm__separator"></div>
+                                <div class="slotm__reel-window">
+                                    <div class="slotm__reel" id="reel-1"></div>
+                                </div>
+                                <div class="slotm__separator"></div>
+                                <div class="slotm__reel-window">
+                                    <div class="slotm__reel" id="reel-2"></div>
+                                </div>
+                                <div class="slotm__payline"></div>
+                            </div>
+                        </div>
+                        <div class="slotm__bottom">
+                            <div class="slotm__btn-spin" id="btn-spin">
+                                <span>SPIN</span>
+                            </div>
+                        </div>
+                        <div class="slotm__lever" id="slot-lever">
+                            <div class="slotm__lever-stick">
+                                <div class="slotm__lever-ball"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slotm__result" id="slot-result" style="display:none;">
+                        <div class="slot-result__gain" id="slot-result-gain"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Droite : Historique -->
+            <div class="slot-sidebar slot-sidebar--right">
+                <div class="slot-sidebar__title">Derniers tirages</div>
+                <div class="slot-history__list" id="slot-history-list">
+                    <p class="text-muted text-center" style="padding:var(--spacing-md);">Aucun tirage pour le moment.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal Jackpot -->
+        <!-- Modal Regles -->
+        <div class="modal-overlay" id="modal-slot-rules" style="background:transparent;">
+            <div class="modal" style="max-width:850px;width:90%;">
+                <div class="modal__header">
+                    <h2 class="modal__title">Regles du jeu</h2>
+                    <button class="modal__close" id="rules-close">&times;</button>
+                </div>
+                <div class="modal__body">
+                    <div style="display:flex;gap:var(--spacing-xl);flex-wrap:wrap;">
+                        <!-- Colonne gauche : infos -->
+                        <div style="flex:1;min-width:250px;">
+                            <div style="margin-bottom:var(--spacing-md);">
+                                <h3 style="font-family:var(--font-title);font-size:0.95rem;margin-bottom:var(--spacing-xs);color:var(--color-accent);">Comment jouer ?</h3>
+                                <p class="text-muted" style="font-size:0.85rem;">Misez vos <strong>jetons classiques</strong> <img class="icon-inline" src="assets/images/jeton.png" alt="jetons"> et faites tourner les rouleaux. Vos gains sont credites en <strong>Kamatrix</strong> <img class="icon-inline" src="assets/images/kamatrix.png" alt="kamatrix">.</p>
+                            </div>
+                            <div style="margin-bottom:var(--spacing-md);">
+                                <h3 style="font-family:var(--font-title);font-size:0.95rem;margin-bottom:var(--spacing-xs);color:var(--color-accent);">Combinaisons</h3>
+                                <p class="text-muted" style="font-size:0.85rem;margin-bottom:var(--spacing-xs);"><strong>Triple</strong> (3 identiques) : gros gain</p>
+                                <p class="text-muted" style="font-size:0.85rem;"><strong>Paire</strong> (2 identiques) : petit gain</p>
+                            </div>
+                            <div style="margin-bottom:var(--spacing-md);">
+                                <h3 style="font-family:var(--font-title);font-size:0.95rem;margin-bottom:var(--spacing-xs);color:var(--color-accent);">Conversion</h3>
+                                <p class="text-muted" style="font-size:0.85rem;">100 Kamatrix <img class="icon-inline" src="assets/images/kamatrix.png" alt="kamatrix"> = 75 jetons <img class="icon-inline" src="assets/images/jeton.png" alt="jetons"> (-25%)</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-md);padding:var(--spacing-sm);text-align:center;">
+                                <span class="text-muted" style="font-size:0.8rem;">RTP : </span>
+                                <strong id="slot-rules-rtp" style="color:var(--color-warning);">--</strong>
+                            </div>
+                        </div>
+                        <!-- Colonne droite : table des gains -->
+                        <div style="flex:1;min-width:280px;">
+                            <h3 style="font-family:var(--font-title);font-size:0.95rem;margin-bottom:var(--spacing-sm);color:var(--color-accent);">Table des gains</h3>
+                            <div id="slot-rules-table"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modal-jackpot">
+            <div class="modal modal--jackpot">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="jackpot-title">JACKPOT !</h2>
+                    <button class="modal__close" id="jackpot-close">&times;</button>
+                </div>
+                <div class="modal__body" id="jackpot-body"></div>
+            </div>
+        </div>
+
+        <div class="confetti-container" id="confetti-container"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer__left">
+            <span class="footer__members" id="footer-member-count">0 Membres</span>
+        </div>
+        <div class="footer__right">Developpe par <strong>Rorschach</strong></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="script.js"></script>
+    <script src="js/slot.js"></script>
+</body>
+</html>

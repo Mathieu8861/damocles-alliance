@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damoclès - Demo Cadres Profil</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-damocles.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === RESET === */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e8eaed;
+            background: #1a1b1e;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === PAGE === */
+        .demo-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .demo-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #e8eaed;
+        }
+
+        .demo-subtitle {
+            text-align: center;
+            color: #a1a5ad;
+            font-size: 0.9rem;
+            margin-bottom: 3rem;
+        }
+
+        /* === GRID === */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .demo-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+            .demo-grid { grid-template-columns: 1fr; }
+        }
+
+        /* === CARD === */
+        .demo-card {
+            background: #25262b;
+            border: 1px solid #373a40;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        .demo-card__tier {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .demo-card__points {
+            font-size: 0.8rem;
+            color: #6c7077;
+            margin-top: -0.75rem;
+        }
+
+        .demo-card__name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e8eaed;
+        }
+
+        .demo-card__rank {
+            font-size: 0.75rem;
+            color: #a1a5ad;
+        }
+
+        /* ============================================ */
+        /* CADRES ORNEMENTAUX                           */
+        /* 9 Paliers par points cumules                 */
+        /* ============================================ */
+
+        /* --- BASE AVATAR --- */
+        .avatar-frame {
+            position: relative;
+            width: 115px;
+            height: 115px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-frame__img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+            background: #3a3c42;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-frame__img svg {
+            width: 40px;
+            height: 40px;
+            color: #6c7077;
+        }
+
+        /* ============================== */
+        /* TIER 1 : INITIE (0 - 49 pts)  */
+        /* Bordure fine grise             */
+        /* ============================== */
+        .avatar-frame--initie .avatar-frame__img {
+            border: 2px solid #4a4d55;
+        }
+
+        .tier-color--initie { color: #6c7077; }
+
+        /* ============================== */
+        /* TIER 2 : BRONZE (50 - 149 pts) */
+        /* Bordure bronze + lueur douce   */
+        /* ============================== */
+        .avatar-frame--bronze .avatar-frame__img {
+            border: 3px solid #cd7f32;
+            box-shadow: 0 0 12px rgba(205, 127, 50, 0.25);
+        }
+
+        .tier-color--bronze { color: #cd7f32; }
+
+        /* ================================= */
+        /* TIER 3 : ARGENT (150 - 299 pts)   */
+        /* Bordure argent + lueur moderee    */
+        /* ================================= */
+        .avatar-frame--argent .avatar-frame__img {
+            border: 3px solid #c0c0c0;
+            box-shadow: 0 0 14px rgba(192, 192, 192, 0.3);
+        }
+
+        .tier-color--argent { color: #c0c0c0; }
+
+        /* ============================== */
+        /* TIER 4 : OR (300 - 499 pts)    */
+        /* Bordure doree + glow pulsante  */
+        /* ============================== */
+        .avatar-frame--or .avatar-frame__img {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.3);
+            animation: glow-or 2.5s ease-in-out infinite;
+        }
+
+        @keyframes glow-or {
+            0%, 100% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+            50% { box-shadow: 0 0 22px rgba(255, 215, 0, 0.45); }
+        }
+
+        .tier-color--or { color: #ffd700; }
+
+        /* ================================= */
+        /* TIER 5 : SAPHIR (500 - 749 pts)   */
+        /* Aura bleue intense + ring rotatif */
+        /* ================================= */
+        .avatar-frame--saphir .avatar-frame__img {
+            border: 3px solid #3b82f6;
+            box-shadow:
+                0 0 24px rgba(59, 130, 246, 0.5),
+                0 0 48px rgba(37, 99, 235, 0.2),
+                inset 0 0 14px rgba(59, 130, 246, 0.15);
+            animation: glow-saphir 2s ease-in-out infinite;
+        }
+
+        .avatar-frame--saphir::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0%,
+                rgba(59, 130, 246, 0.5) 25%,
+                transparent 40%,
+                rgba(96, 165, 250, 0.4) 65%,
+                transparent 80%,
+                rgba(59, 130, 246, 0.5) 100%
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: spin-saphir 7s linear infinite;
+            mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+            -webkit-mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+        }
+
+        /* Aura externe diffuse */
+        .avatar-frame--saphir::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 40%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-aura-saphir 2.5s ease-in-out infinite;
+        }
+
+        @keyframes glow-saphir {
+            0%, 100% {
+                box-shadow:
+                    0 0 20px rgba(59, 130, 246, 0.4),
+                    0 0 40px rgba(37, 99, 235, 0.15),
+                    inset 0 0 10px rgba(59, 130, 246, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 32px rgba(59, 130, 246, 0.65),
+                    0 0 60px rgba(37, 99, 235, 0.25),
+                    inset 0 0 18px rgba(59, 130, 246, 0.2);
+            }
+        }
+
+        @keyframes spin-saphir {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-aura-saphir {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+
+        .tier-color--saphir { color: #3b82f6; }
+
+        /* =================================== */
+        /* TIER 6 : EMERAUDE (750 - 999 pts)   */
+        /* Aura verte puissante + ring 3 bras  */
+        /* =================================== */
+        .avatar-frame--emeraude .avatar-frame__img {
+            border: 3px solid #10b981;
+            box-shadow:
+                0 0 26px rgba(16, 185, 129, 0.5),
+                0 0 52px rgba(5, 150, 105, 0.2),
+                inset 0 0 14px rgba(16, 185, 129, 0.15);
+            animation: glow-emeraude 2s ease-in-out infinite;
+        }
+
+        .avatar-frame--emeraude::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0%,
+                rgba(16, 185, 129, 0.55) 15%,
+                transparent 30%,
+                rgba(16, 185, 129, 0.55) 48%,
+                transparent 63%,
+                rgba(16, 185, 129, 0.55) 82%,
+                transparent 100%
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: spin-emeraude 6s linear infinite;
+            mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+            -webkit-mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+        }
+
+        /* Aura externe diffuse */
+        .avatar-frame--emeraude::after {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 35%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-aura-emeraude 2.2s ease-in-out infinite;
+        }
+
+        @keyframes glow-emeraude {
+            0%, 100% {
+                box-shadow:
+                    0 0 22px rgba(16, 185, 129, 0.4),
+                    0 0 44px rgba(5, 150, 105, 0.15),
+                    inset 0 0 10px rgba(16, 185, 129, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 36px rgba(16, 185, 129, 0.65),
+                    0 0 65px rgba(5, 150, 105, 0.25),
+                    inset 0 0 18px rgba(16, 185, 129, 0.2);
+            }
+        }
+
+        @keyframes spin-emeraude {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-aura-emeraude {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .tier-color--emeraude { color: #10b981; }
+
+        /* ======================================= */
+        /* TIER 7 : RUBIS (1 000 - 1 499 pts)      */
+        /* Aura rouge feu + ring rapide + pulse    */
+        /* ======================================= */
+        .avatar-frame--rubis .avatar-frame__img {
+            border: 3px solid #ef4444;
+            box-shadow:
+                0 0 28px rgba(239, 68, 68, 0.55),
+                0 0 56px rgba(219, 41, 41, 0.2),
+                inset 0 0 16px rgba(239, 68, 68, 0.15);
+            animation: glow-rubis 1.8s ease-in-out infinite;
+        }
+
+        .avatar-frame--rubis::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0%,
+                rgba(239, 68, 68, 0.6) 20%,
+                transparent 40%,
+                rgba(239, 68, 68, 0.6) 60%,
+                transparent 80%,
+                rgba(239, 68, 68, 0.6) 100%
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: spin-rubis 5s linear infinite;
+            mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+            -webkit-mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+        }
+
+        /* Aura rouge large */
+        .avatar-frame--rubis::after {
+            content: '';
+            position: absolute;
+            inset: -14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 30%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-aura-rubis 1.8s ease-in-out infinite;
+        }
+
+        @keyframes glow-rubis {
+            0%, 100% {
+                box-shadow:
+                    0 0 24px rgba(239, 68, 68, 0.45),
+                    0 0 48px rgba(219, 41, 41, 0.15),
+                    inset 0 0 12px rgba(239, 68, 68, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 40px rgba(239, 68, 68, 0.7),
+                    0 0 70px rgba(219, 41, 41, 0.3),
+                    inset 0 0 20px rgba(239, 68, 68, 0.2);
+            }
+        }
+
+        @keyframes spin-rubis {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-aura-rubis {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.12); opacity: 1; }
+        }
+
+        .tier-color--rubis { color: #ef4444; }
+
+        /* ========================================= */
+        /* TIER 8 : DIAMANT (1 500 - 1 999 pts)      */
+        /* Aura prismatique eclatante + ring irise  */
+        /* ========================================= */
+        .avatar-frame--diamant .avatar-frame__img {
+            border: 3px solid #e0e7ff;
+            box-shadow:
+                0 0 30px rgba(224, 231, 255, 0.5),
+                0 0 60px rgba(165, 180, 252, 0.2),
+                0 0 80px rgba(147, 197, 253, 0.1),
+                inset 0 0 16px rgba(224, 231, 255, 0.15);
+            animation: glow-diamant 1.8s ease-in-out infinite;
+        }
+
+        .avatar-frame--diamant::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #a5b4fc,
+                #e0e7ff,
+                #c4b5fd,
+                #fbcfe8,
+                #93c5fd,
+                #e0e7ff,
+                #a5f3fc,
+                #e0e7ff,
+                #a5b4fc
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: spin-diamant 4s linear infinite;
+            mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+            -webkit-mask: radial-gradient(circle, transparent 50px, black 51px, black 56px, transparent 57px);
+        }
+
+        /* Aura irisee large */
+        .avatar-frame--diamant::after {
+            content: '';
+            position: absolute;
+            inset: -16px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(224, 231, 255, 0.18) 25%, rgba(165, 180, 252, 0.08) 50%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-aura-diamant 1.8s ease-in-out infinite;
+        }
+
+        @keyframes glow-diamant {
+            0%, 100% {
+                box-shadow:
+                    0 0 24px rgba(224, 231, 255, 0.4),
+                    0 0 50px rgba(165, 180, 252, 0.15),
+                    0 0 70px rgba(147, 197, 253, 0.06),
+                    inset 0 0 12px rgba(224, 231, 255, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 40px rgba(224, 231, 255, 0.7),
+                    0 0 75px rgba(165, 180, 252, 0.3),
+                    0 0 100px rgba(147, 197, 253, 0.12),
+                    inset 0 0 20px rgba(224, 231, 255, 0.2);
+            }
+        }
+
+        @keyframes spin-diamant {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-aura-diamant {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .tier-color--diamant { color: #e0e7ff; }
+
+        /* ===================================== */
+        /* TIER 9 : LEGENDAIRE (2 000+ pts)      */
+        /* EFFET FLAMME : ring rouge/or rotatif  */
+        /* + flammes CSS animees + mega glow     */
+        /* ===================================== */
+        .avatar-frame--legendaire {
+            width: 120px;
+            height: 120px;
+        }
+
+        .avatar-frame--legendaire .avatar-frame__img {
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            box-shadow:
+                0 0 22px rgba(219, 41, 41, 0.5),
+                0 0 44px rgba(255, 107, 53, 0.15),
+                inset 0 0 12px rgba(219, 41, 41, 0.1);
+            animation: glow-legendaire 2s ease-in-out infinite;
+        }
+
+        /* Ring gradient rotatif rouge/or */
+        .avatar-frame--legendaire::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #db2929,
+                #ff6b35,
+                #ffd700,
+                #ff6b35,
+                #db2929,
+                #ff6b35,
+                #ffd700,
+                #ff6b35,
+                #db2929
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: spin-legendaire 3s linear infinite;
+            mask: radial-gradient(circle, transparent 50px, black 51px, black 57px, transparent 58px);
+            -webkit-mask: radial-gradient(circle, transparent 50px, black 51px, black 57px, transparent 58px);
+        }
+
+        /* Aura externe subtile */
+        .avatar-frame--legendaire::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(219, 41, 41, 0.12) 30%,
+                rgba(255, 107, 53, 0.06) 55%,
+                transparent 70%
+            );
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-aura-legendaire 2s ease-in-out infinite;
+        }
+
+        @keyframes spin-legendaire {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes glow-legendaire {
+            0%, 100% {
+                box-shadow:
+                    0 0 18px rgba(219, 41, 41, 0.4),
+                    0 0 36px rgba(255, 107, 53, 0.12),
+                    inset 0 0 10px rgba(219, 41, 41, 0.08);
+            }
+            50% {
+                box-shadow:
+                    0 0 30px rgba(219, 41, 41, 0.6),
+                    0 0 55px rgba(255, 107, 53, 0.2),
+                    inset 0 0 16px rgba(219, 41, 41, 0.15);
+            }
+        }
+
+        @keyframes pulse-aura-legendaire {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        /* === BRAISES / ETINCELLES SUBTILES === */
+        .avatar-frame--legendaire .frame-flames {
+            position: absolute;
+            inset: -4px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .frame-flame {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #ffd700;
+            filter: blur(0.5px);
+            animation: ember-float 2.5s ease-out infinite;
+            opacity: 0;
+        }
+
+        .frame-flame:nth-child(1) {
+            top: 8%; left: 48%;
+            animation-delay: 0s;
+            background: #ffd700;
+        }
+        .frame-flame:nth-child(2) {
+            top: 12%; right: 15%;
+            animation-delay: 0.4s;
+            background: #ff6b35;
+            width: 3px; height: 3px;
+        }
+        .frame-flame:nth-child(3) {
+            top: 5%; left: 30%;
+            animation-delay: 0.8s;
+            background: #ffd700;
+            width: 3px; height: 3px;
+        }
+        .frame-flame:nth-child(4) {
+            top: 15%; left: 10%;
+            animation-delay: 1.2s;
+            background: #ff6b35;
+        }
+        .frame-flame:nth-child(5) {
+            top: 10%; right: 30%;
+            animation-delay: 1.6s;
+            background: #ffd700;
+            width: 3px; height: 3px;
+        }
+        .frame-flame:nth-child(6) {
+            top: 20%; right: 8%;
+            animation-delay: 2s;
+            background: #ef4444;
+            width: 2px; height: 2px;
+        }
+        .frame-flame:nth-child(7) {
+            top: 3%; left: 55%;
+            animation-delay: 0.6s;
+            background: #ffd700;
+            width: 2px; height: 2px;
+        }
+        .frame-flame:nth-child(8) {
+            top: 18%; left: 22%;
+            animation-delay: 1.8s;
+            background: #ff6b35;
+            width: 3px; height: 3px;
+        }
+
+        @keyframes ember-float {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5);
+            }
+            15% {
+                opacity: 0.9;
+                transform: translateY(-3px) scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: translateY(-14px) scale(0.7);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-26px) scale(0.2);
+            }
+        }
+
+        .tier-color--legendaire {
+            background: linear-gradient(135deg, #db2929, #ff6b35, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* === LEGENDE EN BAS === */
+        .demo-legend {
+            margin-top: 3rem;
+            background: #25262b;
+            border: 1px solid #373a40;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+        }
+
+        .demo-legend__title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #a1a5ad;
+        }
+
+        .demo-legend__table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .demo-legend__table th {
+            text-align: left;
+            font-size: 0.75rem;
+            color: #6c7077;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #373a40;
+        }
+
+        .demo-legend__table td {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(55, 58, 64, 0.5);
+        }
+
+        .demo-legend__table td:first-child {
+            font-weight: 600;
+        }
+
+        .demo-legend__table td:nth-child(2) {
+            color: #a1a5ad;
+        }
+
+        .demo-legend__table td:nth-child(3) {
+            color: #6c7077;
+            font-size: 0.8rem;
+        }
+
+        /* === MINI BADGES === */
+        .tier-badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .tier-badge--initie {
+            background: rgba(108, 112, 119, 0.15);
+            color: #6c7077;
+            border: 1px solid rgba(108, 112, 119, 0.3);
+        }
+
+        .tier-badge--bronze {
+            background: rgba(205, 127, 50, 0.1);
+            color: #cd7f32;
+            border: 1px solid rgba(205, 127, 50, 0.3);
+        }
+
+        .tier-badge--argent {
+            background: rgba(192, 192, 192, 0.1);
+            color: #c0c0c0;
+            border: 1px solid rgba(192, 192, 192, 0.3);
+        }
+
+        .tier-badge--or {
+            background: rgba(255, 215, 0, 0.08);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .tier-badge--saphir {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .tier-badge--emeraude {
+            background: rgba(5, 150, 105, 0.1);
+            color: #059669;
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .tier-badge--rubis {
+            background: rgba(219, 41, 41, 0.1);
+            color: #db2929;
+            border: 1px solid rgba(219, 41, 41, 0.3);
+        }
+
+        .tier-badge--diamant {
+            background: rgba(224, 231, 255, 0.08);
+            color: #e0e7ff;
+            border: 1px solid rgba(224, 231, 255, 0.3);
+        }
+
+        .tier-badge--legendaire {
+            background: linear-gradient(135deg, rgba(219, 41, 41, 0.1), rgba(255, 215, 0, 0.1));
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* === BACK LINK === */
+        .demo-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #6c7077;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .demo-back:hover { color: #db2929; }
+
+        /* === NOTE === */
+        .demo-note {
+            text-align: center;
+            color: #6c7077;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="demo-page">
+
+        <a href="index.html" class="demo-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour
+        </a>
+
+        <h1 class="demo-title">Cadres de Profil</h1>
+        <p class="demo-subtitle">Ornements qui evoluent en fonction des points PVP cumules (definitif)</p>
+
+        <div class="demo-grid">
+
+            <!-- TIER 1 : INITIE -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--initie">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--initie">Initie</div>
+                <div class="demo-card__points">0 - 49 points</div>
+                <div class="demo-card__name">Joueur Lambda</div>
+                <div class="demo-card__rank">Debutant PVP</div>
+            </div>
+
+            <!-- TIER 2 : BRONZE -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--bronze">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--bronze">Bronze</div>
+                <div class="demo-card__points">50 - 149 points</div>
+                <div class="demo-card__name">Guerrier de Base</div>
+                <div class="demo-card__rank">Se fait les dents</div>
+            </div>
+
+            <!-- TIER 3 : ARGENT -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--argent">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--argent">Argent</div>
+                <div class="demo-card__points">150 - 299 points</div>
+                <div class="demo-card__name">Combattant Confirme</div>
+                <div class="demo-card__rank">On le connait en PVP</div>
+            </div>
+
+            <!-- TIER 4 : OR -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--or">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--or">Or</div>
+                <div class="demo-card__points">300 - 499 points</div>
+                <div class="demo-card__name">Elite PVP</div>
+                <div class="demo-card__rank">Force tranquille</div>
+            </div>
+
+            <!-- TIER 5 : SAPHIR -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--saphir">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--saphir">Saphir</div>
+                <div class="demo-card__points">500 - 999 points</div>
+                <div class="demo-card__name">Veteran des Arenes</div>
+                <div class="demo-card__rank">Craint et respecte</div>
+            </div>
+
+            <!-- TIER 6 : EMERAUDE -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--emeraude">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--emeraude">Emeraude</div>
+                <div class="demo-card__points">1 000 - 1 499 points</div>
+                <div class="demo-card__name">Seigneur de Guerre</div>
+                <div class="demo-card__rank">Un pilier de l'alliance</div>
+            </div>
+
+            <!-- TIER 7 : RUBIS -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--rubis">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--rubis">Rubis</div>
+                <div class="demo-card__points">1 500 - 2 499 points</div>
+                <div class="demo-card__name">Machine de Guerre</div>
+                <div class="demo-card__rank">Terreur de l'alliance</div>
+            </div>
+
+            <!-- TIER 8 : DIAMANT -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--diamant">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--diamant">Diamant</div>
+                <div class="demo-card__points">2 500 - 3 999 points</div>
+                <div class="demo-card__name">Faucheuse des Champs</div>
+                <div class="demo-card__rank">La mort incarnee</div>
+            </div>
+
+            <!-- TIER 9 : LEGENDAIRE -->
+            <div class="demo-card">
+                <div class="avatar-frame avatar-frame--legendaire">
+                    <div class="avatar-frame__img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="frame-flames">
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                        <div class="frame-flame"></div>
+                    </div>
+                </div>
+                <div class="demo-card__tier tier-color--legendaire">Legendaire</div>
+                <div class="demo-card__points">4 000+ points</div>
+                <div class="demo-card__name">Dieu du PVP</div>
+                <div class="demo-card__rank">On parle de lui partout</div>
+            </div>
+
+        </div>
+
+        <!-- LEGENDE -->
+        <div class="demo-legend">
+            <div class="demo-legend__title">Recapitulatif des paliers</div>
+            <table class="demo-legend__table">
+                <thead>
+                    <tr>
+                        <th>Palier</th>
+                        <th>Points requis</th>
+                        <th>Style du cadre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--initie">Initie</span></td>
+                        <td>0 - 49</td>
+                        <td>Bordure fine grise, neutre</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--bronze">Bronze</span></td>
+                        <td>50 - 149</td>
+                        <td>Bordure bronze + lueur douce</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--argent">Argent</span></td>
+                        <td>150 - 299</td>
+                        <td>Bordure argent + lueur moderee</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--or">Or</span></td>
+                        <td>300 - 499</td>
+                        <td>Bordure doree + glow pulsante</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--saphir">Saphir</span></td>
+                        <td>500 - 999</td>
+                        <td>Bordure saphir + ring rotatif lent + glow pulsante</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--emeraude">Emeraude</span></td>
+                        <td>1 000 - 1 499</td>
+                        <td>Bordure emeraude + ring rotatif 3 branches + glow intense</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--rubis">Rubis</span></td>
+                        <td>1 500 - 2 499</td>
+                        <td>Bordure rouge Damoclès + ring rotatif + glow pulsante intense</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--diamant">Diamant</span></td>
+                        <td>2 500 - 3 999</td>
+                        <td>Bordure prismatique + ring irise rotatif + glow irisee</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-badge tier-badge--legendaire">Legendaire</span></td>
+                        <td>4 000+</td>
+                        <td>Ring gradient rouge/or rotatif + particules + glow pulsant</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="demo-note">Page de demo — Les seuils et les styles sont ajustables avant l'import dans le site.</p>
+
+    </div>
+
+</body>
+</html>
