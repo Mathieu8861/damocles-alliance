@@ -793,17 +793,24 @@
     /* ============================================ */
     /* === LANGUE (drapeau EN, traduction Google) == */
     /* ============================================ */
-    /* Un clic sur le drapeau bascule tout le site   */
-    /* en anglais via Google Translate (contenu      */
-    /* dynamique inclus). Preference memorisee en    */
-    /* localStorage, les elements .notranslate       */
-    /* (pseudos, noms de runes) restent intacts.     */
+    /* Un clic sur le drapeau ouvre un menu de       */
+    /* langues (FR / EN / DE). Traduction Google de  */
+    /* tout le site (contenu dynamique inclus).      */
+    /* Preference memorisee en localStorage, les     */
+    /* elements .notranslate (pseudos, noms de       */
+    /* runes) restent intacts.                       */
     const LANG_KEY = 'damocles_lang';
-    const UK_FLAG_SVG = '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 60,40 M60,0 0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 60,40 M60,0 0,40" stroke="#C8102E" stroke-width="4"/><path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg>';
-    const FR_FLAG_SVG = '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="20" height="40" fill="#002395"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ED2939"/></svg>';
+    const LANGS = {
+        fr: { label: 'Français', flag: '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="20" height="40" fill="#002395"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ED2939"/></svg>' },
+        en: { label: 'English', flag: '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 60,40 M60,0 0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 60,40 M60,0 0,40" stroke="#C8102E" stroke-width="4"/><path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg>' },
+        de: { label: 'Deutsch', flag: '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="60" height="40" fill="#000"/><rect y="13.3" width="60" height="13.4" fill="#DD0000"/><rect y="26.7" width="60" height="13.3" fill="#FFCE00"/></svg>' }
+    };
 
     function getLang() {
-        try { return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'fr'; } catch (e) { return 'fr'; }
+        try {
+            var l = localStorage.getItem(LANG_KEY);
+            return LANGS[l] ? l : 'fr';
+        } catch (e) { return 'fr'; }
     }
 
     function setGoogTransCookie(val) {
@@ -817,23 +824,59 @@
         document.cookie = 'googtrans=/fr/fr' + past + '; domain=.' + window.location.hostname;
     }
 
-    function toggleLang() {
-        var next = getLang() === 'en' ? 'fr' : 'en';
+    function setLang(next) {
+        if (!LANGS[next]) next = 'fr';
         try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
-        if (next === 'en') setGoogTransCookie('/fr/en'); else clearGoogTransCookie();
+        if (next === 'fr') clearGoogTransCookie(); else setGoogTransCookie('/fr/' + next);
         window.location.reload();
     }
 
-    function bootGoogleTranslate() {
+    function openLangMenu(btn) {
+        var existing = document.getElementById('app-lang-menu');
+        if (existing) { existing.remove(); return; }
+        var menu = document.createElement('div');
+        menu.id = 'app-lang-menu';
+        menu.className = 'lang-menu notranslate';
+        var current = getLang();
+        Object.keys(LANGS).forEach(function (code) {
+            var item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'lang-menu__item' + (code === current ? ' active' : '');
+            item.innerHTML = LANGS[code].flag + '<span>' + LANGS[code].label + '</span>';
+            item.addEventListener('click', function () {
+                if (code === current) { menu.remove(); return; }
+                setLang(code);
+            });
+            menu.appendChild(item);
+        });
+        document.body.appendChild(menu);
+        /* Position : au-dessus du bouton si la place le permet, sinon dessous */
+        var r = btn.getBoundingClientRect();
+        var top = r.top - menu.offsetHeight - 8;
+        if (top < 8) top = r.bottom + 8;
+        var left = Math.min(Math.max(8, r.left + r.width / 2 - menu.offsetWidth / 2), window.innerWidth - menu.offsetWidth - 8);
+        menu.style.top = top + 'px';
+        menu.style.left = left + 'px';
+        setTimeout(function () {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 0);
+    }
+
+    function bootGoogleTranslate(lang) {
         if (document.getElementById('google_translate_element')) return;
-        setGoogTransCookie('/fr/en');
+        setGoogTransCookie('/fr/' + lang);
         var holder = document.createElement('div');
         holder.id = 'google_translate_element';
         document.body.appendChild(holder);
         window.googleTranslateElementInit = function () {
             new window.google.translate.TranslateElement({
                 pageLanguage: 'fr',
-                includedLanguages: 'en',
+                includedLanguages: 'en,de',
                 autoDisplay: false
             }, 'google_translate_element');
         };
@@ -852,11 +895,11 @@
             btn.className = 'lang-float';
             document.body.appendChild(btn);
         }
-        btn.innerHTML = lang === 'en' ? FR_FLAG_SVG : UK_FLAG_SVG;
-        btn.title = lang === 'en' ? 'Version française' : 'English version';
+        btn.innerHTML = LANGS[lang].flag;
+        btn.title = 'Langue / Language';
         btn.setAttribute('aria-label', btn.title);
-        btn.addEventListener('click', toggleLang);
-        if (lang === 'en') bootGoogleTranslate();
+        btn.addEventListener('click', function () { openLangMenu(btn); });
+        if (lang !== 'fr') bootGoogleTranslate(lang);
     }
 
     /* === INIT === */

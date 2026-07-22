@@ -53,7 +53,7 @@
 - 22/07/2026 : choix du nom **Damoclès [SWRD]** (menace qui plane sur BCL). Leads : Rorschach, Lord, Pannah, Henrich, Big. Messages d'annonce Discord + MP de démarchage rédigés. Discord : duplication du serveur Renegats via modèle de serveur natif (Paramètres > Modèle de serveur, désactiver le mode Communauté le temps de créer le modèle)
 - 22/07/2026 : duplication du code REN → DAMOCLES (site + sql + edge function), rebrand Damoclès, SQL consolidé, checklist INSTALLATION.md
 - 23/07/2026 : bascule de la DA rouge → **violet #7d5ff7** (demande Mathieu). Variables accent + littéraux (sidebar, badges, glows, cadres, confettis, logo SVG). Rouges sémantiques conservés
-- 23/07/2026 : **drapeau EN** (membres internationaux) : bouton drapeau dans la sidebar (ou flottant en bas à droite sur connexion/admin) qui traduit tout le site en anglais via Google Translate (contenu dynamique inclus, bannière Google masquée, préférence en localStorage `damocles_lang`, cookie `googtrans`). Pseudos sidebar, marque et noms de runes protégés par `class="notranslate"`. Testé aller-retour FR↔EN en local
+- 23/07/2026 : **sélecteur de langue FR / EN / DE** (membres internationaux) : bouton drapeau dans la sidebar (ou flottant en bas à droite sur connexion/admin) qui ouvre un menu de langues. Traduction Google de tout le site (contenu dynamique inclus, bannière Google masquée, préférence en localStorage `damocles_lang`, cookie `googtrans`). Pseudos sidebar, marque et noms de runes protégés par `class="notranslate"`. Ajouter une langue = 1 entrée dans le const `LANGS` de script.js + code dans `includedLanguages`. Testé FR→EN, FR→DE et retours en local
 
 ## Prochaines étapes
 - [ ] Créer le projet Supabase + runner le SQL d'install
