@@ -10,8 +10,8 @@
     /* nouveau projet Supabase (Dashboard > Settings > API)    */
     /* Tant que c'est un placeholder, le site affiche une page */
     /* vide : c'est voulu, voir INSTALLATION.md                */
-    const SUPABASE_URL = 'VOTRE_SUPABASE_URL';
-    const SUPABASE_ANON_KEY = 'VOTRE_SUPABASE_ANON_KEY';
+    const SUPABASE_URL = 'https://yebfbdgxikbnqdkbycam.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_2bEkqhNcB3JXYG1yQ7pivg_T__Q5OIq';
 
     let supabaseClient = null;
     if (window.supabase && SUPABASE_URL !== 'VOTRE_SUPABASE_URL') {
