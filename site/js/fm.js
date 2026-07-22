@@ -501,7 +501,7 @@
             }
             var html = '';
             matches.forEach(function (r) {
-                html += '<div class="ally-dropdown__item" data-id="' + r.id + '">'
+                html += '<div class="ally-dropdown__item notranslate" data-id="' + r.id + '">'
                     + runeIconHtml(r)
                     + esc(r.nom)
                     + ' <span style="opacity:0.55;font-size:0.78em;">' + esc(r.categorie) + '</span>'
@@ -758,7 +758,7 @@
                 var adjText = adj === 0 ? '—'
                     : '<span style="color:' + (adj > 0 ? 'var(--color-success)' : 'var(--color-warning)') + ';">' + (adj > 0 ? '+' : '') + fmt(adj) + '</span>';
                 html += '<tr>'
-                    + '<td>' + runeIconHtml(rune) + '<strong>' + esc(rune.nom) + '</strong></td>'
+                    + '<td>' + runeIconHtml(rune) + '<strong class="notranslate">' + esc(rune.nom) + '</strong></td>'
                     + '<td class="recyc-num">' + fmt(sr.qty_avant) + '</td>'
                     + '<td class="recyc-num">' + (sr.qty_achetee ? '+' + fmt(sr.qty_achetee) : '—') + '</td>'
                     + '<td class="recyc-num">' + adjText + '</td>'
@@ -985,7 +985,7 @@
             var rune = a.rune_id ? (runesById[a.rune_id] || { nom: '?' }) : { nom: 'Non identifiée' };
             html += '<div class="recyc-history__row">'
                 + '<div class="recyc-history__user">'
-                    + '<span class="recyc-history__username">' + runeIconHtml(rune) + esc(rune.nom) + '</span>'
+                    + '<span class="recyc-history__username notranslate">' + runeIconHtml(rune) + esc(rune.nom) + '</span>'
                     + '<span class="recyc-history__date">' + window.REN.formatDate(a.created_at) + '</span>'
                 + '</div>'
                 + '<div class="recyc-history__zone"><span class="text-muted" style="font-size:0.75rem;">' + esc((a.message_brut || '').substring(0, 80)) + '</span></div>'
@@ -1161,7 +1161,7 @@
             var cible = runesById[c.rune_cible_id] || { nom: '?' };
             html += '<div class="recyc-history__row">'
                 + '<div class="recyc-history__user">'
-                    + '<span class="recyc-history__username">' + runeIconHtml(src) + esc(src.nom) + ' → ' + runeIconHtml(cible) + esc(cible.nom) + '</span>'
+                    + '<span class="recyc-history__username notranslate">' + runeIconHtml(src) + esc(src.nom) + ' → ' + runeIconHtml(cible) + esc(cible.nom) + '</span>'
                     + '<span class="recyc-history__date">' + window.REN.formatDate(c.created_at) + '</span>'
                 + '</div>'
                 + '<div class="recyc-history__zone"></div>'
@@ -1358,7 +1358,7 @@
                 var dispo = dispoOf(sr);
                 var fin = gridApres[sr.rune_id] !== undefined ? gridApres[sr.rune_id] : 0;
                 html += '<tr data-rune="' + sr.rune_id + '">'
-                    + '<td>' + runeIconHtml(rune) + '<strong>' + esc(rune.nom) + '</strong></td>'
+                    + '<td>' + runeIconHtml(rune) + '<strong class="notranslate">' + esc(rune.nom) + '</strong></td>'
                     + '<td class="recyc-num"><input type="number" class="form-input fm-grid__qty fm-apres-dispo" min="0" value="' + dispo + '" style="width:90px;" title="Départ + achats + concassages — corrigeable si le screen de départ était faux"></td>'
                     + '<td class="recyc-num"><input type="number" class="form-input fm-grid__qty fm-apres-qty" min="0" value="' + fin + '" style="width:90px;"></td>'
                     + '<td class="recyc-num fm-apres-conso">—</td>'
@@ -1525,7 +1525,7 @@
                 var conso = Math.max(0, dispoOf(sr) - fin);
                 if (!conso) return;
                 html += '<tr>'
-                    + '<td>' + runeIconHtml(rune) + '<strong>' + esc(rune.nom) + '</strong></td>'
+                    + '<td>' + runeIconHtml(rune) + '<strong class="notranslate">' + esc(rune.nom) + '</strong></td>'
                     + '<td class="recyc-num">' + fmt(conso) + '</td>'
                     + '<td class="recyc-num">' + fmt(rune.prix_kamas || 0) + '</td>'
                     + '<td class="recyc-num" style="color:var(--color-warning);font-weight:700;">' + fmt(conso * (rune.prix_kamas || 0)) + '</td>'
@@ -1806,7 +1806,7 @@
                 + '</tr></thead><tbody>';
             sorted.forEach(function (r) {
                 html += '<tr>'
-                    + '<td>' + runeIconHtml(r) + '<strong>' + esc(r.nom) + '</strong></td>'
+                    + '<td>' + runeIconHtml(r) + '<strong class="notranslate">' + esc(r.nom) + '</strong></td>'
                     + '<td class="recyc-num">' + fmt(r.qty_consommee) + '</td>'
                     + '<td class="recyc-num">' + fmt(r.prix_unitaire) + '</td>'
                     + '<td class="recyc-num" style="color:var(--color-warning);font-weight:700;">' + fmt(r.cout_kamas) + '</td>'
@@ -1997,7 +1997,7 @@
                     ? '<input type="number" class="form-input fm-prix-input" data-id="' + r.id + '" min="0" value="' + (r.prix_kamas || 0) + '" style="width:110px;">'
                     : fmt(r.prix_kamas || 0);
                 html += '<tr>'
-                    + '<td>' + runeIconHtml(r) + '<strong>' + esc(r.nom) + '</strong></td>'
+                    + '<td>' + runeIconHtml(r) + '<strong class="notranslate">' + esc(r.nom) + '</strong></td>'
                     + '<td>' + esc(r.categorie) + (r.tier !== 'basique' ? ' <span class="recyc-pill" style="font-size:0.6rem;">' + r.tier.toUpperCase() + '</span>' : '') + '</td>'
                     + '<td class="recyc-num">+' + r.bonus + '</td>'
                     + '<td class="recyc-num">' + r.poids + '</td>'

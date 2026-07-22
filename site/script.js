@@ -593,7 +593,7 @@
         /* Bloc brand : logo + nom alliance en haut de la sidebar (desktop only) */
         html += '<div class="app-sidebar__brand">'
             + '<img src="assets/images/logo-damocles.svg" alt="Logo Damoclès">'
-            + '<span class="app-sidebar__brand-name">Damoclès</span>'
+            + '<span class="app-sidebar__brand-name notranslate">Damoclès</span>'
             + '</div>';
 
         /* Groupes de nav */
@@ -618,8 +618,9 @@
 
         /* Bloc user en bas de la sidebar (sticky) */
         html += '<div class="app-sidebar__user">'
+            + '<button class="app-sidebar__user-icon" id="app-lang-toggle" title="English version"></button>'
             + '<a href="admin.html" class="app-sidebar__user-icon" id="app-admin-link" title="Admin" style="display:none;">' + ADMIN_ICON_SVG + '</a>'
-            + '<span class="app-sidebar__username" id="app-username" title="Voir mon profil"></span>'
+            + '<span class="app-sidebar__username notranslate" id="app-username" title="Voir mon profil"></span>'
             + '<button class="app-sidebar__user-icon" id="app-btn-logout" title="Déconnexion">' + LOGOUT_ICON_SVG + '</button>'
             + '</div>';
 
@@ -789,6 +790,75 @@
         });
     };
 
+    /* ============================================ */
+    /* === LANGUE (drapeau EN, traduction Google) == */
+    /* ============================================ */
+    /* Un clic sur le drapeau bascule tout le site   */
+    /* en anglais via Google Translate (contenu      */
+    /* dynamique inclus). Preference memorisee en    */
+    /* localStorage, les elements .notranslate       */
+    /* (pseudos, noms de runes) restent intacts.     */
+    const LANG_KEY = 'damocles_lang';
+    const UK_FLAG_SVG = '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 60,40 M60,0 0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 60,40 M60,0 0,40" stroke="#C8102E" stroke-width="4"/><path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg>';
+    const FR_FLAG_SVG = '<svg class="lang-flag" viewBox="0 0 60 40"><rect width="20" height="40" fill="#002395"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ED2939"/></svg>';
+
+    function getLang() {
+        try { return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'fr'; } catch (e) { return 'fr'; }
+    }
+
+    function setGoogTransCookie(val) {
+        document.cookie = 'googtrans=' + val + '; path=/';
+        document.cookie = 'googtrans=' + val + '; path=/; domain=.' + window.location.hostname;
+    }
+
+    function clearGoogTransCookie() {
+        var past = '; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        document.cookie = 'googtrans=/fr/fr' + past;
+        document.cookie = 'googtrans=/fr/fr' + past + '; domain=.' + window.location.hostname;
+    }
+
+    function toggleLang() {
+        var next = getLang() === 'en' ? 'fr' : 'en';
+        try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+        if (next === 'en') setGoogTransCookie('/fr/en'); else clearGoogTransCookie();
+        window.location.reload();
+    }
+
+    function bootGoogleTranslate() {
+        if (document.getElementById('google_translate_element')) return;
+        setGoogTransCookie('/fr/en');
+        var holder = document.createElement('div');
+        holder.id = 'google_translate_element';
+        document.body.appendChild(holder);
+        window.googleTranslateElementInit = function () {
+            new window.google.translate.TranslateElement({
+                pageLanguage: 'fr',
+                includedLanguages: 'en',
+                autoDisplay: false
+            }, 'google_translate_element');
+        };
+        var s = document.createElement('script');
+        s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        document.head.appendChild(s);
+    }
+
+    function initLangSwitch() {
+        var lang = getLang();
+        var btn = document.getElementById('app-lang-toggle');
+        if (!btn) {
+            /* Pages sans sidebar (connexion, admin) : bouton flottant */
+            btn = document.createElement('button');
+            btn.id = 'app-lang-toggle';
+            btn.className = 'lang-float';
+            document.body.appendChild(btn);
+        }
+        btn.innerHTML = lang === 'en' ? FR_FLAG_SVG : UK_FLAG_SVG;
+        btn.title = lang === 'en' ? 'Version française' : 'English version';
+        btn.setAttribute('aria-label', btn.title);
+        btn.addEventListener('click', toggleLang);
+        if (lang === 'en') bootGoogleTranslate();
+    }
+
     /* === INIT === */
     function init() {
         injectSidebar();
@@ -796,6 +866,7 @@
         readModulesCache();
         applyModulesToSidebar();
         if (guardCurrentPage()) return; /* redirection en cours, inutile de continuer */
+        initLangSwitch();
         loadModulesConfig();
         setActiveNav();
         bindSidebarMobileToggle();
