@@ -38,11 +38,13 @@ Guide de mise en ligne complet, à dérouler dans l'ordre. Durée estimée : 30 
 
 ## 7. Premier compte admin
 1. Sur le site en ligne : s'inscrire normalement (compte Rorschach)
-2. SQL Editor :
+2. SQL Editor. ⚠️ Un simple UPDATE ne suffit pas : le trigger anti-escalade `protect_admin_fields` annule silencieusement tout changement de `is_admin`/`is_validated` fait sans être déjà admin (y compris via la clé service). Il faut le suspendre le temps de la requête :
 ```sql
+ALTER TABLE public.profiles DISABLE TRIGGER trigger_protect_admin_fields;
 UPDATE public.profiles SET is_admin = TRUE, is_validated = TRUE WHERE username = 'Rorschach';
+ALTER TABLE public.profiles ENABLE TRIGGER trigger_protect_admin_fields;
 ```
-3. Se déconnecter puis se reconnecter
+3. Se déconnecter puis se reconnecter. Les membres suivants se valident depuis Admin > Validation (plus jamais besoin de SQL)
 
 ## 8. Vérifications finales
 - [ ] Connexion OK, accès au panneau admin OK
