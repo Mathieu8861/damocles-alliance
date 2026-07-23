@@ -1,12 +1,11 @@
 /* ================================================================ */
 /* INSTALLATION COMPLETE - ALLIANCE DAMOCLES [SWRD]                 */
 /* ================================================================ */
-/* Script unique : toutes les migrations REN 001 a 024 dans        */
-/* l'ordre chronologique d'application, + overrides Damocles.      */
-/* A runner UNE SEULE FOIS dans Supabase > SQL Editor sur un       */
-/* projet NEUF. Ne pas runner les fichiers numerotes en plus.      */
-/* Prerequis conseille : creer d'abord le bucket Storage public    */
-/* 'preuves-recyclages' (voir INSTALLATION.md).                    */
+/* Script unique : migrations REN 001 a 024 en ordre chronologique, */
+/* rendu re-runnable (DROP avant chaque policy), + correctifs de    */
+/* rejeu, + colonnes de derive de schema REN, + overrides Damocles. */
+/* Prerequis : buckets Storage publics 'preuves-recyclages' et      */
+/* 'builds' crees via Dashboard (voir INSTALLATION.md).             */
 /* ================================================================ */
 
 
@@ -497,21 +496,25 @@ ORDER BY pepites DESC;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Tout utilisateur authentifie peut lire les profils
+DROP POLICY IF EXISTS "profiles_select" ON public.profiles;
 CREATE POLICY "profiles_select" ON public.profiles
     FOR SELECT TO authenticated USING (true);
 
 -- Un user peut modifier son propre profil (mais pas is_admin/is_validated)
+DROP POLICY IF EXISTS "profiles_update_self" ON public.profiles;
 CREATE POLICY "profiles_update_self" ON public.profiles
     FOR UPDATE TO authenticated
     USING (auth.uid() = id)
     WITH CHECK (auth.uid() = id);
 
 -- Un admin peut tout modifier sur les profils
+DROP POLICY IF EXISTS "profiles_admin_update" ON public.profiles;
 CREATE POLICY "profiles_admin_update" ON public.profiles
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
 -- Un admin peut supprimer un profil
+DROP POLICY IF EXISTS "profiles_admin_delete" ON public.profiles;
 CREATE POLICY "profiles_admin_delete" ON public.profiles
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -520,18 +523,22 @@ CREATE POLICY "profiles_admin_delete" ON public.profiles
 ALTER TABLE public.alliances ENABLE ROW LEVEL SECURITY;
 
 -- Tout user authentifie peut lire
+DROP POLICY IF EXISTS "alliances_select" ON public.alliances;
 CREATE POLICY "alliances_select" ON public.alliances
     FOR SELECT TO authenticated USING (true);
 
 -- Seuls les admins peuvent gerer
+DROP POLICY IF EXISTS "alliances_admin_insert" ON public.alliances;
 CREATE POLICY "alliances_admin_insert" ON public.alliances
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "alliances_admin_update" ON public.alliances;
 CREATE POLICY "alliances_admin_update" ON public.alliances
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "alliances_admin_delete" ON public.alliances;
 CREATE POLICY "alliances_admin_delete" ON public.alliances
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -540,15 +547,18 @@ CREATE POLICY "alliances_admin_delete" ON public.alliances
 ALTER TABLE public.combats ENABLE ROW LEVEL SECURITY;
 
 -- Tout user authentifie peut lire
+DROP POLICY IF EXISTS "combats_select" ON public.combats;
 CREATE POLICY "combats_select" ON public.combats
     FOR SELECT TO authenticated USING (true);
 
 -- Seuls les users valides peuvent inserer
+DROP POLICY IF EXISTS "combats_insert" ON public.combats;
 CREATE POLICY "combats_insert" ON public.combats
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true));
 
 -- Un admin peut supprimer
+DROP POLICY IF EXISTS "combats_admin_delete" ON public.combats;
 CREATE POLICY "combats_admin_delete" ON public.combats
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -556,13 +566,16 @@ CREATE POLICY "combats_admin_delete" ON public.combats
 -- === COMBAT_PARTICIPANTS ===
 ALTER TABLE public.combat_participants ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "participants_select" ON public.combat_participants;
 CREATE POLICY "participants_select" ON public.combat_participants
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "participants_insert" ON public.combat_participants;
 CREATE POLICY "participants_insert" ON public.combat_participants
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true));
 
+DROP POLICY IF EXISTS "participants_admin_delete" ON public.combat_participants;
 CREATE POLICY "participants_admin_delete" ON public.combat_participants
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -570,9 +583,11 @@ CREATE POLICY "participants_admin_delete" ON public.combat_participants
 -- === BAREME_POINTS ===
 ALTER TABLE public.bareme_points ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "bareme_select" ON public.bareme_points;
 CREATE POLICY "bareme_select" ON public.bareme_points
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "bareme_admin_update" ON public.bareme_points;
 CREATE POLICY "bareme_admin_update" ON public.bareme_points
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -580,17 +595,21 @@ CREATE POLICY "bareme_admin_update" ON public.bareme_points
 -- === BUILDS ===
 ALTER TABLE public.builds ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "builds_select" ON public.builds;
 CREATE POLICY "builds_select" ON public.builds
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "builds_admin_insert" ON public.builds;
 CREATE POLICY "builds_admin_insert" ON public.builds
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "builds_admin_update" ON public.builds;
 CREATE POLICY "builds_admin_update" ON public.builds
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "builds_admin_delete" ON public.builds;
 CREATE POLICY "builds_admin_delete" ON public.builds
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -598,9 +617,11 @@ CREATE POLICY "builds_admin_delete" ON public.builds
 -- === JEU_CONFIG ===
 ALTER TABLE public.jeu_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "jeu_config_select" ON public.jeu_config;
 CREATE POLICY "jeu_config_select" ON public.jeu_config
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "jeu_config_admin_update" ON public.jeu_config;
 CREATE POLICY "jeu_config_admin_update" ON public.jeu_config
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -608,9 +629,11 @@ CREATE POLICY "jeu_config_admin_update" ON public.jeu_config
 -- === JEU_LOTS ===
 ALTER TABLE public.jeu_lots ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "jeu_lots_select" ON public.jeu_lots;
 CREATE POLICY "jeu_lots_select" ON public.jeu_lots
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "jeu_lots_admin_all" ON public.jeu_lots;
 CREATE POLICY "jeu_lots_admin_all" ON public.jeu_lots
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -618,13 +641,16 @@ CREATE POLICY "jeu_lots_admin_all" ON public.jeu_lots
 -- === JEU_HISTORIQUE ===
 ALTER TABLE public.jeu_historique ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "jeu_historique_select" ON public.jeu_historique;
 CREATE POLICY "jeu_historique_select" ON public.jeu_historique
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "jeu_historique_insert" ON public.jeu_historique;
 CREATE POLICY "jeu_historique_insert" ON public.jeu_historique
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true));
 
+DROP POLICY IF EXISTS "jeu_historique_admin_delete" ON public.jeu_historique;
 CREATE POLICY "jeu_historique_admin_delete" ON public.jeu_historique
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -769,15 +795,21 @@ ALTER TABLE public.semaine_snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recompenses_config ENABLE ROW LEVEL SECURITY;
 
 -- Lecture pour tous les utilisateurs authentifiés
+DROP POLICY IF EXISTS "semaines_select" ON public.semaines;
 CREATE POLICY "semaines_select" ON public.semaines FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "snapshots_select" ON public.semaine_snapshots;
 CREATE POLICY "snapshots_select" ON public.semaine_snapshots FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "recompenses_select" ON public.recompenses_config;
 CREATE POLICY "recompenses_select" ON public.recompenses_config FOR SELECT TO authenticated USING (true);
 
 -- Écriture réservée aux admins
+DROP POLICY IF EXISTS "semaines_insert" ON public.semaines;
 CREATE POLICY "semaines_insert" ON public.semaines FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+DROP POLICY IF EXISTS "snapshots_insert" ON public.semaine_snapshots;
 CREATE POLICY "snapshots_insert" ON public.semaine_snapshots FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+DROP POLICY IF EXISTS "recompenses_all" ON public.recompenses_config;
 CREATE POLICY "recompenses_all" ON public.recompenses_config FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true))
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -837,9 +869,11 @@ CREATE TABLE IF NOT EXISTS public.boutique_demandes_kamas (
 -- === RLS: boutique_config ===
 ALTER TABLE public.boutique_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "boutique_config_select" ON public.boutique_config;
 CREATE POLICY "boutique_config_select" ON public.boutique_config
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "boutique_config_admin" ON public.boutique_config;
 CREATE POLICY "boutique_config_admin" ON public.boutique_config
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -847,9 +881,11 @@ CREATE POLICY "boutique_config_admin" ON public.boutique_config
 -- === RLS: boutique_items ===
 ALTER TABLE public.boutique_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "boutique_items_select" ON public.boutique_items;
 CREATE POLICY "boutique_items_select" ON public.boutique_items
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "boutique_items_admin" ON public.boutique_items;
 CREATE POLICY "boutique_items_admin" ON public.boutique_items
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -858,21 +894,25 @@ CREATE POLICY "boutique_items_admin" ON public.boutique_items
 ALTER TABLE public.boutique_achats ENABLE ROW LEVEL SECURITY;
 
 -- Joueur peut voir ses propres achats
+DROP POLICY IF EXISTS "boutique_achats_select_own" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_select_own" ON public.boutique_achats
     FOR SELECT TO authenticated
     USING (user_id = auth.uid());
 
 -- Joueur peut créer un achat pour lui-même
+DROP POLICY IF EXISTS "boutique_achats_insert_own" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_insert_own" ON public.boutique_achats
     FOR INSERT TO authenticated
     WITH CHECK (user_id = auth.uid());
 
 -- Joueur peut supprimer ses achats distribués
+DROP POLICY IF EXISTS "boutique_achats_delete_own" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_delete_own" ON public.boutique_achats
     FOR DELETE TO authenticated
     USING (user_id = auth.uid() AND statut = 'distribue');
 
 -- Admin peut tout voir et modifier
+DROP POLICY IF EXISTS "boutique_achats_admin" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_admin" ON public.boutique_achats
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -881,16 +921,19 @@ CREATE POLICY "boutique_achats_admin" ON public.boutique_achats
 ALTER TABLE public.boutique_demandes_kamas ENABLE ROW LEVEL SECURITY;
 
 -- Joueur peut voir ses propres demandes
+DROP POLICY IF EXISTS "boutique_demandes_select_own" ON public.boutique_demandes_kamas;
 CREATE POLICY "boutique_demandes_select_own" ON public.boutique_demandes_kamas
     FOR SELECT TO authenticated
     USING (user_id = auth.uid());
 
 -- Joueur peut créer une demande pour lui-même
+DROP POLICY IF EXISTS "boutique_demandes_insert_own" ON public.boutique_demandes_kamas;
 CREATE POLICY "boutique_demandes_insert_own" ON public.boutique_demandes_kamas
     FOR INSERT TO authenticated
     WITH CHECK (user_id = auth.uid());
 
 -- Admin peut tout voir et modifier
+DROP POLICY IF EXISTS "boutique_demandes_admin" ON public.boutique_demandes_kamas;
 CREATE POLICY "boutique_demandes_admin" ON public.boutique_demandes_kamas
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1019,9 +1062,11 @@ CREATE TRIGGER trigger_protect_jetons
 -- RECOMPENSES_CONFIG
 ALTER TABLE public.recompenses_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "recompenses_config_select" ON public.recompenses_config;
 CREATE POLICY "recompenses_config_select" ON public.recompenses_config
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "recompenses_config_admin_all" ON public.recompenses_config;
 CREATE POLICY "recompenses_config_admin_all" ON public.recompenses_config
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1029,9 +1074,11 @@ CREATE POLICY "recompenses_config_admin_all" ON public.recompenses_config
 -- SEMAINES
 ALTER TABLE public.semaines ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "semaines_select" ON public.semaines;
 CREATE POLICY "semaines_select" ON public.semaines
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "semaines_admin_insert" ON public.semaines;
 CREATE POLICY "semaines_admin_insert" ON public.semaines
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1039,9 +1086,11 @@ CREATE POLICY "semaines_admin_insert" ON public.semaines
 -- SEMAINE_SNAPSHOTS
 ALTER TABLE public.semaine_snapshots ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "snapshots_select" ON public.semaine_snapshots;
 CREATE POLICY "snapshots_select" ON public.semaine_snapshots
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "snapshots_admin_insert" ON public.semaine_snapshots;
 CREATE POLICY "snapshots_admin_insert" ON public.semaine_snapshots
     FOR INSERT TO authenticated
     WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1049,9 +1098,11 @@ CREATE POLICY "snapshots_admin_insert" ON public.semaine_snapshots
 -- BOUTIQUE_ITEMS
 ALTER TABLE public.boutique_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "boutique_items_select" ON public.boutique_items;
 CREATE POLICY "boutique_items_select" ON public.boutique_items
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "boutique_items_admin_all" ON public.boutique_items;
 CREATE POLICY "boutique_items_admin_all" ON public.boutique_items
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1059,14 +1110,17 @@ CREATE POLICY "boutique_items_admin_all" ON public.boutique_items
 -- BOUTIQUE_ACHATS
 ALTER TABLE public.boutique_achats ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "boutique_achats_select_own" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_select_own" ON public.boutique_achats
     FOR SELECT TO authenticated
     USING (user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "boutique_achats_insert_own" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_insert_own" ON public.boutique_achats
     FOR INSERT TO authenticated
     WITH CHECK (user_id = auth.uid() AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true));
 
+DROP POLICY IF EXISTS "boutique_achats_admin_update" ON public.boutique_achats;
 CREATE POLICY "boutique_achats_admin_update" ON public.boutique_achats
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1074,9 +1128,11 @@ CREATE POLICY "boutique_achats_admin_update" ON public.boutique_achats
 -- BOUTIQUE_CONFIG
 ALTER TABLE public.boutique_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "boutique_config_select" ON public.boutique_config;
 CREATE POLICY "boutique_config_select" ON public.boutique_config
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "boutique_config_admin_update" ON public.boutique_config;
 CREATE POLICY "boutique_config_admin_update" ON public.boutique_config
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1084,14 +1140,17 @@ CREATE POLICY "boutique_config_admin_update" ON public.boutique_config
 -- BOUTIQUE_DEMANDES_KAMAS
 ALTER TABLE public.boutique_demandes_kamas ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "demandes_kamas_select_own" ON public.boutique_demandes_kamas;
 CREATE POLICY "demandes_kamas_select_own" ON public.boutique_demandes_kamas
     FOR SELECT TO authenticated
     USING (user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+DROP POLICY IF EXISTS "demandes_kamas_insert_own" ON public.boutique_demandes_kamas;
 CREATE POLICY "demandes_kamas_insert_own" ON public.boutique_demandes_kamas
     FOR INSERT TO authenticated
     WITH CHECK (user_id = auth.uid() AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true));
 
+DROP POLICY IF EXISTS "demandes_kamas_admin_update" ON public.boutique_demandes_kamas;
 CREATE POLICY "demandes_kamas_admin_update" ON public.boutique_demandes_kamas
     FOR UPDATE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1596,9 +1655,11 @@ ON CONFLICT (nom) DO NOTHING;
 -- RLS
 ALTER TABLE public.slot_symboles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "slot_symboles_select" ON public.slot_symboles;
 CREATE POLICY "slot_symboles_select" ON public.slot_symboles
     FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "slot_symboles_admin" ON public.slot_symboles;
 CREATE POLICY "slot_symboles_admin" ON public.slot_symboles
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1615,14 +1676,17 @@ CREATE TABLE IF NOT EXISTS public.slot_historique (
 
 ALTER TABLE public.slot_historique ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "slot_select_own" ON public.slot_historique;
 CREATE POLICY "slot_select_own" ON public.slot_historique
     FOR SELECT TO authenticated
     USING (joueur_id = auth.uid());
 
+DROP POLICY IF EXISTS "slot_insert_own" ON public.slot_historique;
 CREATE POLICY "slot_insert_own" ON public.slot_historique
     FOR INSERT TO authenticated
     WITH CHECK (joueur_id = auth.uid());
 
+DROP POLICY IF EXISTS "slot_admin" ON public.slot_historique;
 CREATE POLICY "slot_admin" ON public.slot_historique
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1764,12 +1828,15 @@ CREATE TABLE IF NOT EXISTS public.slot_demandes_conversion (
 
 ALTER TABLE public.slot_demandes_conversion ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "slot_conversion_select_own" ON public.slot_demandes_conversion;
 CREATE POLICY "slot_conversion_select_own" ON public.slot_demandes_conversion
     FOR SELECT TO authenticated USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "slot_conversion_insert_own" ON public.slot_demandes_conversion;
 CREATE POLICY "slot_conversion_insert_own" ON public.slot_demandes_conversion
     FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "slot_conversion_admin" ON public.slot_demandes_conversion;
 CREATE POLICY "slot_conversion_admin" ON public.slot_demandes_conversion
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
@@ -1807,6 +1874,11 @@ SET search_path = public;
 /* ################################################################ */
 /* ### SOURCE : 009-slot-v2.sql ################################### */
 /* ################################################################ */
+
+/* Fix rejeu : 007/008 definissent acheter_boutique RETURNS INTEGER, */
+/* la 009 la redefinit RETURNS JSONB. CREATE OR REPLACE ne peut pas  */
+/* changer le type de retour : il faut dropper d'abord.              */
+DROP FUNCTION IF EXISTS public.acheter_boutique(UUID, INTEGER);
 
 -- =============================================
 -- 009-slot-v2.sql
@@ -2292,19 +2364,23 @@ CREATE TABLE IF NOT EXISTS public.zones_bda (
 /* RLS : tout le monde peut lire, seuls les admins écrivent */
 ALTER TABLE public.zones_bda ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "zones_bda_select" ON public.zones_bda;
 CREATE POLICY "zones_bda_select" ON public.zones_bda
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "zones_bda_admin_insert" ON public.zones_bda;
 CREATE POLICY "zones_bda_admin_insert" ON public.zones_bda
     FOR INSERT WITH CHECK (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "zones_bda_admin_update" ON public.zones_bda;
 CREATE POLICY "zones_bda_admin_update" ON public.zones_bda
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "zones_bda_admin_delete" ON public.zones_bda;
 CREATE POLICY "zones_bda_admin_delete" ON public.zones_bda
     FOR DELETE USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
@@ -2419,11 +2495,13 @@ ALTER TABLE public.recyclages  ENABLE ROW LEVEL SECURITY;
 
 /* Zones : tout valide lit, admin ecrit */
 DROP POLICY IF EXISTS "zones_perco_select" ON public.zones_perco;
+DROP POLICY IF EXISTS "zones_perco_select" ON public.zones_perco;
 CREATE POLICY "zones_perco_select" ON public.zones_perco
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "zones_perco_admin_insert" ON public.zones_perco;
 DROP POLICY IF EXISTS "zones_perco_admin_insert" ON public.zones_perco;
 CREATE POLICY "zones_perco_admin_insert" ON public.zones_perco
     FOR INSERT WITH CHECK (
@@ -2431,11 +2509,13 @@ CREATE POLICY "zones_perco_admin_insert" ON public.zones_perco
     );
 
 DROP POLICY IF EXISTS "zones_perco_admin_update" ON public.zones_perco;
+DROP POLICY IF EXISTS "zones_perco_admin_update" ON public.zones_perco;
 CREATE POLICY "zones_perco_admin_update" ON public.zones_perco
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "zones_perco_admin_delete" ON public.zones_perco;
 DROP POLICY IF EXISTS "zones_perco_admin_delete" ON public.zones_perco;
 CREATE POLICY "zones_perco_admin_delete" ON public.zones_perco
     FOR DELETE USING (
@@ -2445,11 +2525,13 @@ CREATE POLICY "zones_perco_admin_delete" ON public.zones_perco
 /* Recyclages : chacun voit tout (stats alliance), chacun saisit pour lui,
    chacun edite/supprime ses propres recyclages, admin peut tout       */
 DROP POLICY IF EXISTS "recyclages_select_validated" ON public.recyclages;
+DROP POLICY IF EXISTS "recyclages_select_validated" ON public.recyclages;
 CREATE POLICY "recyclages_select_validated" ON public.recyclages
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "recyclages_insert_self" ON public.recyclages;
 DROP POLICY IF EXISTS "recyclages_insert_self" ON public.recyclages;
 CREATE POLICY "recyclages_insert_self" ON public.recyclages
     FOR INSERT WITH CHECK (
@@ -2458,12 +2540,14 @@ CREATE POLICY "recyclages_insert_self" ON public.recyclages
     );
 
 DROP POLICY IF EXISTS "recyclages_update_self_or_admin" ON public.recyclages;
+DROP POLICY IF EXISTS "recyclages_update_self_or_admin" ON public.recyclages;
 CREATE POLICY "recyclages_update_self_or_admin" ON public.recyclages
     FOR UPDATE USING (
         auth.uid() = user_id
         OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "recyclages_delete_self_or_admin" ON public.recyclages;
 DROP POLICY IF EXISTS "recyclages_delete_self_or_admin" ON public.recyclages;
 CREATE POLICY "recyclages_delete_self_or_admin" ON public.recyclages
     FOR DELETE USING (
@@ -3120,11 +3204,13 @@ ALTER TABLE public.fm_session_achats  ENABLE ROW LEVEL SECURITY;
 
 /* Runes : lecture membres valides, ecriture admin */
 DROP POLICY IF EXISTS "runes_select" ON public.runes;
+DROP POLICY IF EXISTS "runes_select" ON public.runes;
 CREATE POLICY "runes_select" ON public.runes
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "runes_admin_insert" ON public.runes;
 DROP POLICY IF EXISTS "runes_admin_insert" ON public.runes;
 CREATE POLICY "runes_admin_insert" ON public.runes
     FOR INSERT WITH CHECK (
@@ -3132,11 +3218,13 @@ CREATE POLICY "runes_admin_insert" ON public.runes
     );
 
 DROP POLICY IF EXISTS "runes_admin_update" ON public.runes;
+DROP POLICY IF EXISTS "runes_admin_update" ON public.runes;
 CREATE POLICY "runes_admin_update" ON public.runes
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "runes_admin_delete" ON public.runes;
 DROP POLICY IF EXISTS "runes_admin_delete" ON public.runes;
 CREATE POLICY "runes_admin_delete" ON public.runes
     FOR DELETE USING (
@@ -3145,11 +3233,13 @@ CREATE POLICY "runes_admin_delete" ON public.runes
 
 /* FM sessions : chacun gere les siennes, lecture pour tous les valides */
 DROP POLICY IF EXISTS "fm_sessions_select" ON public.fm_sessions;
+DROP POLICY IF EXISTS "fm_sessions_select" ON public.fm_sessions;
 CREATE POLICY "fm_sessions_select" ON public.fm_sessions
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "fm_sessions_insert_self" ON public.fm_sessions;
 DROP POLICY IF EXISTS "fm_sessions_insert_self" ON public.fm_sessions;
 CREATE POLICY "fm_sessions_insert_self" ON public.fm_sessions
     FOR INSERT WITH CHECK (
@@ -3158,12 +3248,14 @@ CREATE POLICY "fm_sessions_insert_self" ON public.fm_sessions
     );
 
 DROP POLICY IF EXISTS "fm_sessions_update_self_or_admin" ON public.fm_sessions;
+DROP POLICY IF EXISTS "fm_sessions_update_self_or_admin" ON public.fm_sessions;
 CREATE POLICY "fm_sessions_update_self_or_admin" ON public.fm_sessions
     FOR UPDATE USING (
         auth.uid() = user_id
         OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "fm_sessions_delete_self_or_admin" ON public.fm_sessions;
 DROP POLICY IF EXISTS "fm_sessions_delete_self_or_admin" ON public.fm_sessions;
 CREATE POLICY "fm_sessions_delete_self_or_admin" ON public.fm_sessions
     FOR DELETE USING (
@@ -3173,11 +3265,13 @@ CREATE POLICY "fm_sessions_delete_self_or_admin" ON public.fm_sessions
 
 /* FM session runes / achats : suivent la session parente */
 DROP POLICY IF EXISTS "fm_session_runes_select" ON public.fm_session_runes;
+DROP POLICY IF EXISTS "fm_session_runes_select" ON public.fm_session_runes;
 CREATE POLICY "fm_session_runes_select" ON public.fm_session_runes
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "fm_session_runes_all_owner" ON public.fm_session_runes;
 DROP POLICY IF EXISTS "fm_session_runes_all_owner" ON public.fm_session_runes;
 CREATE POLICY "fm_session_runes_all_owner" ON public.fm_session_runes
     FOR ALL USING (
@@ -3190,11 +3284,13 @@ CREATE POLICY "fm_session_runes_all_owner" ON public.fm_session_runes
     );
 
 DROP POLICY IF EXISTS "fm_session_achats_select" ON public.fm_session_achats;
+DROP POLICY IF EXISTS "fm_session_achats_select" ON public.fm_session_achats;
 CREATE POLICY "fm_session_achats_select" ON public.fm_session_achats
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "fm_session_achats_all_owner" ON public.fm_session_achats;
 DROP POLICY IF EXISTS "fm_session_achats_all_owner" ON public.fm_session_achats;
 CREATE POLICY "fm_session_achats_all_owner" ON public.fm_session_achats
     FOR ALL USING (
@@ -3524,11 +3620,13 @@ CREATE INDEX IF NOT EXISTS idx_fm_concassages_session ON public.fm_session_conca
 ALTER TABLE public.fm_session_concassages ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "fm_concassages_select" ON public.fm_session_concassages;
+DROP POLICY IF EXISTS "fm_concassages_select" ON public.fm_session_concassages;
 CREATE POLICY "fm_concassages_select" ON public.fm_session_concassages
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_validated = true)
     );
 
+DROP POLICY IF EXISTS "fm_concassages_all_owner" ON public.fm_session_concassages;
 DROP POLICY IF EXISTS "fm_concassages_all_owner" ON public.fm_session_concassages;
 CREATE POLICY "fm_concassages_all_owner" ON public.fm_session_concassages
     FOR ALL USING (
@@ -3729,10 +3827,12 @@ ALTER TABLE public.modules_config ENABLE ROW LEVEL SECURITY;
 
 /* Lecture par tout le monde (la sidebar en a besoin des le chargement) */
 DROP POLICY IF EXISTS "modules_select" ON public.modules_config;
+DROP POLICY IF EXISTS "modules_select" ON public.modules_config;
 CREATE POLICY "modules_select" ON public.modules_config
     FOR SELECT USING (true);
 
 /* Ecriture admin uniquement */
+DROP POLICY IF EXISTS "modules_admin_insert" ON public.modules_config;
 DROP POLICY IF EXISTS "modules_admin_insert" ON public.modules_config;
 CREATE POLICY "modules_admin_insert" ON public.modules_config
     FOR INSERT WITH CHECK (
@@ -3740,11 +3840,13 @@ CREATE POLICY "modules_admin_insert" ON public.modules_config
     );
 
 DROP POLICY IF EXISTS "modules_admin_update" ON public.modules_config;
+DROP POLICY IF EXISTS "modules_admin_update" ON public.modules_config;
 CREATE POLICY "modules_admin_update" ON public.modules_config
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
     );
 
+DROP POLICY IF EXISTS "modules_admin_delete" ON public.modules_config;
 DROP POLICY IF EXISTS "modules_admin_delete" ON public.modules_config;
 CREATE POLICY "modules_admin_delete" ON public.modules_config
     FOR DELETE USING (
@@ -3772,5 +3874,41 @@ ON CONFLICT (module) DO NOTHING;
 /* ### OVERRIDES DAMOCLES ######################################### */
 /* ################################################################ */
 
-/* Modules desactives au lancement (reactivables dans Admin > Modules) */
+/* --- Derive de schema REN : colonnes ajoutees a la main en prod   */
+/* (hors migrations), confirmees par sondage REST le 23/07/2026 --- */
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS mules TEXT[] DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS zone_reservee TEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS preference_recompense TEXT DEFAULT NULL;
+
+ALTER TABLE public.builds
+    ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS type_build TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS classe TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS valeur_kamas BIGINT DEFAULT 0;
+
+/* --- Storage : policies du bucket 'builds' (images des builds).   */
+/* Le bucket lui-meme se cree en Public via Dashboard > Storage --- */
+DROP POLICY IF EXISTS "builds_images_select" ON storage.objects;
+DROP POLICY IF EXISTS "builds_images_select" ON storage.objects;
+CREATE POLICY "builds_images_select" ON storage.objects
+    FOR SELECT USING (bucket_id = 'builds');
+
+DROP POLICY IF EXISTS "builds_images_admin_insert" ON storage.objects;
+DROP POLICY IF EXISTS "builds_images_admin_insert" ON storage.objects;
+CREATE POLICY "builds_images_admin_insert" ON storage.objects
+    FOR INSERT WITH CHECK (
+        bucket_id = 'builds'
+        AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+    );
+
+DROP POLICY IF EXISTS "builds_images_admin_delete" ON storage.objects;
+DROP POLICY IF EXISTS "builds_images_admin_delete" ON storage.objects;
+CREATE POLICY "builds_images_admin_delete" ON storage.objects
+    FOR DELETE USING (
+        bucket_id = 'builds'
+        AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+    );
+
+/* --- Modules desactives au lancement (Admin > Modules pour react.) --- */
 UPDATE public.modules_config SET actif = FALSE, updated_at = NOW() WHERE module IN ('jeux', 'boutique');
