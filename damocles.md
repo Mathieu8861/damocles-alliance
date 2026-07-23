@@ -9,9 +9,10 @@
 - **Nom / Tag :** Damoclès, tag **[SWRD]** (l'épée de Damoclès : la menace qui plane au-dessus du roi)
 - **Type :** Site d'alliance (clone du site REN), gestion membres, PvP, percos, recyclages, forgemagie
 - **Dossier site :** `Création site Web/DAMOCLES/`
-- **URL prod :** à créer (Vercel)
+- **URL prod :** 🚀 **https://damocles-alliance.vercel.app** (en ligne depuis le 23/07/2026)
+- **Supabase :** projet `alliance-damocles`, ID `yebfbdgxikbnqdkbycam`, org gratuite "Damocles" (⚠️ pause possible après 7j sans requête, improbable avec 30 joueurs actifs). Clés : publishable dans script.js, secret + mdp BDD + clé Anthropic dans `.env.local`
 - **Git :** https://github.com/Mathieu8861/damocles-alliance (public) — **Branche :** master
-- **Statut projet :** 🟢 actif — duplication en cours
+- **Statut projet :** 🚀 EN LIGNE, premier admin Rorschach actif
 
 ## Stack technique
 - HTML/CSS/JS vanilla (identique REN : IIFE par page, event `ren:ready`, helpers `window.REN.*`)
@@ -58,14 +59,23 @@
 - 23/07/2026 : bascule de la DA rouge → **violet #7d5ff7** (demande Mathieu). Variables accent + littéraux (sidebar, badges, glows, cadres, confettis, logo SVG). Rouges sémantiques conservés
 - 23/07/2026 : **sélecteur de langue FR / EN / DE** (membres internationaux) : bouton drapeau dans la sidebar (ou flottant en bas à droite sur connexion/admin) qui ouvre un menu de langues. Traduction Google de tout le site (contenu dynamique inclus, bannière Google masquée, préférence en localStorage `damocles_lang`, cookie `googtrans`). Pseudos sidebar, marque et noms de runes protégés par `class="notranslate"`. Ajouter une langue = 1 entrée dans le const `LANGS` de script.js + code dans `includedLanguages`. Testé FR→EN, FR→DE et retours en local
 
+## Historique mise en ligne (23/07/2026, avec Claude en guidage pas à pas)
+- Org Supabase gratuite "Damocles" créée (l'org Pro facturait 10$/m par projet Micro, Nano indisponible à la création)
+- SQL 000 passé après 2 corrections : commentaires de séparateurs non fermés, puis policies en double dans l'historique (006 vs 005-securite) → script rendu idempotent (DROP avant chaque CREATE POLICY) + fix type de retour `acheter_boutique` (007 INTEGER → 009 JSONB)
+- **Dérive de schéma REN détectée par sondage REST** et réintégrée : `profiles.mules/zone_reservee/preference_recompense`, `builds.image_url/type_build/classe/valeur_kamas`, bucket storage `builds`
+- Buckets `preuves-recyclages` + `builds` (publics), edge function `extract-runes` déployée (piège UI : le fichier doit s'appeler `index.ts`, le champ "Function name" porte le nom de la fonction), secret `ANTHROPIC_API_KEY` = **nouvelle clé** créée le 23/07 (l'ancienne clé REN est irrécupérable, secrets write-only partout)
+- Vercel importé (framework Other), URL `damocles-alliance.vercel.app`
+- **Fix inscriptions** : les nouveaux projets Supabase rejettent le domaine `example.com` des emails internes générés depuis le pseudo → domaine changé en `@damocles-alliance.vercel.app` (auth.js). Provider Email activé, "Confirm email" désactivé
+- **Premier admin** : le trigger `protect_admin_fields` bloque toute promotion (même via clé service, auth.uid() NULL) → DISABLE TRIGGER / UPDATE / ENABLE TRIGGER dans le SQL Editor (documenté dans INSTALLATION.md)
+- Vérifié à distance : Rorschach admin+validé, 105 runes, 305 zones, 50 barèmes, 6 symboles slot, modules jeux+boutique off
+
 ## Prochaines étapes
-- [ ] Créer le projet Supabase + runner le SQL d'install
-- [ ] Bucket storage + edge function + secret
-- [ ] Renseigner URL/clé Supabase dans `site/script.js`
-- [ ] Créer le repo GitHub + brancher Vercel
-- [ ] Premier compte admin (Rorschach)
-- [ ] Logo définitif Damoclès (placeholder épée SVG en attendant)
-- [ ] Valider les membres au fil des inscriptions
+- [ ] Ajouter **BCL** (et les autres alliances adverses) dans Admin > Alliances
+- [ ] Poster l'annonce Discord + MP de démarchage des PvPistes (textes prêts, session du 22/07)
+- [ ] Dupliquer le serveur Discord Renegats via modèle de serveur
+- [ ] Valider les membres au fil des inscriptions (Admin > Validation)
+- [ ] Logo définitif Damoclès (placeholder épée SVG violette en attendant)
+- [ ] Rafraîchir les prix des runes si le marché a bougé depuis le 11/06
 
 ## Notes
 - Projet communautaire, même modèle que REN (gratuit)
