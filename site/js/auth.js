@@ -1,7 +1,7 @@
 /* ============================================ */
 /* Damoclès     - Auth (Login / Register)       */
 /* Login par pseudo (pas d'email demande)       */
-/* Email genere auto: pseudo.ren@example.com     */
+/* Email genere auto: pseudo.swrd@damocles-alliance.vercel.app */
 /* ============================================ */
 (function () {
     'use strict';
@@ -9,7 +9,7 @@
     /* === CONSTANTES === */
     function pseudoToEmail(pseudo) {
         var clean = pseudo.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-        return clean + '.ren@example.com';
+        return clean + '.swrd@damocles-alliance.vercel.app';
     }
 
     /* === SELECTEURS === */
