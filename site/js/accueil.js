@@ -232,9 +232,16 @@
                 var butinStr = c.type === 'attaque' && c.butin_kamas > 0 ? ' &mdash; Butin : <span class="kamas">' + window.REN.formatKamas(c.butin_kamas) + '</span>' : '';
                 var pointsStr = c.points_gagnes !== 0 ? ' &mdash; <span class="' + (c.points_gagnes > 0 ? 'text-success' : 'text-danger') + '">' + (c.points_gagnes > 0 ? '+' : '') + c.points_gagnes + ' pts</span>' : '';
 
+                var preuvesStr = '';
+                [c.preuve_url_1, c.preuve_url_2].forEach(function (u, idx) {
+                    if (!u) return;
+                    var su = window.REN.sanitizeUrl ? window.REN.sanitizeUrl(u) : u;
+                    preuvesStr += ' <a class="activity__preuve" href="' + su + '" target="_blank" rel="noopener" title="Voir le screenshot ' + (idx + 1) + '">&#128247;' + (idx + 1) + '</a>';
+                });
+
                 html += '<div class="activity__item">';
                 html += '<div class="activity__text"><span class="badge ' + badgeClass + '">' + badgeText + '</span> ';
-                html += '<strong>' + auteurName + '</strong>' + matesStr + ' ' + actionVerb + ' ' + actionType + ' contre ' + allianceName + butinStr + pointsStr;
+                html += '<strong>' + auteurName + '</strong>' + matesStr + ' ' + actionVerb + ' ' + actionType + ' contre ' + allianceName + butinStr + pointsStr + preuvesStr;
                 html += '</div>';
                 html += '<span class="activity__time">' + window.REN.formatDate(c.created_at) + '</span>';
                 html += '</div>';

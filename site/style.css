@@ -8198,3 +8198,13 @@ body {
     object-fit: cover;
     display: block;
 }
+.activity__preuve {
+    color: var(--color-accent-light);
+    text-decoration: none;
+    font-size: 0.8rem;
+    margin-left: 2px;
+    white-space: nowrap;
+}
+.activity__preuve:hover {
+    text-decoration: underline;
+}
