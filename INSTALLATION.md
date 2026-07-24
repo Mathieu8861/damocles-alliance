@@ -8,10 +8,11 @@ Guide de mise en ligne complet, à dérouler dans l'ordre. Durée estimée : 30 
 3. Nom : `alliance-damocles` · Région : **West EU (Ireland)** (comme REN) · Mot de passe BDD : générer et conserver
 4. Attendre la fin du provisioning (~2 min)
 
-## 2. Buckets Storage (2 buckets)
+## 2. Buckets Storage (3 buckets)
 1. Storage > **New bucket** > nom exact : `preuves-recyclages` · **Cocher "Public bucket"** > Create
 2. Storage > **New bucket** > nom exact : `builds` (images des builds) · **Cocher "Public bucket"** > Create
-3. Rien d'autre : les policies d'accès des deux buckets sont créées par le SQL de l'étape 3
+3. Storage > **New bucket** > nom exact : `avatars` (photos de profil) · **Cocher "Public bucket"** > Create
+4. Rien d'autre : les policies d'accès des trois buckets sont créées par le SQL de l'étape 3
 
 ## 3. Base de données
 1. SQL Editor > New query
