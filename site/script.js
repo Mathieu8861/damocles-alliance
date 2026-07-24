@@ -143,14 +143,18 @@
     }
 
     async function updateMemberCount() {
-        if (!footerMemberCount || !window.REN.supabase) return;
+        /* Sidebar publique (injectee) + footer admin */
+        var sidebarCount = document.getElementById('app-member-count');
+        if ((!footerMemberCount && !sidebarCount) || !window.REN.supabase) return;
         try {
             const { count } = await window.REN.supabase
                 .from('profiles')
                 .select('*', { count: 'exact', head: true })
                 .eq('is_validated', true);
             if (count !== null) {
-                footerMemberCount.textContent = count + ' Membres Inscrits';
+                var label = count + (count > 1 ? ' Membres Inscrits' : ' Membre Inscrit');
+                if (footerMemberCount) footerMemberCount.textContent = label;
+                if (sidebarCount) sidebarCount.textContent = label;
             }
         } catch (err) {
             /* ignore */
@@ -615,6 +619,12 @@
             });
             html += '</div>';
         });
+
+        /* Meta (ex-footer) : compteur membres + credit dev */
+        html += '<div class="app-sidebar__meta">'
+            + '<span class="app-sidebar__meta-count" id="app-member-count"></span>'
+            + '<span class="app-sidebar__meta-dev">Développé par <strong class="notranslate">Rorschach</strong></span>'
+            + '</div>';
 
         /* Bloc user en bas de la sidebar (sticky) */
         html += '<div class="app-sidebar__user">'

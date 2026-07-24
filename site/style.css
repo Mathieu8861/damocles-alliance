@@ -8208,3 +8208,25 @@ body {
 .activity__preuve:hover {
     text-decoration: underline;
 }
+
+/* === META SIDEBAR (ex-footer : membres + credit) === */
+.app-sidebar__meta {
+    margin-top: auto;
+    padding: 10px 12px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+}
+.app-sidebar__meta-count {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+.app-sidebar__meta-dev strong {
+    color: var(--color-accent-light);
+    font-weight: 700;
+}
+.app-sidebar__meta + .app-sidebar__user {
+    margin-top: 0;
+}
