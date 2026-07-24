@@ -69,6 +69,9 @@
 - **Premier admin** : le trigger `protect_admin_fields` bloque toute promotion (même via clé service, auth.uid() NULL) → DISABLE TRIGGER / UPDATE / ENABLE TRIGGER dans le SQL Editor (documenté dans INSTALLATION.md)
 - Vérifié à distance : Rorschach admin+validé, 105 runes, 305 zones, 50 barèmes, 6 symboles slot, modules jeux+boutique off
 
+## Historique post-lancement
+- 23/07/2026 (soir) : **2 screenshots obligatoires par combat** (attaque + défense, demande Mathieu : "obligatoire pour la nouvelle alliance"). Module partagé `js/combat-preuves.js` (2 slots, Ctrl+V routé vers le 1er slot vide, compression canvas JPEG 0.82 max 1600px, upload `preuves-recyclages/combats/{userId}/`). Soumission bloquée côté client + contrainte CHECK côté serveur. Miniatures cliquables dans l'historique. Migration `sql/025` (inclut le rattrapage de la dérive `combats.perco_owner_id`, colonne REN jamais migrée qu'utilise le formulaire défense). Vérifié en local via compte test jetable (supprimé ensuite)
+
 ## Prochaines étapes
 - [ ] Ajouter **BCL** (et les autres alliances adverses) dans Admin > Alliances
 - [ ] Poster l'annonce Discord + MP de démarchage des PvPistes (textes prêts, session du 22/07)
