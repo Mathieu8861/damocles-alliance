@@ -266,6 +266,18 @@
                 return;
             }
 
+            /* 2 screenshots obligatoires */
+            if (window.REN.combatPreuves) {
+                if (window.REN.combatPreuves.isUploading()) {
+                    window.REN.toast('Attends la fin de l\'upload des screens.', 'info');
+                    return;
+                }
+                if (!window.REN.combatPreuves.isComplete()) {
+                    window.REN.toast('Les 2 screenshots du combat sont obligatoires.', 'error');
+                    return;
+                }
+            }
+
             var selectAlliance = document.getElementById('select-alliance');
             var customInput = document.getElementById('input-alliance-custom');
             var allianceId = null;
@@ -297,6 +309,7 @@
 
                 var points = pointsRes.data || 0;
 
+                var preuves = window.REN.combatPreuves ? window.REN.combatPreuves.getUrls() : [null, null];
                 var insertData = {
                     type: combatType,
                     auteur_id: window.REN.currentProfile.id,
@@ -307,7 +320,9 @@
                     resultat: resultat,
                     butin_kamas: 0,
                     points_gagnes: points,
-                    commentaire: commentaire
+                    commentaire: commentaire,
+                    preuve_url_1: preuves[0],
+                    preuve_url_2: preuves[1]
                 };
                 if (percoOwnerId) insertData.perco_owner_id = percoOwnerId;
 

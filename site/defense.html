@@ -130,6 +130,43 @@
                 </div>
             </div>
 
+            <div class="combat-form__section">
+                <div class="combat-form__label">
+                    <svg class="combat-form__label-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Screenshots du combat <span class="combat-preuves__req">2 obligatoires</span>
+                </div>
+                <div class="combat-preuves">
+                    <div class="combat-preuve">
+                        <div class="recyc-preuve__drop" id="combat-preuve-drop-1">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>Screen 1 : colle (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique</span>
+                            <input type="file" id="combat-preuve-file-1" accept="image/*" style="display:none;">
+                        </div>
+                        <div class="recyc-preuve__preview" id="combat-preuve-preview-wrap-1" style="display:none;">
+                            <img id="combat-preuve-preview-1" src="" alt="Screenshot 1">
+                            <div class="recyc-preuve__status" id="combat-preuve-status-1">Upload…</div>
+                            <button type="button" class="recyc-preuve__remove" id="combat-preuve-remove-1" title="Retirer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="combat-preuve">
+                        <div class="recyc-preuve__drop" id="combat-preuve-drop-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>Screen 2 : colle (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique</span>
+                            <input type="file" id="combat-preuve-file-2" accept="image/*" style="display:none;">
+                        </div>
+                        <div class="recyc-preuve__preview" id="combat-preuve-preview-wrap-2" style="display:none;">
+                            <img id="combat-preuve-preview-2" src="" alt="Screenshot 2">
+                            <div class="recyc-preuve__status" id="combat-preuve-status-2">Upload…</div>
+                            <button type="button" class="recyc-preuve__remove" id="combat-preuve-remove-2" title="Retirer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button class="combat-form__submit combat-form__submit--defense" id="btn-submit-combat">Enregistrer la defense</button>
         </div>
     </main>
@@ -143,6 +180,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+    <script src="js/combat-preuves.js"></script>
     <script src="js/defense.js"></script>
 </body>
 </html>
