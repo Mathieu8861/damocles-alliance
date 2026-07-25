@@ -6312,7 +6312,7 @@ table {
     height: 80px;
     border-radius: 50%;
     background:
-        radial-gradient(circle at 38% 32%, #ff5555 0%, #dd2020 40%, #aa0000 80%, #880000 100%);
+        radial-gradient(circle at 38% 32%, #9d8bff 0%, #7d5ff7 40%, #4c35b8 80%, #35247f 100%);
     border: 6px solid #d4a017;
     display: flex;
     align-items: center;
@@ -6321,7 +6321,7 @@ table {
     box-shadow:
         0 8px 20px rgba(0, 0, 0, 0.5),
         0 0 24px rgba(125, 95, 247, 0.25),
-        inset 0 3px 8px rgba(255, 150, 150, 0.35),
+        inset 0 3px 8px rgba(205, 190, 255, 0.35),
         inset 0 -4px 8px rgba(0, 0, 0, 0.5);
     transition: all 0.15s ease;
     user-select: none;
@@ -6344,7 +6344,7 @@ table {
     position: absolute;
     width: 16px;
     height: 8px;
-    background: rgba(255, 200, 200, 0.3);
+    background: rgba(222, 212, 255, 0.3);
     border-radius: 50%;
     top: 12px;
     left: 50%;
@@ -6356,7 +6356,7 @@ table {
     box-shadow:
         0 10px 30px rgba(125, 95, 247, 0.5),
         0 0 40px rgba(125, 95, 247, 0.3),
-        inset 0 3px 8px rgba(255, 150, 150, 0.4),
+        inset 0 3px 8px rgba(205, 190, 255, 0.4),
         inset 0 -4px 8px rgba(0, 0, 0, 0.5);
 }
 
