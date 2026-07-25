@@ -20,6 +20,13 @@
     var toggleToRegister = document.getElementById('toggle-to-register');
     var toggleToLogin = document.getElementById('toggle-to-login');
 
+    /* === BLASON ANIME === */
+    /* Relance la lecture si l'autoplay a ete bloque par le navigateur */
+    var blasonVideo = document.querySelector('.auth-card__video');
+    if (blasonVideo) {
+        blasonVideo.play().catch(function () { /* le poster reste affiche */ });
+    }
+
     /* === AVATAR PREVIEW === */
     var avatarUpload = document.getElementById('avatar-upload');
     var avatarPreview = document.getElementById('avatar-preview');
