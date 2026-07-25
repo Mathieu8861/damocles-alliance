@@ -8230,3 +8230,9 @@ body {
 .app-sidebar__meta + .app-sidebar__user {
     margin-top: 0;
 }
+
+/* Footer supprime des pages publiques : on libere la zone qu'il reservait */
+/* (la variable garde 36px sur l'admin qui a conserve son footer)          */
+body.app-has-sidebar {
+    --footer-height: 0px;
+}
