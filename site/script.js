@@ -596,7 +596,7 @@
 
         /* Bloc brand : logo + nom alliance en haut de la sidebar (desktop only) */
         html += '<div class="app-sidebar__brand">'
-            + '<img src="assets/images/logo-damocles.svg" alt="Logo Damoclès">'
+            + '<img src="assets/images/logo-damocles.png" alt="Logo Damoclès">'
             + '<span class="app-sidebar__brand-name notranslate">Damoclès</span>'
             + '</div>';
 
