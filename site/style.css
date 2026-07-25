@@ -533,11 +533,11 @@ table {
 }
 
 .combat-form__submit--attaque {
-    background: linear-gradient(135deg, var(--color-accent) 0%, #c0392b 100%);
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
 }
 
 .combat-form__submit--attaque:hover {
-    box-shadow: 0 4px 24px rgba(232, 68, 68, 0.3);
+    box-shadow: 0 4px 24px rgba(125, 95, 247, 0.35);
     transform: translateY(-1px);
 }
 
@@ -1964,19 +1964,31 @@ table {
     max-width: 100%;
     padding-left: 0;
     padding-right: 0;
+    background-color: var(--color-bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Artwork Ecaflip repeint en violet (rotation de teinte) */
+.main--jeux::before {
+    content: '';
+    position: fixed;
+    inset: 0;
     background-image: url('assets/images/image_fond_page_jeu.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
-    position: relative;
+    filter: hue-rotate(-75deg) saturate(0.75);
+    pointer-events: none;
+    z-index: 0;
 }
 
-.main--jeux::before {
+/* Voile sombre violet par-dessus l'artwork */
+.main--jeux::after {
     content: '';
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background-color: rgba(13, 13, 18, 0.7);
+    background-color: rgba(18, 13, 34, 0.74);
     pointer-events: none;
     z-index: 0;
 }
@@ -2113,7 +2125,7 @@ table {
 }
 
 .game-card__front {
-    background: linear-gradient(135deg, #1a0a08, var(--color-accent-dark), var(--color-accent));
+    background: linear-gradient(135deg, #140b28, var(--color-accent-dark), var(--color-accent));
     border: 2.5px solid #d4a017;
     box-shadow: 0 4px 16px rgba(212, 160, 23, 0.25);
 }
@@ -2133,7 +2145,6 @@ table {
     height: 72px;
     opacity: 0.9;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
-    border-radius: 50%;
     object-fit: contain;
 }
 
