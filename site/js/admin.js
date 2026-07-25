@@ -2253,6 +2253,19 @@
         var state = {};
         (data || []).forEach(function (m) { state[m.module] = m.actif; });
 
+        /* Réglage économie : interrupteur de distribution des jetons */
+        var jetonsActifs = true;
+        var siteConfigOk = true;
+        try {
+            var cfgRes = await window.REN.supabase
+                .from('site_config')
+                .select('valeur')
+                .eq('cle', 'jetons_actifs')
+                .maybeSingle();
+            if (cfgRes.error) siteConfigOk = false;
+            else if (cfgRes.data && cfgRes.data.valeur === 'false') jetonsActifs = false;
+        } catch (e) { siteConfigOk = false; }
+
         var html = '<div class="admin-panel__title">Modules du site</div>';
         html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Décoche un module pour le masquer de la navigation et bloquer l\'accès à ses pages. Réactivable à tout moment — aucune donnée n\'est supprimée. Les membres voient le changement au prochain chargement de page.</p>';
 
@@ -2268,6 +2281,17 @@
                 + '</tr>';
         });
         html += '</tbody></table>';
+
+        html += '<div class="admin-panel__title" style="margin-top:var(--spacing-xl);">Économie</div>';
+        if (siteConfigOk) {
+            html += '<table class="admin-table" style="width:100%;"><tbody><tr>'
+                + '<td style="text-align:center;width:70px;"><input type="checkbox" id="toggle-jetons"' + (jetonsActifs ? ' checked' : '') + '></td>'
+                + '<td><strong>Distribution des jetons</strong></td>'
+                + '<td class="text-muted" style="font-size:0.8125rem;">1 point de combat = 1 jeton pour chaque participant. Décoché : plus aucun jeton distribué. Les jetons déjà gagnés sont conservés.</td>'
+                + '</tr></tbody></table>';
+        } else {
+            html += '<p class="text-muted" style="font-size:0.8125rem;">Table site_config absente — exécute la migration <code>sql/028-jetons-toggle.sql</code> dans Supabase.</p>';
+        }
 
         html += '<div style="display:flex;gap:var(--spacing-sm);margin-top:var(--spacing-md);">';
         html += '<button class="btn btn--primary" id="btn-save-modules">Sauvegarder</button>';
@@ -2292,13 +2316,26 @@
                 window.REN.toast('Erreur sauvegarde : ' + err.message, 'error');
                 return;
             }
+            /* Interrupteur jetons (site_config) */
+            var cbJetons = document.getElementById('toggle-jetons');
+            if (cbJetons) {
+                var cfgSave = await window.REN.supabase
+                    .from('site_config')
+                    .upsert({ cle: 'jetons_actifs', valeur: cbJetons.checked ? 'true' : 'false', updated_at: new Date().toISOString() }, { onConflict: 'cle' });
+                if (cfgSave.error) {
+                    console.error('[REN-ADMIN] Erreur site_config:', cfgSave.error);
+                    window.REN.toast('Modules OK, mais erreur jetons : ' + cfgSave.error.message, 'error');
+                    return;
+                }
+            }
+
             /* Rafraîchir le cache local pour voir l'effet immédiatement */
             try {
                 var map = {};
                 rows.forEach(function (r) { map[r.module] = r.actif; });
                 localStorage.setItem('ren_modules', JSON.stringify(map));
             } catch (e) { /* ignore */ }
-            window.REN.toast('Modules sauvegardés !', 'success');
+            window.REN.toast('Réglages sauvegardés !', 'success');
         });
     }
 

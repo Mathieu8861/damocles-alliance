@@ -312,8 +312,14 @@
                     await window.REN.supabase.from('combat_participants').insert(participants);
                 }
 
-                /* Ajouter les jetons à tous les participants via RPC (1 point = 1 jeton, seulement si positif) */
-                if (points > 0) {
+                /* Distribution des jetons (désactivable dans Admin > Modules > Économie) */
+                var jetonsActifs = true;
+                try {
+                    var cfgJetons = await window.REN.supabase.from('site_config').select('valeur').eq('cle', 'jetons_actifs').maybeSingle();
+                    if (cfgJetons.data && cfgJetons.data.valeur === 'false') jetonsActifs = false;
+                } catch (e) { /* table absente : jetons actifs par défaut */ }
+
+                if (points > 0 && jetonsActifs) {
                     for (var pi = 0; pi < selectedAllies.length; pi++) {
                         await window.REN.supabase.rpc('ajouter_jetons', { p_user_id: selectedAllies[pi], p_points: points });
                     }
@@ -321,7 +327,7 @@
                 }
 
                 var msg = resultat === 'victoire'
-                    ? 'Victoire enregistrée ! +' + points + ' points (+' + points + ' jetons)'
+                    ? 'Victoire enregistrée ! +' + points + ' points' + (jetonsActifs && points > 0 ? ' (+' + points + ' jetons)' : '')
                     : 'Défaite enregistrée. ' + points + ' points';
 
                 window.REN.toast(msg, resultat === 'victoire' ? 'success' : 'info');
