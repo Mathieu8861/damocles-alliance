@@ -28,14 +28,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SYSTEM_PROMPT = `Tu es un extracteur de données pour le jeu Dofus.
-On te donne un screenshot d'inventaire filtré sur les runes de forgemagie.
-Chaque cellule de la grille affiche une icône de rune avec sa quantité en haut à gauche.
-
-Tu dois identifier chaque rune visible et sa quantité.
-
-Les noms officiels des runes Dofus sont :
-Rune Fo, Rune Pa Fo, Rune Ra Fo (Force)
+const RUNE_NAMES = `Rune Fo, Rune Pa Fo, Rune Ra Fo (Force)
 Rune Ine, Rune Pa Ine, Rune Ra Ine (Intelligence)
 Rune Cha, Rune Pa Cha, Rune Ra Cha (Chance)
 Rune Age, Rune Pa Age, Rune Ra Age (Agilité)
@@ -61,7 +54,16 @@ Rune Ré Feu, Rune Pa Ré Feu, Rune Ra Ré Feu (et idem Eau / Air / Terre / Neut
 Rune Ré Per Feu, Rune Ré Per Eau, Rune Ré Per Air, Rune Ré Per Terre, Rune Ré Per Neutre (% résistances élémentaires)
 Rune Ré Per Mé (% résistance mêlée), Rune Ré Per Di (% résistance distance)
 Rune Ga Pa (PA), Rune Ga Pme (PM), Rune Po (Portée), Rune Invo (Invocation)
-Rune de chasse, Rune de Signature
+Rune de chasse, Rune de Signature`;
+
+const SYSTEM_PROMPT = `Tu es un extracteur de données pour le jeu Dofus.
+On te donne un screenshot d'inventaire filtré sur les runes de forgemagie.
+Chaque cellule de la grille affiche une icône de rune avec sa quantité en haut à gauche.
+
+Tu dois identifier chaque rune visible et sa quantité.
+
+Les noms officiels des runes Dofus sont :
+${RUNE_NAMES}
 
 DEUX FORMATS DE SCREENSHOT POSSIBLES — détecte lequel tu reçois :
 
@@ -114,6 +116,28 @@ Réponds UNIQUEMENT avec un JSON valide de cette forme, sans markdown :
 - Si tu vois une cellule de rune mais ne peux pas l'identifier avec certitude, incrémente "non_identifiees" au lieu de deviner.
 - N'inclus PAS les items qui ne sont pas des runes de forgemagie (potions, ressources, équipements).`;
 
+const HDV_PROMPT = `Tu es un extracteur de prix pour le jeu Dofus.
+On te donne un screenshot de l'Hôtel de Vente (HDV) affichant des runes de forgemagie avec leurs prix en kamas.
+
+Chaque ligne visible affiche : l'icône de la rune, son nom (ex: "Rune Ine"), et un ou plusieurs prix en kamas.
+- Si plusieurs prix sont affichés pour une même rune (lots x1 / x10 / x100), prends le prix UNITAIRE (lot x1).
+- Si un seul "prix moyen" est visible, prends celui-là.
+- Les prix peuvent contenir des espaces comme séparateurs de milliers (ex: "1 592") : renvoie un entier sans espaces.
+
+Les noms officiels des runes Dofus sont :
+${RUNE_NAMES}
+
+MÉTHODE :
+1. Balaye chaque ligne visible de haut en bas.
+2. Associe chaque nom lu au nom officiel EXACT de la liste ci-dessus (avec ses accents).
+3. Ignore tout ce qui n'est pas une rune de forgemagie (potions, ressources, équipements).
+4. Ne devine JAMAIS un prix illisible ou partiellement masqué.
+
+Réponds UNIQUEMENT avec un JSON valide de cette forme, sans markdown :
+{"runes": [{"nom": "Rune Fo", "prix": 51}, ...], "non_identifiees": 0}
+- "prix" : entier en kamas.
+- Si une ligne est illisible ou douteuse, incrémente "non_identifiees" au lieu de deviner.`;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -156,13 +180,16 @@ Deno.serve(async (req: Request) => {
     }
     /* ===================================================== */
 
-    const { image, media_type } = await req.json();
+    const { image, media_type, mode } = await req.json();
     if (!image) {
       return new Response(
         JSON.stringify({ error: "Champ 'image' (base64) requis" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    /* Deux modes : "inventory" (defaut, quantites) ou "hdv_prices" (prix HDV) */
+    const isHdv = mode === "hdv_prices";
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -174,7 +201,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 4096,
-        system: SYSTEM_PROMPT,
+        system: isHdv ? HDV_PROMPT : SYSTEM_PROMPT,
         messages: [
           {
             role: "user",
@@ -189,7 +216,9 @@ Deno.serve(async (req: Request) => {
               },
               {
                 type: "text",
-                text: "Extrais les runes et quantités de cet inventaire.",
+                text: isHdv
+                  ? "Extrais les noms et prix des runes de ce screenshot d'HDV."
+                  : "Extrais les runes et quantités de cet inventaire.",
               },
             ],
           },

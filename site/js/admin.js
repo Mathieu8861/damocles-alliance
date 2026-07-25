@@ -90,6 +90,7 @@
                 case 'bareme-perco': await tabBaremePerco(content); break;
                 case 'recyclages-hebdo': await tabRecyclagesHebdo(content); break;
                 case 'zones-perco': await tabZonesPerco(content); break;
+                case 'runes-prix': await tabRunesPrix(content); break;
                 case 'boutique': await tabBoutique(content); break;
                 case 'demandes-kamas': await tabDemandesKamas(content); break;
                 case 'slot': await tabSlot(content); break;
@@ -2002,6 +2003,241 @@
         { key: 'fm',         label: 'Forgemagie',     desc: 'Tracker de sessions FM (runes, coûts, pui)' },
         { key: 'jeux',       label: 'Jeux',           desc: 'Jeux de cartes + slot machine (inclut la page Slot)' }
     ];
+
+    /* ============================================ */
+    /* RUNES & PRIX                                 */
+    /* Maj des prix du catalogue pour tout le monde */
+    /* + lecture des prix depuis des screens HDV    */
+    /* via l'edge function (mode hdv_prices).       */
+    /* ============================================ */
+    var rpPasteBound = false;
+
+    function rpNorm(s) {
+        return (s || '').toString().toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9% ]/g, ' ')
+            .replace(/\s+/g, ' ').trim();
+    }
+
+    function rpCompress(file) {
+        return new Promise(function (resolve, reject) {
+            var url = URL.createObjectURL(file);
+            var img = new Image();
+            img.onload = function () {
+                try {
+                    var MAX_W = 1920;
+                    var scale = img.width > MAX_W ? MAX_W / img.width : 1;
+                    var w = Math.round(img.width * scale);
+                    var h = Math.round(img.height * scale);
+                    var canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    URL.revokeObjectURL(url);
+                    resolve({
+                        base64: dataUrl.substring(dataUrl.indexOf(',') + 1),
+                        mediaType: 'image/jpeg'
+                    });
+                } catch (e) {
+                    URL.revokeObjectURL(url);
+                    reject(e);
+                }
+            };
+            img.onerror = function () {
+                URL.revokeObjectURL(url);
+                reject(new Error('Image illisible'));
+            };
+            img.src = url;
+        });
+    }
+
+    async function tabRunesPrix(content) {
+        var { data: runes, error } = await window.REN.supabase
+            .from('runes')
+            .select('*')
+            .order('ordre');
+
+        if (error) {
+            content.innerHTML = '<div class="admin-panel__title">Runes & prix</div>'
+                + '<p class="text-muted" style="padding:1rem;">Erreur de chargement du catalogue : ' + window.REN.escapeHtml(error.message) + '</p>';
+            return;
+        }
+
+        var esc = window.REN.escapeHtml;
+        var fmt = window.REN.formatNumber;
+
+        var html = '<div class="admin-panel__title">Runes & prix</div>'
+            + '<p class="text-muted" style="font-size:0.8125rem; margin-bottom: var(--spacing-md);">'
+            + 'Colle un ou plusieurs screenshots de l\'HDV runes (<kbd>Ctrl</kbd>+<kbd>V</kbd>) : l\'IA lit les prix et préremplit la colonne "Nouveau prix". '
+            + 'Vérifie, ajuste à la main si besoin, puis <strong>Appliquer</strong> met à jour le catalogue pour toute l\'alliance. La saisie 100% manuelle marche aussi.</p>'
+            + '<div class="recyc-preuve__drop" id="rp-drop" style="margin-bottom:10px;">'
+            + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+            + '<span>Colle un screenshot HDV (<kbd>Ctrl</kbd>+<kbd>V</kbd>) ou clique pour parcourir (multi-fichiers OK)</span>'
+            + '<input type="file" id="rp-file" accept="image/*" multiple style="display:none;">'
+            + '</div>'
+            + '<div id="rp-status" class="text-muted" style="font-size:0.8rem; min-height:18px; margin-bottom:10px;"></div>'
+            + '<div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px;">'
+            + '<input class="form-input" id="rp-search" placeholder="Filtrer les runes..." style="max-width:240px;">'
+            + '<button class="btn btn--primary" id="rp-apply">Appliquer les nouveaux prix</button>'
+            + '<span id="rp-count" class="text-muted" style="font-size:0.8rem;"></span>'
+            + '</div>'
+            + '<div class="table-wrapper"><table class="table">'
+            + '<thead><tr><th>Rune</th><th>Catégorie</th><th>Prix actuel</th><th>Nouveau prix</th></tr></thead>'
+            + '<tbody id="rp-tbody"></tbody>'
+            + '</table></div>';
+        content.innerHTML = html;
+
+        var byNorm = {};
+        runes.forEach(function (r) { byNorm[rpNorm(r.nom)] = r; });
+
+        function updateCount() {
+            var n = runes.filter(function (r) { return r._nouveau != null && r._nouveau !== (r.prix_kamas || 0); }).length;
+            document.getElementById('rp-count').textContent = n ? n + ' prix à mettre à jour' : '';
+        }
+
+        function renderRows(filter) {
+            var q = rpNorm(filter || '');
+            var rows = '';
+            runes.forEach(function (r) {
+                if (q && rpNorm(r.nom + ' ' + r.categorie).indexOf(q) === -1) return;
+                var icon = r.img_url ? '<img src="' + esc(r.img_url) + '" alt="" style="width:22px; height:22px; vertical-align:middle; margin-right:6px;">' : '';
+                var changed = r._nouveau != null && r._nouveau !== (r.prix_kamas || 0);
+                rows += '<tr data-id="' + r.id + '"' + (changed ? ' style="background: rgba(var(--color-accent-rgb), 0.07);"' : '') + '>'
+                    + '<td>' + icon + '<strong class="notranslate">' + esc(r.nom) + '</strong></td>'
+                    + '<td>' + esc(r.categorie) + '</td>'
+                    + '<td>' + fmt(r.prix_kamas || 0) + '</td>'
+                    + '<td><input type="number" class="form-input rp-new" data-id="' + r.id + '" min="0" placeholder="—" style="width:110px; padding:5px 8px;" value="' + (r._nouveau != null ? r._nouveau : '') + '"></td>'
+                    + '</tr>';
+            });
+            document.getElementById('rp-tbody').innerHTML = rows || '<tr><td colspan="4" class="text-muted">Aucune rune.</td></tr>';
+
+            document.querySelectorAll('.rp-new').forEach(function (inp) {
+                inp.addEventListener('input', function () {
+                    var id = parseInt(inp.getAttribute('data-id'), 10);
+                    var r = null;
+                    for (var i = 0; i < runes.length; i++) { if (runes[i].id === id) { r = runes[i]; break; } }
+                    if (r) r._nouveau = inp.value === '' ? null : (parseInt(inp.value, 10) || 0);
+                    updateCount();
+                });
+            });
+            updateCount();
+        }
+
+        async function handleScreens(files) {
+            var status = document.getElementById('rp-status');
+            for (var i = 0; i < files.length; i++) {
+                if (!status || !document.getElementById('rp-drop')) return; /* onglet quitté */
+                status.textContent = 'Analyse du screenshot' + (files.length > 1 ? ' ' + (i + 1) + '/' + files.length : '') + ' en cours… (quelques secondes)';
+                try {
+                    var img = await rpCompress(files[i]);
+                    var res = await window.REN.supabase.functions.invoke('extract-runes', {
+                        body: { image: img.base64, media_type: img.mediaType, mode: 'hdv_prices' }
+                    });
+                    if (res.error) {
+                        var detail = '';
+                        try {
+                            if (res.error.context && typeof res.error.context.json === 'function') {
+                                var j = await res.error.context.json();
+                                detail = j.error || '';
+                            }
+                        } catch (e) { /* ignore */ }
+                        throw new Error(detail || res.error.message || 'Erreur edge function');
+                    }
+                    var found = (res.data && res.data.runes) || [];
+                    var matched = 0;
+                    var unknown = [];
+                    found.forEach(function (f) {
+                        var r = byNorm[rpNorm(f.nom)];
+                        if (r && f.prix != null) {
+                            r._nouveau = parseInt(f.prix, 10) || 0;
+                            matched++;
+                        } else if (f.nom) {
+                            unknown.push(f.nom);
+                        }
+                    });
+                    renderRows(document.getElementById('rp-search').value);
+                    var msg = matched + ' prix détectés et préremplis';
+                    if (unknown.length) msg += ' · non reconnues : ' + unknown.join(', ');
+                    if (res.data && res.data.non_identifiees) msg += ' · ' + res.data.non_identifiees + ' illisibles';
+                    if (!matched && !unknown.length) msg = 'Aucun prix détecté sur ce screen. La fonction extract-runes a-t-elle été redéployée avec le mode HDV ?';
+                    status.textContent = msg;
+                } catch (err) {
+                    console.error('[REN-ADMIN] Erreur analyse HDV:', err);
+                    if (status) status.textContent = '';
+                    window.REN.toast('Analyse échouée : ' + (err.message || ''), 'error');
+                }
+            }
+        }
+
+        var drop = document.getElementById('rp-drop');
+        var fileInput = document.getElementById('rp-file');
+        drop.addEventListener('click', function () { fileInput.click(); });
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files && fileInput.files.length) {
+                handleScreens(Array.prototype.slice.call(fileInput.files));
+            }
+            fileInput.value = '';
+        });
+
+        /* Paste global : lié une seule fois, inactif si l'onglet est fermé */
+        if (!rpPasteBound) {
+            rpPasteBound = true;
+            document.addEventListener('paste', function (e) {
+                if (!document.getElementById('rp-drop')) return;
+                var items = (e.clipboardData || window.clipboardData).items;
+                if (!items) return;
+                var files = [];
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].type && items[i].type.indexOf('image') === 0) {
+                        var f = items[i].getAsFile();
+                        if (f) files.push(f);
+                    }
+                }
+                if (files.length) {
+                    e.preventDefault();
+                    handleScreens(files);
+                }
+            });
+        }
+
+        document.getElementById('rp-search').addEventListener('input', function () {
+            renderRows(this.value);
+        });
+
+        document.getElementById('rp-apply').addEventListener('click', async function () {
+            var btn = this;
+            var changes = runes.filter(function (r) { return r._nouveau != null && r._nouveau !== (r.prix_kamas || 0); });
+            if (!changes.length) {
+                window.REN.toast('Aucun nouveau prix à appliquer', 'info');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Application… (' + changes.length + ')';
+            var okCount = 0;
+            var koCount = 0;
+            for (var i = 0; i < changes.length; i++) {
+                var r = changes[i];
+                var res = await window.REN.supabase.from('runes')
+                    .update({ prix_kamas: r._nouveau, updated_at: new Date().toISOString() })
+                    .eq('id', r.id);
+                if (res.error) {
+                    koCount++;
+                    console.error('[REN-ADMIN] Erreur maj prix', r.nom, res.error);
+                } else {
+                    r.prix_kamas = r._nouveau;
+                    r._nouveau = null;
+                    okCount++;
+                }
+            }
+            btn.disabled = false;
+            btn.textContent = 'Appliquer les nouveaux prix';
+            renderRows(document.getElementById('rp-search').value);
+            window.REN.toast(okCount + ' prix mis à jour pour toute l\'alliance' + (koCount ? ' · ' + koCount + ' erreurs' : ''), koCount ? 'error' : 'success');
+        });
+
+        renderRows('');
+    }
 
     async function tabModules(content) {
         var { data, error } = await window.REN.supabase
