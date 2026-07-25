@@ -1,5 +1,5 @@
 /* ================================================================ */
-/* INSTALLATION COMPLETE - ALLIANCE DAMOCLES [SWRD]                 */
+/* INSTALLATION COMPLETE - ALLIANCE DAMOCLES [DMO]                 */
 /* ================================================================ */
 /* Script unique : migrations REN 001 a 024 en ordre chronologique, */
 /* rendu re-runnable (DROP avant chaque policy), + correctifs de    */

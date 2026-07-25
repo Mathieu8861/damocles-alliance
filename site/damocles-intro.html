@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Damoclès - Intro (logo officiel)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --violet: #6a5be2;
+    --violet-clair: #9080f2;
+    --or: #f5a623;
+    --bg: #141519;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+/* === FOND VIVANT === */
+.smoke {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.16;
+    pointer-events: none;
+}
+.smoke--1 {
+    width: 55vmax; height: 55vmax;
+    background: radial-gradient(circle, #5b3fd4, transparent 65%);
+    top: -12vmax; right: -14vmax;
+    animation: drift1 16s ease-in-out infinite alternate;
+}
+.smoke--2 {
+    width: 48vmax; height: 48vmax;
+    background: radial-gradient(circle, #b06a12, transparent 65%);
+    bottom: -16vmax; left: -12vmax;
+    animation: drift2 19s ease-in-out infinite alternate;
+}
+@keyframes drift1 { to { transform: translate(-9vmax, 7vmax) scale(1.18); } }
+@keyframes drift2 { to { transform: translate(8vmax, -6vmax) scale(1.12); } }
+
+/* Braises qui montent */
+.ember {
+    position: fixed;
+    bottom: -12px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: rise linear infinite;
+    pointer-events: none;
+}
+@keyframes rise {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    12% { opacity: var(--o); }
+    100% { transform: translate(var(--sway), -108vh) scale(0.3); opacity: 0; }
+}
+
+/* === SCENE === */
+.scene { text-align: center; position: relative; z-index: 2; }
+.stage {
+    position: relative;
+    width: min(56vh, 78vw);
+    aspect-ratio: 1;
+    margin: 0 auto;
+}
+.stage.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake {
+    10%, 90% { transform: translate(-1px, 2px); }
+    20%, 80% { transform: translate(2px, -3px); }
+    30%, 50%, 70% { transform: translate(-4px, 5px); }
+    40%, 60% { transform: translate(4px, -4px); }
+}
+
+/* === LOGO OFFICIEL (PNG intact) === */
+#logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: translateY(-46vh) scale(1.14);
+    opacity: 0;
+    filter: blur(6px) drop-shadow(0 0 0 rgba(106, 91, 226, 0));
+    animation: logoDrop 0.55s cubic-bezier(.25,.9,.3,1.02) 1.05s forwards;
+}
+@keyframes logoDrop {
+    0% { transform: translateY(-46vh) scale(1.14); opacity: 0; filter: blur(6px); }
+    55% { opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+}
+.stage.done #logo {
+    animation: glowBreath 3.4s ease-in-out infinite;
+    transform: none; opacity: 1;
+}
+@keyframes glowBreath {
+    0%, 100% { filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 22px rgba(106, 91, 226, 0.22)); }
+    50% { filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 44px rgba(106, 91, 226, 0.44)); }
+}
+
+/* Reflet balaye, limite aux pixels du logo grace au masque PNG */
+.sheen {
+    position: absolute;
+    inset: 0;
+    -webkit-mask-image: url('assets/images/logo-damocles-fond-transparent.png');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('assets/images/logo-damocles-fond-transparent.png');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    overflow: hidden;
+    pointer-events: none;
+}
+.sheen::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -35%;
+    width: 26%;
+    height: 140%;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+    transform: translateX(-160%) skewX(-16deg);
+}
+.stage.landed .sheen::before { animation: sweep 1.15s ease-in-out 0.75s; }
+.stage.done .sheen::before { animation: sweep 1.15s ease-in-out 4.6s infinite; }
+@keyframes sweep {
+    0% { transform: translateX(-160%) skewX(-16deg); }
+    100% { transform: translateX(620%) skewX(-16deg); }
+}
+
+/* === IMPACT === */
+.ring {
+    position: absolute;
+    left: 50%; top: 58%;
+    width: 30%;
+    aspect-ratio: 1;
+    border: 4px solid var(--violet-clair);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.25);
+    opacity: 0;
+}
+.stage.landed .ring { animation: ringOut 0.6s ease-out forwards; }
+@keyframes ringOut {
+    0% { transform: translate(-50%, -50%) scale(0.25); opacity: 0.85; }
+    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+.dust {
+    position: absolute;
+    left: 50%; top: 72%;
+    border-radius: 50%;
+    opacity: 0;
+}
+.stage.landed .dust { animation: dustOut 0.8s cubic-bezier(.17,.67,.4,1) forwards; }
+@keyframes dustOut {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.1); opacity: 0; }
+}
+
+/* === TITRE === */
+.title {
+    margin-top: 3vh;
+    font-size: clamp(2.6rem, 7.5vh, 4.6rem);
+    font-weight: 700;
+    letter-spacing: 0.45em;
+    text-indent: 0.45em;
+    color: #f2f3f7;
+    text-transform: uppercase;
+    opacity: 0;
+    filter: blur(10px);
+    animation: titleIn 0.9s ease-out 2.35s forwards;
+}
+@keyframes titleIn { to { opacity: 1; filter: blur(0); letter-spacing: 0.16em; text-indent: 0.16em; } }
+.tag {
+    font-size: clamp(1.1rem, 3vh, 1.6rem);
+    font-weight: 600;
+    letter-spacing: 0.55em;
+    text-indent: 0.55em;
+    color: var(--violet-clair);
+    opacity: 0;
+    animation: fadeUp 0.7s ease-out 2.85s forwards;
+}
+.tagline {
+    margin-top: 1.3vh;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(0.78rem, 2vh, 0.95rem);
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: #8f93a0;
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 3.25s forwards;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#replay {
+    position: fixed;
+    bottom: 22px; right: 24px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #d5d7de;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 5;
+    transition: border-color 0.2s, background 0.2s;
+}
+#replay:hover { border-color: var(--violet); background: rgba(106, 91, 226, 0.14); }
+</style>
+</head>
+<body>
+
+<div class="smoke smoke--1"></div>
+<div class="smoke smoke--2"></div>
+<div id="embers"></div>
+
+<div class="scene" id="scene">
+    <div class="stage" id="stage">
+        <img id="logo" src="assets/images/logo-damocles-fond-transparent.png" alt="Damoclès">
+        <div class="sheen"></div>
+        <div class="ring"></div>
+        <div id="dusts"></div>
+    </div>
+    <div class="title">Damoclès</div>
+    <div class="tag">[ DMO ]</div>
+    <div class="tagline">L'ÉPÉE EST SUSPENDUE.</div>
+</div>
+
+<button id="replay">↻ Rejouer</button>
+
+<script>
+(function () {
+    /* Braises d'ambiance (déterministes) */
+    var embersWrap = document.getElementById('embers');
+    var N = 26;
+    for (var i = 0; i < N; i++) {
+        var e = document.createElement('div');
+        e.className = 'ember';
+        var gold = i % 3 === 0;
+        var size = 2 + (i * 7) % 5;
+        e.style.width = size + 'px';
+        e.style.height = size + 'px';
+        e.style.left = ((i * 37) % 100) + 'vw';
+        e.style.background = gold ? 'rgba(245, 166, 35, 0.8)' : 'rgba(144, 128, 242, 0.8)';
+        e.style.setProperty('--sway', (((i * 13) % 9) - 4) + 'vw');
+        e.style.setProperty('--o', (0.25 + ((i * 11) % 50) / 100).toFixed(2));
+        e.style.animationDuration = (7 + (i * 5) % 9) + 's';
+        e.style.animationDelay = ((i * 733) % 7000) + 'ms';
+        embersWrap.appendChild(e);
+    }
+
+    var stage = document.getElementById('stage');
+
+    function buildDust() {
+        var wrap = document.getElementById('dusts');
+        wrap.innerHTML = '';
+        var n = 13;
+        for (var i = 0; i < n; i++) {
+            var a = Math.PI + (Math.PI * i) / (n - 1); /* demi-cercle vers le haut inversé : sol */
+            var dist = 90 + (i % 4) * 46;
+            var d = document.createElement('div');
+            d.className = 'dust';
+            var s = 5 + (i % 3) * 3;
+            d.style.width = s + 'px';
+            d.style.height = s + 'px';
+            d.style.background = i % 2 ? 'rgba(144, 128, 242, 0.9)' : 'rgba(245, 166, 35, 0.9)';
+            d.style.setProperty('--dx', Math.cos(a) * -dist + 'px');
+            d.style.setProperty('--dy', Math.sin(a) * -dist * 0.5 - 10 + 'px');
+            wrap.appendChild(d);
+        }
+    }
+
+    var timers = [];
+    function schedule() {
+        /* Atterrissage du logo : impact */
+        timers.push(setTimeout(function () {
+            stage.classList.add('shake', 'landed');
+        }, 1580));
+        timers.push(setTimeout(function () {
+            stage.classList.add('done');
+        }, 3900));
+    }
+
+    function play() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        var scene = document.getElementById('scene');
+        var clone = scene.cloneNode(true);
+        scene.parentNode.replaceChild(clone, scene);
+        stage = clone.querySelector('#stage');
+        buildDust();
+        schedule();
+    }
+
+    document.getElementById('replay').addEventListener('click', play);
+    buildDust();
+    schedule();
+})();
+</script>
+</body>
+</html>

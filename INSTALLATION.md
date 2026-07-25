@@ -1,4 +1,4 @@
-# Installation du site Damoclès [SWRD]
+# Installation du site Damoclès [DMO]
 
 Guide de mise en ligne complet, à dérouler dans l'ordre. Durée estimée : 30 minutes.
 

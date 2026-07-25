@@ -1,4 +1,4 @@
-# Alliance Damoclès [SWRD] - Mémoire
+# Alliance Damoclès [DMO] - Mémoire
 
 ## Infos
 - **Client :** Alliance Damoclès (projet communautaire Dofus, pas de facturation)
@@ -6,7 +6,7 @@
 - **Leads alliance :** Rorschach, Lord, Pannah, Henrich, Big
 - **Univers :** Dofus (MMORPG)
 - **Objectif :** réunir ~30 joueurs PvP éparpillés dans différentes alliances sous une seule bannière pour renverser l'alliance BCL. Attaques et défenses coordonnées.
-- **Nom / Tag :** Damoclès, tag **[SWRD]** (l'épée de Damoclès : la menace qui plane au-dessus du roi)
+- **Nom / Tag :** Damoclès, tag **[DMO]** (ex-[SWRD] du 22/07, corrigé le 25/07 ; l'épée de Damoclès : la menace qui plane au-dessus du roi)
 - **Type :** Site d'alliance (clone du site REN), gestion membres, PvP, percos, recyclages, forgemagie
 - **Dossier site :** `Création site Web/DAMOCLES/`
 - **URL prod :** 🚀 **https://damocles-alliance.vercel.app** (en ligne depuis le 23/07/2026)
@@ -54,7 +54,7 @@
 7. S'inscrire sur le site puis se passer admin en SQL
 
 ## Historique & Décisions
-- 22/07/2026 : choix du nom **Damoclès [SWRD]** (menace qui plane sur BCL). Leads : Rorschach, Lord, Pannah, Henrich, Big. Messages d'annonce Discord + MP de démarchage rédigés. Discord : duplication du serveur Renegats via modèle de serveur natif (Paramètres > Modèle de serveur, désactiver le mode Communauté le temps de créer le modèle)
+- 22/07/2026 : choix du nom **Damoclès [DMO]** (menace qui plane sur BCL). Leads : Rorschach, Lord, Pannah, Henrich, Big. Messages d'annonce Discord + MP de démarchage rédigés. Discord : duplication du serveur Renegats via modèle de serveur natif (Paramètres > Modèle de serveur, désactiver le mode Communauté le temps de créer le modèle)
 - 22/07/2026 : duplication du code REN → DAMOCLES (site + sql + edge function), rebrand Damoclès, SQL consolidé, checklist INSTALLATION.md
 - 23/07/2026 : bascule de la DA rouge → **violet #7d5ff7** (demande Mathieu). Variables accent + littéraux (sidebar, badges, glows, cadres, confettis, logo SVG). Rouges sémantiques conservés
 - 23/07/2026 : **sélecteur de langue FR / EN / DE** (membres internationaux) : bouton drapeau dans la sidebar (ou flottant en bas à droite sur connexion/admin) qui ouvre un menu de langues. Traduction Google de tout le site (contenu dynamique inclus, bannière Google masquée, préférence en localStorage `damocles_lang`, cookie `googtrans`). Pseudos sidebar, marque et noms de runes protégés par `class="notranslate"`. Ajouter une langue = 1 entrée dans le const `LANGS` de script.js + code dans `includedLanguages`. Testé FR→EN, FR→DE et retours en local
