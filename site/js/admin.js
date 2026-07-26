@@ -563,7 +563,8 @@
 
             await window.REN.supabase.from('builds').insert({
                 titre: titre, description: desc, lien_dofusbook: lien || '', image_url: imageUrl,
-                type_build: typeBuild || '', classe: classeBuild || '', valeur_kamas: valeurKamas ? parseInt(valeurKamas) : 0
+                type_build: typeBuild || '', classe: classeBuild || '', valeur_kamas: valeurKamas ? parseInt(valeurKamas) : 0,
+                auteur_id: window.REN.currentProfile.id
             });
             window.REN.toast('Build ajoute !', 'success');
             loadTab('builds');

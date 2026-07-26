@@ -8258,3 +8258,62 @@ body.app-has-sidebar {
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
+
+/* === BUILDS COMMUNAUTAIRES === */
+.build-submit {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.build-submit__title {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent-light);
+}
+.build-submit__row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.build-submit__actions {
+    display: flex;
+    gap: 10px;
+}
+.build-card {
+    position: relative;
+}
+.build-card__author {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+.build-card__delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.build-card__delete:hover {
+    background: var(--color-danger);
+}
