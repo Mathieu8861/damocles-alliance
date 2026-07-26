@@ -131,6 +131,9 @@
             if (participants.length > 1) {
                 html += '<br><span class="text-muted">Avec: ' + participants.filter(function(p) { return p !== auteur; }).join(', ') + '</span>';
             }
+            if (c.invites && c.invites.length) {
+                html += '<br><span class="text-muted">Invités hors site : ' + c.invites.map(function (n) { return esc(n); }).join(', ') + '</span>';
+            }
             if (c.commentaire) {
                 html += '<br><span class="text-muted">&#128205; ' + esc(c.commentaire) + '</span>';
             }

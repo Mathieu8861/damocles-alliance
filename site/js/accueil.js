@@ -226,6 +226,9 @@
                     });
                 }
                 var matesStr = mates.length > 0 ? ' <span class="text-muted">(avec ' + mates.map(function(m) { return '<span class="highlight">' + m + '</span>'; }).join(', ') + ')</span>' : '';
+                if (c.invites && c.invites.length) {
+                    matesStr += ' <span class="text-muted">(+ invités : ' + c.invites.map(function (n) { return window.REN.escapeHtml(n); }).join(', ') + ')</span>';
+                }
                 var actionType = c.type === 'attaque' ? 'une Attaque' : 'une Defense';
                 var actionVerb = c.resultat === 'victoire' ? 'a remporte' : 'a perdu';
                 var allianceName = c.alliance ? '<strong>' + c.alliance.nom + (c.alliance.tag ? ' [' + c.alliance.tag + ']' : '') + '</strong>' : (c.alliance_ennemie_nom || 'Inconnu');

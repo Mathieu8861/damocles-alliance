@@ -4151,3 +4151,20 @@ CREATE POLICY "builds_images_delete_own_or_admin" ON storage.objects
             OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
         )
     );
+
+
+/* ################################################################ */
+/* ### SOURCE : 030-combats-invites.sql ########################### */
+/* ################################################################ */
+
+/* ============================================ */
+/* Combats : invites hors site                  */
+/* ============================================ */
+/* Joueurs presents au combat mais pas inscrits */
+/* sur le site (pas encore inscrits, ou autres  */
+/* alliances). Stockes en simple liste de noms  */
+/* sur le combat : ils comptent dans l'effectif */
+/* mais ne recoivent ni points ni jetons.       */
+
+ALTER TABLE public.combats
+    ADD COLUMN IF NOT EXISTS invites TEXT[] DEFAULT NULL;

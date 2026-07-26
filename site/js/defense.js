@@ -9,6 +9,7 @@
     var nbAllies = 1;
     var nbEnnemis = 1;
     var selectedAllies = [];
+    var selectedInvites = [];
     var resultat = null;
     var allProfiles = [];
     var allAlliances = [];
@@ -83,6 +84,7 @@
             html += '<div class="ally-autocomplete" data-index="' + i + '">';
             html += '<input type="text" class="form-input ally-search" placeholder="Rechercher allié ' + (i + 1) + '..." autocomplete="off">';
             html += '<input type="hidden" class="ally-value">';
+            html += '<input type="hidden" class="ally-invite">';
             html += '<div class="ally-dropdown"></div>';
             html += '</div>';
         }
@@ -90,11 +92,13 @@
         container.querySelectorAll('.ally-autocomplete').forEach(function (wrap) {
             setupAllyAutocomplete(wrap);
         });
+        updateSelectedAllies();
     }
 
     function setupAllyAutocomplete(wrap) {
         var input = wrap.querySelector('.ally-search');
         var hidden = wrap.querySelector('.ally-value');
+        var inviteHidden = wrap.querySelector('.ally-invite');
         var dropdown = wrap.querySelector('.ally-dropdown');
         var esc = window.REN.escapeHtml;
 
@@ -116,24 +120,42 @@
                 return o.label.toLowerCase().indexOf(query) !== -1;
             });
 
-            if (!matches.length) {
-                dropdown.innerHTML = '<div class="ally-dropdown__empty">Aucun résultat</div>';
-                dropdown.classList.add('active');
-                return;
-            }
+            var raw = (filter || '').trim();
+            var exact = options.some(function (o) {
+                return o.label.replace('↳ ', '').toLowerCase() === query.trim();
+            });
 
             var html = '';
             matches.forEach(function (o) {
                 html += '<div class="ally-dropdown__item' + (o.isMule ? ' ally-dropdown__item--mule' : '') + '" data-id="' + o.id + '" data-label="' + esc(o.label) + '">' + esc(o.label) + '</div>';
             });
+            /* Joueur non inscrit sur le site : proposable comme invité */
+            if (raw.length >= 2 && raw.length <= 30 && !exact) {
+                html += '<div class="ally-dropdown__item ally-dropdown__item--invite" data-invite="' + esc(raw) + '">&#10133; Ajouter &laquo; ' + esc(raw) + ' &raquo; (invité hors site)</div>';
+            }
+            if (!html) {
+                dropdown.innerHTML = '<div class="ally-dropdown__empty">Aucun résultat</div>';
+                dropdown.classList.add('active');
+                return;
+            }
             dropdown.innerHTML = html;
             dropdown.classList.add('active');
 
             dropdown.querySelectorAll('.ally-dropdown__item').forEach(function (item) {
                 item.addEventListener('mousedown', function (e) {
                     e.preventDefault();
-                    input.value = item.getAttribute('data-label');
-                    hidden.value = item.getAttribute('data-id');
+                    var inviteName = item.getAttribute('data-invite');
+                    if (inviteName) {
+                        input.value = inviteName;
+                        hidden.value = '';
+                        inviteHidden.value = inviteName;
+                        wrap.classList.add('ally-autocomplete--invite');
+                    } else {
+                        input.value = item.getAttribute('data-label');
+                        hidden.value = item.getAttribute('data-id');
+                        inviteHidden.value = '';
+                        wrap.classList.remove('ally-autocomplete--invite');
+                    }
                     dropdown.classList.remove('active');
                     updateSelectedAllies();
                 });
@@ -146,6 +168,8 @@
 
         input.addEventListener('input', function () {
             hidden.value = '';
+            inviteHidden.value = '';
+            wrap.classList.remove('ally-autocomplete--invite');
             updateSelectedAllies();
             showDropdown(input.value);
         });
@@ -159,6 +183,10 @@
         selectedAllies = [window.REN.currentProfile.id];
         document.querySelectorAll('.ally-value').forEach(function (h) {
             if (h.value) selectedAllies.push(h.value);
+        });
+        selectedInvites = [];
+        document.querySelectorAll('.ally-invite').forEach(function (h) {
+            if (h.value) selectedInvites.push(h.value);
         });
     }
 
@@ -321,6 +349,7 @@
                     butin_kamas: 0,
                     points_gagnes: points,
                     commentaire: commentaire,
+                    invites: selectedInvites.length ? selectedInvites : null,
                     preuve_url_1: preuves[0],
                     preuve_url_2: preuves[1]
                 };
