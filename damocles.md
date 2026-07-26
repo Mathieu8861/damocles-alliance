@@ -74,6 +74,8 @@
 
 - 24/07/2026 : footer supprimé (infos regroupées en bas de sidebar), fix espace vide (--footer-height à 0 sur pages publiques). **Onglet Admin > Économie > Runes & prix** : maj des prix du catalogue en masse + lecture IA des screenshots HDV (edge function mode `hdv_prices`, prompt dédié). ⚠️ nécessite le redéploiement de l'edge function
 
+- 25-26/07/2026 : **vrai logo** (bouclier épée-couronne, PNG transparent fourni par Mathieu, version 256px optimisée) partout + **vidéo du blason animée** sur la carte de connexion (autoplay muet boucle). Tag corrigé **[DMO]** (les emails internes gardent .swrd, invisible, pour ne pas casser les comptes). **DA violette sur la partie jeu** : fond Ecaflip repeint par hue-rotate, cartes violettes bordées or, bouton SPIN violet, vignette hub remplacée (capture Mathieu; celle du slot reste à refaire). Dernière dérive REN : `recompenses_config.jetons_reward` (027, balayage exhaustif des 80 colonnes = plus aucune manquante). **Interrupteur jetons** (028) : site_config + fonction `ajouter_jetons` recréée (manquait sur Damoclès !) avec verrou serveur, case dans Admin > Modules > Économie, l'existant jamais supprimé. **Builds communautaires** (029) : tout membre validé propose un build depuis la page (form + screenshot compressé), auteur affiché, suppression auteur/admin, XSS des cartes corrigé
+
 ## Prochaines étapes
 - [ ] Ajouter **BCL** (et les autres alliances adverses) dans Admin > Alliances
 - [ ] Poster l'annonce Discord + MP de démarchage des PvPistes (textes prêts, session du 22/07)
