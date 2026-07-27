@@ -3438,6 +3438,16 @@ table {
     box-shadow: 0 0 0 3px rgba(125, 95, 247, 0.22);
 }
 
+/* Neutralise le fond blanc impose par l'autofill Chrome */
+.auth-card .form-input:-webkit-autofill,
+.auth-card .form-input:-webkit-autofill:hover,
+.auth-card .form-input:-webkit-autofill:focus {
+    -webkit-box-shadow: inset 0 0 0 1000px #16112b;
+    -webkit-text-fill-color: var(--color-text-primary);
+    caret-color: var(--color-text-primary);
+    transition: background-color 9999999s ease-in-out 0s;
+}
+
 /* Bouton degrade violet + ombre teintee */
 .auth-card .btn--primary {
     background: linear-gradient(135deg, #8d68ff 0%, #6a3ff0 55%, #5b32d6 100%);
