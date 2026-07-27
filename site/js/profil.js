@@ -387,9 +387,14 @@
             var totalCombats = totalAtk + totalDef;
             var totalVictoires = winAtk + winDef;
             var totalDefaites = totalCombats - totalVictoires;
-            var winrateGlobal = totalCombats > 0 ? Math.round(totalVictoires / totalCombats * 100) : 0;
-            var winrateAtk = totalAtk > 0 ? Math.round(winAtk / totalAtk * 100) : 0;
-            var winrateDef = totalDef > 0 ? Math.round(winDef / totalDef * 100) : 0;
+            /* Winrate : combats équilibrés uniquement (1v1, 2v2...), fallback sur les totaux si la migration 031 n'est pas passée */
+            var eqAtk = myStats.eq_attaques != null ? (myStats.eq_attaques || 0) : totalAtk;
+            var eqWinAtk = myStats.eq_attaques != null ? (myStats.eq_victoires_attaque || 0) : winAtk;
+            var eqDef = myStats.eq_attaques != null ? (myStats.eq_defenses || 0) : totalDef;
+            var eqWinDef = myStats.eq_attaques != null ? (myStats.eq_victoires_defense || 0) : winDef;
+            var winrateGlobal = (eqAtk + eqDef) > 0 ? Math.round((eqWinAtk + eqWinDef) / (eqAtk + eqDef) * 100) : 0;
+            var winrateAtk = eqAtk > 0 ? Math.round(eqWinAtk / eqAtk * 100) : 0;
+            var winrateDef = eqDef > 0 ? Math.round(eqWinDef / eqDef * 100) : 0;
 
             var totalPts = myStats.total_points || 0;
             var tier = window.REN.getTierFromPoints(totalPts);

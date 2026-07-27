@@ -142,7 +142,10 @@
 
             var totalCombats = (me.total_attaques || 0) + (me.total_defenses || 0);
             var totalVictoires = (me.victoires_attaque || 0) + (me.victoires_defense || 0);
-            var winrate = totalCombats > 0 ? Math.round(totalVictoires / totalCombats * 100) : 0;
+            /* Winrate : combats équilibrés uniquement (1v1, 2v2...) */
+            var eqCombats = me.eq_attaques != null ? (me.eq_attaques || 0) + (me.eq_defenses || 0) : totalCombats;
+            var eqVictoires = me.eq_attaques != null ? (me.eq_victoires_attaque || 0) + (me.eq_victoires_defense || 0) : totalVictoires;
+            var winrate = eqCombats > 0 ? Math.round(eqVictoires / eqCombats * 100) : 0;
 
             var html = '<div class="dashboard-rank">';
 

@@ -62,7 +62,10 @@
         filtered.forEach(function (m) {
             var totalCombats = (m.total_attaques || 0) + (m.total_defenses || 0);
             var totalVictoires = (m.victoires_attaque || 0) + (m.victoires_defense || 0);
-            var winrate = totalCombats > 0 ? Math.round(totalVictoires / totalCombats * 100) : 0;
+            /* Winrate : combats équilibrés uniquement (1v1, 2v2...), fallback sur les totaux si la migration 031 n'est pas passée */
+            var eqCombats = m.eq_attaques != null ? (m.eq_attaques || 0) + (m.eq_defenses || 0) : totalCombats;
+            var eqVictoires = m.eq_attaques != null ? (m.eq_victoires_attaque || 0) + (m.eq_victoires_defense || 0) : totalVictoires;
+            var winrate = eqCombats > 0 ? Math.round(eqVictoires / eqCombats * 100) : 0;
 
             var tier = window.REN.getTierFromPoints(m.total_points);
             var wrClass = winrate >= 50 ? ' member-card__stat-value--success' : ' member-card__stat-value--danger';
