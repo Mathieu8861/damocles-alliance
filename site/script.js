@@ -265,9 +265,13 @@
     /* === FORMAT HELPERS === */
     window.REN.formatKamas = function (value) {
         if (!value || value === 0) return '0 K';
-        if (value >= 1000000000) return Math.floor(value / 1000000000).toLocaleString('fr-FR') + ' G';
-        if (value >= 1000000) return Math.floor(value / 1000000).toLocaleString('fr-FR') + ' M';
-        if (value >= 1000) return Math.floor(value / 1000).toLocaleString('fr-FR') + ' K';
+        /* Jusqu'à 2 décimales, sans zéros inutiles : 1,6 M / 1,65 M / 2 M */
+        function unit(v) {
+            return parseFloat(v.toFixed(2)).toLocaleString('fr-FR');
+        }
+        if (value >= 1000000000) return unit(value / 1000000000) + ' G';
+        if (value >= 1000000) return unit(value / 1000000) + ' M';
+        if (value >= 1000) return unit(value / 1000) + ' K';
         return value.toLocaleString('fr-FR');
     };
 
