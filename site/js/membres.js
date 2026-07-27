@@ -68,7 +68,10 @@
             var winrate = eqCombats > 0 ? Math.round(eqVictoires / eqCombats * 100) : 0;
 
             var tier = window.REN.getTierFromPoints(m.total_points);
-            var wrClass = winrate >= 50 ? ' member-card__stat-value--success' : ' member-card__stat-value--danger';
+            /* Aucun combat équilibré : tiret neutre plutôt qu'un 0% rouge */
+            var wrClass = eqCombats === 0 ? ' member-card__stat-value--neutral'
+                : (winrate >= 50 ? ' member-card__stat-value--success' : ' member-card__stat-value--danger');
+            var wrDisplay = eqCombats === 0 ? '&mdash;' : winrate + '%';
 
             html += '<div class="member-card">';
 
@@ -85,14 +88,16 @@
             html += '</div>';
 
             if (m.mules && m.mules.length > 0) {
-                html += '<div class="member-card__mules">Mules : ' + m.mules.map(esc).join(', ') + '</div>';
+                html += '<div class="member-card__mules"><span class="member-card__mules-label">Mules</span>'
+                    + m.mules.map(function (mu) { return '<span class="member-card__mule-chip notranslate">' + esc(mu) + '</span>'; }).join('')
+                    + '</div>';
             }
 
             /* Stats 4 colonnes */
             html += '<div class="member-card__stats">';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">ATK</span><span class="member-card__stat-value">' + (m.total_attaques || 0) + '</span></div>';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">DEF</span><span class="member-card__stat-value">' + (m.total_defenses || 0) + '</span></div>';
-            html += '<div class="member-card__stat"><span class="member-card__stat-label">Winrate</span><span class="member-card__stat-value' + wrClass + '">' + winrate + '%</span></div>';
+            html += '<div class="member-card__stat"><span class="member-card__stat-label">Winrate</span><span class="member-card__stat-value' + wrClass + '">' + wrDisplay + '</span></div>';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">Points</span><span class="member-card__stat-value member-card__stat-value--accent">' + (m.total_points || 0) + '</span></div>';
             html += '</div>';
 
