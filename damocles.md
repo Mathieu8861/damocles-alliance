@@ -76,13 +76,18 @@
 
 - 25-26/07/2026 : **vrai logo** (bouclier épée-couronne, PNG transparent fourni par Mathieu, version 256px optimisée) partout + **vidéo du blason animée** sur la carte de connexion (autoplay muet boucle). Tag corrigé **[DMO]** (les emails internes gardent .swrd, invisible, pour ne pas casser les comptes). **DA violette sur la partie jeu** : fond Ecaflip repeint par hue-rotate, cartes violettes bordées or, bouton SPIN violet, vignette hub remplacée (capture Mathieu; celle du slot reste à refaire). Dernière dérive REN : `recompenses_config.jetons_reward` (027, balayage exhaustif des 80 colonnes = plus aucune manquante). **Interrupteur jetons** (028) : site_config + fonction `ajouter_jetons` recréée (manquait sur Damoclès !) avec verrou serveur, case dans Admin > Modules > Économie, l'existant jamais supprimé. **Builds communautaires** (029) : tout membre validé propose un build depuis la page (form + screenshot compressé), auteur affiché, suppression auteur/admin, XSS des cartes corrigé
 
+- 27/07/2026 : **grosse session d'itérations avec les premiers membres actifs** (16 inscrits, combats réels vs La Boucle [BCL] et OUTSIDERS). Invités hors site dans les combats (030). Winrate = combats équilibrés uniquement (031, dashboard + membres + profil, tiret neutre si aucun combat équilibré). formatKamas exact (1,6 M). Cartes membres redessinées (lisibilité, tuiles stats, chips mules, halo déco). Changelog Damoclès importé + popup version 2026-07-27 (anciennes entrées REN retirées). Balises Open Graph partout + image og-damocles.png générée (aperçu Discord, attention cache Discord par URL). Liens CSS/JS versionnés `?v=` (anti-cache navigateur, bump à chaque déploiement de style/script). Bannière accueil : artwork violet fourni par Mathieu (1376x397, `goultar_damocles.jpg`), affiché net à taille native centré, côtés en dégradé violet lumineux + aura (l'écho flouté de l'image rendait noir, abandonné). Essai blason animé dans l'espace gauche + image à droite : **reverté** (commit 4bbc51d puis revert d712240), à retravailler plus tard. Reset des combats/screens de test effectué à distance
+
 ## Prochaines étapes
 - [ ] Ajouter **BCL** (et les autres alliances adverses) dans Admin > Alliances
 - [ ] Poster l'annonce Discord + MP de démarchage des PvPistes (textes prêts, session du 22/07)
 - [ ] Dupliquer le serveur Discord Renegats via modèle de serveur
 - [ ] Valider les membres au fil des inscriptions (Admin > Validation)
 - [ ] Logo définitif Damoclès (placeholder épée SVG violette en attendant)
-- [ ] Rafraîchir les prix des runes si le marché a bougé depuis le 11/06
+- [ ] Rafraîchir les prix des runes si le marché a bougé depuis le 11/06 (Admin > Runes & prix, screens HDV)
+- [ ] Retravailler la bannière d'accueil (espace violet de gauche : blason ? titre + devise ?)
+- [ ] Re-capturer la vignette slot (capture_ecran_enutrosors.jpg) avec le bouton SPIN violet
+- [ ] Autoriser le connecteur Artlist (claude.ai > connecteurs) pour sonoriser la vidéo du logo
 
 ## Notes
 - Projet communautaire, même modèle que REN (gratuit)
