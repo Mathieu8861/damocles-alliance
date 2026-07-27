@@ -616,12 +616,25 @@ table {
     background-color: var(--color-bg-primary);
 }
 
+/* Fond : écho flouté de l'artwork pour combler les côtés         */
+/* (l'image native fait 1376px, la zone peut être plus large)     */
+.dashboard-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('assets/images/goultar_damocles.jpg') center / cover no-repeat;
+    filter: blur(24px) brightness(0.5) saturate(1.15);
+    transform: scale(1.15);
+}
+
+/* L'artwork ne dépasse JAMAIS sa taille native : netteté maximale */
 .dashboard-banner img {
-    width: 100%;
+    position: relative;
+    z-index: 1;
     display: block;
-    /* Ratio du bandeau source : l'image s'affiche toujours entière, sans rognage */
-    aspect-ratio: 1376 / 397;
-    object-fit: cover;
+    width: min(100%, 1376px);
+    height: auto;
+    margin: 0 auto;
 }
 
 .dashboard-banner__overlay {
