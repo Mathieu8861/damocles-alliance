@@ -3352,23 +3352,53 @@ table {
 /* === AUTH PAGE === */
 .auth-page {
     display: flex;
-    align-items: center;
+    /* Carte en barre horizontale en bas au centre : le personnage reste degage */
+    align-items: flex-end;
     justify-content: center;
     min-height: 100vh;
     padding: var(--spacing-xl);
-    background-image: url('assets/images/image_page_de_connexion.webp');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    padding-bottom: clamp(var(--spacing-lg), 6vh, 64px);
+    background-color: #1b1440;
     position: relative;
+    overflow: hidden;
 }
 
+/* Fond video : boucle aller-retour Goultard (fond-connexion.mp4) */
+.auth-page .auth-page__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+
+/* Blason seul en haut a gauche (selecteur double : prime sur .auth-page > *) */
+.auth-page .auth-page__logo {
+    position: absolute;
+    top: clamp(20px, 4vh, 44px);
+    left: clamp(20px, 3.5vw, 64px);
+    width: clamp(96px, 8vw, 150px);
+    height: auto;
+    /* Assombri + profondeur : ombre de contact + ombre portee + halo violet */
+    filter:
+        brightness(0.82)
+        drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55))
+        drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5))
+        drop-shadow(0 28px 54px rgba(70, 40, 170, 0.5));
+}
+
+/* Voile : sombre en bas derriere la carte, transparent sur le personnage */
 .auth-page::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.55);
-    z-index: 0;
+    background: linear-gradient(to top,
+        rgba(10, 8, 24, 0.82) 0%,
+        rgba(10, 8, 24, 0.45) 22%,
+        rgba(10, 8, 24, 0) 48%);
+    z-index: 1;
 }
 
 .auth-page > * {
@@ -3378,11 +3408,89 @@ table {
 
 .auth-card {
     width: 100%;
-    max-width: 520px;
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
+    max-width: 620px;
+    position: relative;
+    overflow: hidden;
+    /* Verre glace : degrade violet vers noir + blur (fallback opaque sans blur) */
+    background: linear-gradient(135deg,
+        rgba(84, 52, 189, 0.42) 0%,
+        rgba(34, 24, 66, 0.78) 48%,
+        rgba(12, 10, 24, 0.88) 100%);
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+    backdrop-filter: blur(16px) saturate(1.25);
+    border: 1px solid rgba(140, 110, 255, 0.32);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-lg);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 10px 30px rgba(72, 40, 170, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Reflet glace en haut de la carte */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+        rgba(255, 255, 255, 0.09) 0%,
+        rgba(255, 255, 255, 0.02) 28%,
+        transparent 45%);
+    pointer-events: none;
+}
+
+/* Champs assortis au verre */
+.auth-card .form-input,
+.auth-card .form-select {
+    background-color: rgba(10, 8, 22, 0.55);
+    border-color: rgba(140, 110, 255, 0.28);
+}
+
+.auth-card .form-input:focus,
+.auth-card .form-select:focus {
+    border-color: rgba(150, 120, 255, 0.7);
+    box-shadow: 0 0 0 3px rgba(125, 95, 247, 0.22);
+}
+
+/* Bouton degrade violet + ombre teintee */
+.auth-card .btn--primary {
+    background: linear-gradient(135deg, #8d68ff 0%, #6a3ff0 55%, #5b32d6 100%);
+    box-shadow: 0 12px 28px rgba(109, 70, 245, 0.45);
+}
+
+.auth-card .btn--primary:hover {
+    background: linear-gradient(135deg, #9a79ff 0%, #7950f5 55%, #6a3ff0 100%);
+    box-shadow: 0 14px 32px rgba(109, 70, 245, 0.55);
+}
+
+/* Connexion en barre : champs empiles a gauche, gros bouton a droite */
+#login-form {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    grid-template-areas:
+        "msg msg"
+        "pseudo btn"
+        "mdp btn";
+    column-gap: var(--spacing-md);
+    row-gap: 12px;
+}
+
+#login-form #login-message { grid-area: msg; }
+#login-form .form-group:has(#login-username) { grid-area: pseudo; }
+#login-form .form-group:has(#login-password) { grid-area: mdp; }
+#login-form .form-group { margin-bottom: 0; }
+#login-form .form-label { display: none; }
+
+#login-form .btn--primary {
+    grid-area: btn;
+    height: 100%;
+    margin-top: 0;
+}
+
+@media (max-width: 640px) {
+    #login-form { display: block; }
+    #login-form .form-group { margin-bottom: var(--spacing-md); }
+    #login-form .btn--primary { height: auto; margin-top: var(--spacing-sm); }
 }
 
 /* Form row : 2 champs cote a cote */
@@ -3392,27 +3500,6 @@ table {
     gap: var(--spacing-md);
 }
 
-.auth-card__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
-}
-
-.auth-card__logo {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    object-fit: contain;
-}
-
-.auth-card__title {
-    font-family: var(--font-title);
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
 
 .auth-card .form-group {
     margin-bottom: var(--spacing-md);
@@ -3425,10 +3512,14 @@ table {
 }
 
 .auth-toggle {
-    text-align: center;
-    margin-top: var(--spacing-lg);
+    text-align: right;
+    margin-top: var(--spacing-md);
     font-size: 0.8125rem;
     color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+    .auth-toggle { text-align: center; }
 }
 
 .auth-toggle a {
@@ -8335,17 +8426,6 @@ body.app-has-sidebar {
     --footer-height: 0px;
 }
 
-/* Blason anime sur la carte de connexion */
-.auth-card__video {
-    display: block;
-    width: 148px;
-    aspect-ratio: 1;
-    object-fit: cover;
-    margin: 0 auto;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-}
 
 /* === BUILDS COMMUNAUTAIRES === */
 .build-submit {
