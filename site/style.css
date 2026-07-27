@@ -619,9 +619,9 @@ table {
 .dashboard-banner img {
     width: 100%;
     display: block;
-    max-height: 320px;
+    /* Ratio du bandeau source : l'image s'affiche toujours entière, sans rognage */
+    aspect-ratio: 1376 / 397;
     object-fit: cover;
-    object-position: center 32%;
 }
 
 .dashboard-banner__overlay {
