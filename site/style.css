@@ -652,6 +652,10 @@ table {
     align-items: flex-start;
     justify-content: flex-end;
     padding: var(--spacing-md) var(--spacing-lg);
+    /* Largeur = bande violette à gauche de l'artwork (le blason s'y centre) */
+    /* Fallback quand l'artwork couvre tout : largeur du contenu (titre)    */
+    width: calc((100% - min(100%, 1376px)) / 2);
+    min-width: fit-content;
 }
 
 /* Blason classique centré dans l'espace violet au-dessus du titre */
