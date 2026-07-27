@@ -630,14 +630,36 @@ table {
     transform: none;
 }
 
-/* L'artwork ne dépasse JAMAIS sa taille native : netteté maximale */
+/* L'artwork ne dépasse JAMAIS sa taille native : nettete maximale.  */
+/* Colle a droite : tout l'espace restant vit a gauche.              */
 .dashboard-banner img {
     position: relative;
     z-index: 1;
     display: block;
     width: min(100%, 1376px);
     height: auto;
-    margin: 0 auto;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* Blason anime au centre de l'espace violet de gauche */
+.dashboard-banner__blason {
+    position: absolute;
+    z-index: 1;
+    top: 42%;
+    left: calc((100% - 1376px) / 2);
+    transform: translate(-50%, -50%);
+    width: 170px;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Pas assez de place pour l'espace violet : on masque le blason */
+ (max-width: 1849px) {
+    .dashboard-banner__blason { display: none; }
 }
 
 .dashboard-banner__overlay {
