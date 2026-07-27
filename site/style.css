@@ -8502,13 +8502,35 @@ body.app-has-sidebar {
 }
 
 /* ================================================================== */
-/* VERRE GLACE VIOLET : blocs du dashboard (valide le 27/07)          */
-/* Classes doublees : prime sur les raccourcis var() des regles de base */
+/* VERRE GLACE VIOLET : tous les blocs/panneaux du site (28/07)       */
+/* Classes doublees : les raccourcis background/border avec var()     */
+/* des regles de base gagnent sinon (quirk de cascade)                */
 /* ================================================================== */
 .stat-card.stat-card,
 .dashboard-rank.dashboard-rank,
 .changelog__entry.changelog__entry,
-.activity.activity {
+.activity.activity,
+.combat-form.combat-form,
+.history-card.history-card,
+.admin-panel.admin-panel,
+.board-bareme__item.board-bareme__item,
+.board-table-wrap.board-table-wrap,
+.boutique-card.boutique-card,
+.boutique-kamas.boutique-kamas,
+.boutique-solde.boutique-solde,
+.build-card.build-card,
+.build-submit.build-submit,
+.fm-session-card.fm-session-card,
+.fm-modal__card.fm-modal__card,
+.game-info--prominent.game-info--prominent,
+.game-section--ranking.game-section--ranking,
+.link-card.link-card,
+.mule-card.mule-card,
+.profil-card.profil-card,
+.recyc-card.recyc-card,
+.recyc-filters.recyc-filters,
+.recyc-kpi.recyc-kpi,
+.recyc-table-wrap.recyc-table-wrap {
     background: linear-gradient(135deg,
         rgba(84, 52, 189, 0.26) 0%,
         rgba(34, 24, 66, 0.5) 48%,
@@ -8517,7 +8539,8 @@ body.app-has-sidebar {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* La tuile Kamas garde son accent dore par-dessus le verre */
-.stat-card--accent.stat-card--accent {
-    border-color: rgba(212, 175, 55, 0.3);
-}
+/* Accents semantiques re-affirmes par-dessus le verre */
+.stat-card--accent.stat-card--accent { border-color: rgba(212, 175, 55, 0.3); }
+.combat-form--attaque.combat-form--attaque { border-top-color: var(--color-accent); }
+.combat-form--defense.combat-form--defense { border-top-color: #3498db; }
+.fm-session-card--ongoing.fm-session-card--ongoing { border-color: rgba(243, 156, 18, 0.45); }
