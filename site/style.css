@@ -622,10 +622,12 @@ table {
     content: '';
     position: absolute;
     inset: 0;
-    /* Zoom sur le coeur violet de l'artwork (les bords sources sont trop sombres) */
-    background: url('assets/images/goultar_damocles.jpg') center 30% / 240% auto no-repeat;
-    filter: blur(28px) brightness(0.8) saturate(1.4);
-    transform: scale(1.15);
+    /* Cotes : degrade violet lumineux + aura derriere l'artwork */
+    background:
+        radial-gradient(ellipse at center 25%, rgba(157, 133, 255, 0.5), transparent 65%),
+        linear-gradient(160deg, #5643c0 0%, #37288c 50%, #221a56 100%);
+    filter: none;
+    transform: none;
 }
 
 /* L'artwork ne dépasse JAMAIS sa taille native : netteté maximale */
