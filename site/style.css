@@ -622,8 +622,9 @@ table {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('assets/images/goultar_damocles.jpg') center / cover no-repeat;
-    filter: blur(24px) brightness(0.5) saturate(1.15);
+    /* Zoom sur le coeur violet de l'artwork (les bords sources sont trop sombres) */
+    background: url('assets/images/goultar_damocles.jpg') center 30% / 240% auto no-repeat;
+    filter: blur(28px) brightness(0.8) saturate(1.4);
     transform: scale(1.15);
 }
 
