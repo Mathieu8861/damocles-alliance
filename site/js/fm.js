@@ -1698,6 +1698,7 @@
         var modal = document.getElementById('fm-session-modal');
         var content = document.getElementById('fm-modal-content');
         if (!modal || !content) return;
+        bindModal(); /* l'onglet Alliance peut ouvrir la modale sans etre passe par Mes sessions */
 
         modalSession = sessionsCache.find(function (s) { return s.id === sessionId; })
             || alliSessions.find(function (s) { return s.id === sessionId; });
