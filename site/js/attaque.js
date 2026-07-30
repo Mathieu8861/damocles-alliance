@@ -111,15 +111,15 @@
         var esc = window.REN.escapeHtml;
 
         /* Construire la liste des options (profils + mules) */
+        /* Ses propres mules restent selectionnables (multi-compte), seul son perso principal est exclu (deja compte) */
         var options = [];
         allProfiles.forEach(function (p) {
-            if (p.id !== window.REN.currentProfile.id) {
-                options.push({ id: p.id, label: p.username, isMule: false });
-                if (p.mules && p.mules.length > 0) {
-                    p.mules.forEach(function (mule) {
-                        options.push({ id: p.id, label: '\u21B3 ' + mule, isMule: true });
-                    });
-                }
+            var isSelf = p.id === window.REN.currentProfile.id;
+            if (!isSelf) options.push({ id: p.id, label: p.username, isMule: false });
+            if (p.mules && p.mules.length > 0) {
+                p.mules.forEach(function (mule) {
+                    options.push({ id: p.id, label: '\u21B3 ' + mule, isMule: true });
+                });
             }
         });
 
@@ -332,13 +332,22 @@
 
                 if (combatRes.error) throw combatRes.error;
 
-                /* Inserer les participants */
-                var participants = selectedAllies.map(function (uid) {
+                /* Inserer les participants : un joueur present avec ses mules ne compte qu'UNE fois */
+                /* (l'id d'une mule est celui de son proprietaire ; sans dedoublonnage, l'insert */
+                /* entier echouait sur UNIQUE(combat_id, user_id) et personne n'avait ses points) */
+                var uniqueIds = selectedAllies.filter(function (uid, i) {
+                    return selectedAllies.indexOf(uid) === i;
+                });
+                var participants = uniqueIds.map(function (uid) {
                     return { combat_id: combatRes.data.id, user_id: uid };
                 });
 
                 if (participants.length > 0) {
-                    await window.REN.supabase.from('combat_participants').insert(participants);
+                    var partRes = await window.REN.supabase.from('combat_participants').insert(participants);
+                    if (partRes.error) {
+                        console.error('[REN] Participants non enregistres:', partRes.error);
+                        window.REN.toast('Combat enregistré mais participants non comptés, préviens un admin.', 'error');
+                    }
                 }
 
                 /* Distribution des jetons (désactivable dans Admin > Modules > Économie) */
@@ -349,8 +358,8 @@
                 } catch (e) { /* table absente : jetons actifs par défaut */ }
 
                 if (points > 0 && jetonsActifs) {
-                    for (var pi = 0; pi < selectedAllies.length; pi++) {
-                        await window.REN.supabase.rpc('ajouter_jetons', { p_user_id: selectedAllies[pi], p_points: points });
+                    for (var pi = 0; pi < uniqueIds.length; pi++) {
+                        await window.REN.supabase.rpc('ajouter_jetons', { p_user_id: uniqueIds[pi], p_points: points });
                     }
                     window.REN.currentProfile.jetons = (window.REN.currentProfile.jetons || 0) + points;
                 }
