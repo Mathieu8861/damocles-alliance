@@ -563,6 +563,13 @@ CREATE POLICY "combats_admin_delete" ON public.combats
     FOR DELETE TO authenticated
     USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
+-- Un admin peut modifier (032)
+DROP POLICY IF EXISTS "combats_admin_update" ON public.combats;
+CREATE POLICY "combats_admin_update" ON public.combats
+    FOR UPDATE TO authenticated
+    USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+
 -- === COMBAT_PARTICIPANTS ===
 ALTER TABLE public.combat_participants ENABLE ROW LEVEL SECURITY;
 

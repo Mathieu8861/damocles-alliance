@@ -121,6 +121,7 @@
             html += '<div class="history-card">';
             if (isAdmin) {
                 html += '<button class="history-card__delete" data-id="' + c.id + '" title="Supprimer ce combat">&times;</button>';
+                html += '<button class="history-card__edit" data-id="' + c.id + '" title="Modifier ce combat">&#9998;</button>';
             }
             html += '<div class="history-card__header">' + badgeType + ' ' + badgeResult + '</div>';
             html += '<div class="history-card__body">';
@@ -155,12 +156,17 @@
 
         grid.innerHTML = html;
 
-        /* Admin : listeners suppression */
+        /* Admin : listeners suppression + modification */
         if (isAdmin) {
             grid.querySelectorAll('.history-card__delete').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var combatId = parseInt(btn.dataset.id);
                     deleteCombat(combatId);
+                });
+            });
+            grid.querySelectorAll('.history-card__edit').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    openEditModal(parseInt(btn.dataset.id));
                 });
             });
         }
@@ -182,6 +188,123 @@
         } catch (err) {
             console.error('[REN] Erreur suppression combat:', err);
             window.REN.toast('Erreur : ' + err.message, 'error');
+        }
+    }
+
+    /* === MODIFICATION COMBAT (admin) === */
+    var editingCombat = null;
+
+    function ensureEditModal() {
+        if (document.getElementById('history-edit-modal')) return;
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'history-edit-modal';
+        overlay.innerHTML =
+            '<div class="modal" style="max-width:520px;">'
+            + '<div class="modal__header">'
+            +   '<h2 class="modal__title">Modifier le combat</h2>'
+            +   '<button class="modal__close" id="history-edit-close">&times;</button>'
+            + '</div>'
+            + '<div class="form-row">'
+            +   '<div class="form-group"><label class="form-label">Type</label>'
+            +     '<select id="edit-combat-type" class="form-select"><option value="attaque">Attaque</option><option value="defense">Défense</option></select></div>'
+            +   '<div class="form-group"><label class="form-label">Résultat</label>'
+            +     '<select id="edit-combat-resultat" class="form-select"><option value="victoire">Victoire</option><option value="defaite">Défaite</option></select></div>'
+            + '</div>'
+            + '<div class="form-row">'
+            +   '<div class="form-group"><label class="form-label">Alliés</label><select id="edit-combat-allies" class="form-select"></select></div>'
+            +   '<div class="form-group"><label class="form-label">Ennemis</label><select id="edit-combat-ennemis" class="form-select"></select></div>'
+            + '</div>'
+            + '<div class="form-row">'
+            +   '<div class="form-group"><label class="form-label">Butin (kamas)</label><input type="number" id="edit-combat-butin" class="form-input" min="0" step="1"></div>'
+            +   '<div class="form-group"><label class="form-label">Zone / commentaire</label><input type="text" id="edit-combat-commentaire" class="form-input" maxlength="120"></div>'
+            + '</div>'
+            + '<p class="text-muted" style="font-size:0.78rem;margin:4px 0 14px;">Les points sont recalculés automatiquement selon le barème (butin remis à 0 en cas de défaite).</p>'
+            + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+            +   '<button class="btn btn--secondary" id="history-edit-cancel">Annuler</button>'
+            +   '<button class="btn btn--primary" id="history-edit-save">Enregistrer</button>'
+            + '</div>'
+            + '</div>';
+        document.body.appendChild(overlay);
+
+        for (var n = 1; n <= 5; n++) {
+            document.getElementById('edit-combat-allies').add(new Option(n, n));
+            document.getElementById('edit-combat-ennemis').add(new Option(n, n));
+        }
+
+        document.getElementById('history-edit-close').addEventListener('click', closeEditModal);
+        document.getElementById('history-edit-cancel').addEventListener('click', closeEditModal);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeEditModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeEditModal(); });
+        document.getElementById('history-edit-save').addEventListener('click', saveEditCombat);
+    }
+
+    function openEditModal(combatId) {
+        editingCombat = allCombats.find(function (c) { return c.id === combatId; });
+        if (!editingCombat) return;
+        ensureEditModal();
+        document.getElementById('edit-combat-type').value = editingCombat.type;
+        document.getElementById('edit-combat-resultat').value = editingCombat.resultat;
+        document.getElementById('edit-combat-allies').value = editingCombat.nb_allies;
+        document.getElementById('edit-combat-ennemis').value = editingCombat.nb_ennemis;
+        document.getElementById('edit-combat-butin').value = editingCombat.butin_kamas || 0;
+        document.getElementById('edit-combat-commentaire').value = editingCombat.commentaire || '';
+        document.getElementById('history-edit-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        var overlay = document.getElementById('history-edit-modal');
+        if (overlay) overlay.classList.remove('active');
+        editingCombat = null;
+    }
+
+    async function saveEditCombat() {
+        if (!editingCombat) return;
+        var btn = document.getElementById('history-edit-save');
+        var type = document.getElementById('edit-combat-type').value;
+        var resultat = document.getElementById('edit-combat-resultat').value;
+        var nbAllies = parseInt(document.getElementById('edit-combat-allies').value, 10);
+        var nbEnnemis = parseInt(document.getElementById('edit-combat-ennemis').value, 10);
+        var butin = resultat === 'defaite' ? 0 : (parseInt(document.getElementById('edit-combat-butin').value, 10) || 0);
+        var commentaire = document.getElementById('edit-combat-commentaire').value.trim() || null;
+
+        btn.disabled = true;
+        btn.textContent = 'Enregistrement...';
+        try {
+            /* Recalcul des points selon le bareme (meme RPC que la declaration) */
+            var pointsRes = await window.REN.supabase.rpc('calculer_points', {
+                p_nb_allies: nbAllies,
+                p_nb_ennemis: nbEnnemis,
+                p_resultat: resultat,
+                p_alliance_id: editingCombat.alliance_ennemie_id || null,
+                p_type: type
+            });
+            if (pointsRes.error) throw pointsRes.error;
+            var points = pointsRes.data || 0;
+
+            var upd = await window.REN.supabase.from('combats').update({
+                type: type,
+                resultat: resultat,
+                nb_allies: nbAllies,
+                nb_ennemis: nbEnnemis,
+                butin_kamas: butin,
+                commentaire: commentaire,
+                points_gagnes: points
+            }).eq('id', editingCombat.id).select().single();
+            if (upd.error) throw upd.error;
+
+            /* Maj locale (on garde les jointures auteur/alliance/participants) puis re-render */
+            var idx = allCombats.findIndex(function (c) { return c.id === editingCombat.id; });
+            if (idx !== -1) allCombats[idx] = Object.assign({}, allCombats[idx], upd.data);
+            closeEditModal();
+            renderCombats();
+            window.REN.toast('Combat modifié (' + (points > 0 ? '+' : '') + points + ' pts recalculés).', 'success');
+        } catch (err) {
+            console.error('[REN] Erreur modification combat:', err);
+            window.REN.toast('Erreur : ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Enregistrer';
         }
     }
 })();

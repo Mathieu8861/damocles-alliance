@@ -1748,6 +1748,35 @@ table {
     color: var(--color-danger);
 }
 
+/* Bouton modifier (admin), a gauche de la croix */
+.history-card__edit {
+    position: absolute;
+    top: 8px;
+    right: 36px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    opacity: 0;
+}
+
+.history-card:hover .history-card__edit {
+    opacity: 1;
+}
+
+.history-card__edit:hover {
+    background: rgba(125, 95, 247, 0.18);
+    color: var(--color-accent-light);
+}
+
 .history-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
