@@ -86,6 +86,8 @@
 
 - 31/07/2026 : **modification d'un combat par les admins** depuis l'Historique (demande Mathieu, exemple : défense déclarée à la place d'une attaque). Bouton crayon à côté de la croix de suppression (déjà existante), modale d'édition (type, résultat, effectifs, butin, zone/commentaire), **points recalculés via calculer_points** avec la nouvelle configuration, butin remis à 0 si défaite. Migration `sql/032-combats-admin-update.sql` (policy UPDATE admin sur combats, intégrée au 000) **à runner dans le SQL Editor**. Combat n°48 (Madazezette 31/07 13:56, déclaré défense victoire 5v5 +4 pts par erreur) corrigé à distance en attaque victoire 5v5 +3 pts. CSS et historique.js versionnés 20260731
 
+- 31/07/2026 : **winrate retiré des vues membres** (demande Mathieu : le winrate public dissuadait de déclarer les défaites, "trop d'ego"). Retiré des cartes membres (grille passée à 3 tuiles ATK/DEF/Points) et du profil perso (lignes Winrate global/attaque/défense supprimées, les compteurs V/D restent). **Nouvel onglet Admin > Winrate** (groupe PVP & Points) : tableau interne par membre (ATK V/D, WR ATK, DEF V/D, WR DEF, total, WR global), combats équilibrés uniquement, trié par volume. Le winrate d'alliance du dashboard (collectif, pas individuel) est conservé volontairement. JS membres/profil/admin versionnés 20260731, CSS 20260731b
+
 ## Prochaines étapes
 - [ ] Ajouter **BCL** (et les autres alliances adverses) dans Admin > Alliances
 - [ ] Poster l'annonce Discord + MP de démarchage des PvPistes (textes prêts, session du 22/07)
