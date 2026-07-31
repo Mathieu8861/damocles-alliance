@@ -387,14 +387,7 @@
             var totalCombats = totalAtk + totalDef;
             var totalVictoires = winAtk + winDef;
             var totalDefaites = totalCombats - totalVictoires;
-            /* Winrate : combats équilibrés uniquement (1v1, 2v2...), fallback sur les totaux si la migration 031 n'est pas passée */
-            var eqAtk = myStats.eq_attaques != null ? (myStats.eq_attaques || 0) : totalAtk;
-            var eqWinAtk = myStats.eq_attaques != null ? (myStats.eq_victoires_attaque || 0) : winAtk;
-            var eqDef = myStats.eq_attaques != null ? (myStats.eq_defenses || 0) : totalDef;
-            var eqWinDef = myStats.eq_attaques != null ? (myStats.eq_victoires_defense || 0) : winDef;
-            var winrateGlobal = (eqAtk + eqDef) > 0 ? Math.round((eqWinAtk + eqWinDef) / (eqAtk + eqDef) * 100) : 0;
-            var winrateAtk = eqAtk > 0 ? Math.round(eqWinAtk / eqAtk * 100) : 0;
-            var winrateDef = eqDef > 0 ? Math.round(eqWinDef / eqDef * 100) : 0;
+            /* Winrate retiré de la vue membres (suivi en Admin > Winrate uniquement) */
 
             var totalPts = myStats.total_points || 0;
             var tier = window.REN.getTierFromPoints(totalPts);
@@ -426,7 +419,6 @@
             html += buildStatItem('Total', totalCombats);
             html += buildStatItem('Victoires', totalVictoires, 'success');
             html += buildStatItem('Defaites', totalDefaites, 'danger');
-            html += buildStatItem('Winrate', winrateGlobal + '%', winrateGlobal >= 50 ? 'success' : 'danger');
             html += '</div>';
             html += '</div>';
 
@@ -436,7 +428,6 @@
             html += buildStatItem('Combats', totalAtk);
             html += buildStatItem('Victoires', winAtk, 'success');
             html += buildStatItem('Defaites', totalAtk - winAtk, 'danger');
-            html += buildStatItem('Winrate', winrateAtk + '%', winrateAtk >= 50 ? 'success' : 'danger');
             html += '</div>';
             html += '</div>';
 
@@ -446,7 +437,6 @@
             html += buildStatItem('Combats', totalDef);
             html += buildStatItem('Victoires', winDef, 'success');
             html += buildStatItem('Defaites', totalDef - winDef, 'danger');
-            html += buildStatItem('Winrate', winrateDef + '%', winrateDef >= 50 ? 'success' : 'danger');
             html += '</div>';
             html += '</div>';
 

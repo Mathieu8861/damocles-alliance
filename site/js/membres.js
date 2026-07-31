@@ -60,18 +60,7 @@
         var esc = window.REN.escapeHtml;
         var html = '';
         filtered.forEach(function (m) {
-            var totalCombats = (m.total_attaques || 0) + (m.total_defenses || 0);
-            var totalVictoires = (m.victoires_attaque || 0) + (m.victoires_defense || 0);
-            /* Winrate : combats équilibrés uniquement (1v1, 2v2...), fallback sur les totaux si la migration 031 n'est pas passée */
-            var eqCombats = m.eq_attaques != null ? (m.eq_attaques || 0) + (m.eq_defenses || 0) : totalCombats;
-            var eqVictoires = m.eq_attaques != null ? (m.eq_victoires_attaque || 0) + (m.eq_victoires_defense || 0) : totalVictoires;
-            var winrate = eqCombats > 0 ? Math.round(eqVictoires / eqCombats * 100) : 0;
-
             var tier = window.REN.getTierFromPoints(m.total_points);
-            /* Aucun combat équilibré : tiret neutre plutôt qu'un 0% rouge */
-            var wrClass = eqCombats === 0 ? ' member-card__stat-value--neutral'
-                : (winrate >= 50 ? ' member-card__stat-value--success' : ' member-card__stat-value--danger');
-            var wrDisplay = eqCombats === 0 ? '&mdash;' : winrate + '%';
 
             html += '<div class="member-card">';
 
@@ -93,11 +82,10 @@
                     + '</div>';
             }
 
-            /* Stats 4 colonnes */
+            /* Stats 3 colonnes (winrate retiré de la vue membres : suivi en admin uniquement) */
             html += '<div class="member-card__stats">';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">ATK</span><span class="member-card__stat-value">' + (m.total_attaques || 0) + '</span></div>';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">DEF</span><span class="member-card__stat-value">' + (m.total_defenses || 0) + '</span></div>';
-            html += '<div class="member-card__stat"><span class="member-card__stat-label">Winrate</span><span class="member-card__stat-value' + wrClass + '">' + wrDisplay + '</span></div>';
             html += '<div class="member-card__stat"><span class="member-card__stat-label">Points</span><span class="member-card__stat-value member-card__stat-value--accent">' + (m.total_points || 0) + '</span></div>';
             html += '</div>';
 

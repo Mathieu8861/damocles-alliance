@@ -81,6 +81,7 @@
                 case 'alliances': await tabAlliances(content); break;
                 case 'modules': await tabModules(content); break;
                 case 'bareme': await tabBareme(content); break;
+                case 'winrate': await tabWinrate(content); break;
                 case 'builds': await tabBuilds(content); break;
                 case 'jeu-config': await tabJeuConfig(content); break;
                 case 'jeu-lots': await tabJeuLots(content); break;
@@ -158,6 +159,54 @@
     }
 
     /* === TAB: UTILISATEURS === */
+    /* === TAB WINRATE (suivi interne : retiré des vues membres pour ne pas dissuader de déclarer les défaites) === */
+    async function tabWinrate(container) {
+        var { data: stats, error } = await window.REN.supabase.rpc('get_member_stats');
+        if (error) {
+            container.innerHTML = '<p class="text-danger">Erreur : ' + window.REN.escapeHtml(error.message) + '</p>';
+            return;
+        }
+
+        var esc = window.REN.escapeHtml;
+        var rows = (stats || []).map(function (m) {
+            var eqAtk = m.eq_attaques || 0, eqWinAtk = m.eq_victoires_attaque || 0;
+            var eqDef = m.eq_defenses || 0, eqWinDef = m.eq_victoires_defense || 0;
+            var tot = eqAtk + eqDef, wins = eqWinAtk + eqWinDef;
+            return {
+                username: m.username,
+                atk: eqAtk, atkV: eqWinAtk, atkD: eqAtk - eqWinAtk,
+                def: eqDef, defV: eqWinDef, defD: eqDef - eqWinDef,
+                tot: tot,
+                wrAtk: eqAtk > 0 ? Math.round(eqWinAtk / eqAtk * 100) : null,
+                wrDef: eqDef > 0 ? Math.round(eqWinDef / eqDef * 100) : null,
+                wrGlobal: tot > 0 ? Math.round(wins / tot * 100) : null
+            };
+        }).sort(function (a, b) { return b.tot - a.tot || a.username.localeCompare(b.username); });
+
+        function wrCell(wr) {
+            if (wr === null) return '<td class="text-muted">&mdash;</td>';
+            return '<td class="' + (wr >= 50 ? 'text-success' : 'text-danger') + '">' + wr + '%</td>';
+        }
+
+        var html = '<div class="admin-panel__title">Suivi Winrate (interne)</div>';
+        html += '<p class="text-muted" style="font-size:0.8rem;margin-bottom:var(--spacing-md);">Combats équilibrés uniquement (1v1, 2v2... 5v5). Ce tableau est invisible pour les membres : le winrate a été retiré des cartes membres et des profils.</p>';
+        html += '<div class="table-wrapper"><table class="table">';
+        html += '<thead><tr><th>Membre</th><th>ATK (V/D)</th><th>WR ATK</th><th>DEF (V/D)</th><th>WR DEF</th><th>Total</th><th>WR global</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+            html += '<tr>';
+            html += '<td class="notranslate">' + esc(r.username) + '</td>';
+            html += '<td>' + r.atk + ' (<span class="text-success">' + r.atkV + '</span>/<span class="text-danger">' + r.atkD + '</span>)</td>';
+            html += wrCell(r.wrAtk);
+            html += '<td>' + r.def + ' (<span class="text-success">' + r.defV + '</span>/<span class="text-danger">' + r.defD + '</span>)</td>';
+            html += wrCell(r.wrDef);
+            html += '<td>' + r.tot + '</td>';
+            html += wrCell(r.wrGlobal);
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
     async function tabUtilisateurs(container) {
         var { data: users } = await window.REN.supabase
             .from('profiles').select('*').order('username');
