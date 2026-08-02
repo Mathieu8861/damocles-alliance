@@ -166,6 +166,8 @@
         container.innerHTML = html;
     }
 
+    var autoSwitched = false;
+
     /* === CHARGER LE BOARD === */
     async function loadBoard(selection) {
         var tableWrap = document.getElementById('board-table-wrap');
@@ -179,6 +181,13 @@
 
         if (selection === 'last') {
             players = await loadLastWeek();
+            /* Quinzaine passée vide (ex: premiere periode apres le lancement) : bascule sur la quinzaine en cours */
+            if (!players.length && !autoSwitched) {
+                autoSwitched = true;
+                var weekSel = document.getElementById('board-week-select');
+                if (weekSel) weekSel.value = 'current';
+                return loadBoard('current');
+            }
             /* Dates de la quinzaine passée (points) et de la quinzaine en cours (droits) */
             var debut = debutPeriodePvp();
             var lastStart = addDays(debut, -14);
