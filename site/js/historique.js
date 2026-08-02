@@ -119,9 +119,14 @@
             }
 
             html += '<div class="history-card">';
+            /* Edition : admin sans limite ; l'auteur pendant 3h apres la declaration */
+            var me = window.REN.currentProfile;
+            var canEdit = isAdmin || (me && c.auteur_id === me.id && (Date.now() - new Date(c.created_at).getTime()) < 3 * 3600 * 1000);
             if (isAdmin) {
                 html += '<button class="history-card__delete" data-id="' + c.id + '" title="Supprimer ce combat">&times;</button>';
-                html += '<button class="history-card__edit" data-id="' + c.id + '" title="Modifier ce combat">&#9998;</button>';
+            }
+            if (canEdit) {
+                html += '<button class="history-card__edit" data-id="' + c.id + '"' + (isAdmin ? '' : ' style="right:8px;"') + ' title="Modifier ce combat">&#9998;</button>';
             }
             html += '<div class="history-card__header">' + badgeType + ' ' + badgeResult + '</div>';
             html += '<div class="history-card__body">';
@@ -156,7 +161,7 @@
 
         grid.innerHTML = html;
 
-        /* Admin : listeners suppression + modification */
+        /* Listeners : suppression (admin) + modification (admin ou auteur < 3h) */
         if (isAdmin) {
             grid.querySelectorAll('.history-card__delete').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -164,12 +169,12 @@
                     deleteCombat(combatId);
                 });
             });
-            grid.querySelectorAll('.history-card__edit').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    openEditModal(parseInt(btn.dataset.id));
-                });
-            });
         }
+        grid.querySelectorAll('.history-card__edit').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                openEditModal(parseInt(btn.dataset.id));
+            });
+        });
     }
 
     /* === SUPPRESSION COMBAT (admin) === */

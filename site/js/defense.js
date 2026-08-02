@@ -13,6 +13,7 @@
     var resultat = null;
     var allProfiles = [];
     var allAlliances = [];
+    var allianceCombatCounts = {};
 
     document.addEventListener('ren:ready', init);
 
@@ -35,12 +36,17 @@
 
     async function loadData() {
         try {
-            var [profilesRes, alliancesRes] = await Promise.all([
+            var [profilesRes, alliancesRes, combatsRes] = await Promise.all([
                 window.REN.supabase.from('profiles').select('id, username, mules').eq('is_validated', true).order('username'),
-                window.REN.supabase.from('alliances').select('*').order('nom')
+                window.REN.supabase.from('alliances').select('*').order('nom'),
+                window.REN.supabase.from('combats').select('alliance_ennemie_id').not('alliance_ennemie_id', 'is', null)
             ]);
             allProfiles = profilesRes.data || [];
             allAlliances = alliancesRes.data || [];
+            allianceCombatCounts = {};
+            (combatsRes.data || []).forEach(function (c) {
+                allianceCombatCounts[c.alliance_ennemie_id] = (allianceCombatCounts[c.alliance_ennemie_id] || 0) + 1;
+            });
         } catch (err) {
             console.error('[REN] Erreur chargement donnees:', err);
         }
@@ -194,7 +200,11 @@
         var select = document.getElementById('select-alliance');
         var customInput = document.getElementById('input-alliance-custom');
         if (!select) return;
-        allAlliances.forEach(function (a) {
+        /* Alliances triees par frequence de combat : la plus affrontee en premier */
+        var sortedAlliances = allAlliances.slice().sort(function (a, b) {
+            return (allianceCombatCounts[b.id] || 0) - (allianceCombatCounts[a.id] || 0) || a.nom.localeCompare(b.nom);
+        });
+        sortedAlliances.forEach(function (a) {
             var opt = document.createElement('option');
             opt.value = a.id;
             opt.textContent = a.nom + (a.tag ? ' [' + a.tag + ']' : '');
@@ -204,6 +214,10 @@
         optAutre.value = 'autre';
         optAutre.textContent = 'Autre / Pas d\'alliance';
         select.appendChild(optAutre);
+        /* Pre-selection de l'alliance la plus affrontee */
+        if (sortedAlliances.length && (allianceCombatCounts[sortedAlliances[0].id] || 0) > 0) {
+            select.value = String(sortedAlliances[0].id);
+        }
         select.addEventListener('change', function () {
             if (customInput) customInput.style.display = select.value === 'autre' ? '' : 'none';
         });
