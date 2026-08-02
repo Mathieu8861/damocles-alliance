@@ -68,7 +68,7 @@
     async function loadSemaine(container) {
         var { data, error } = await window.REN.supabase.from('classement_pvp_semaine').select('*');
         if (error) throw error;
-        renderRanking(container, data || [], 'points', 'pts', 'Classement PvP - Semaine');
+        renderRanking(container, data || [], 'points', 'pts', 'Classement PvP - Quinzaine');
     }
 
     /* === PVP DEFINITIF === */

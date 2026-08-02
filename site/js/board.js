@@ -179,34 +179,20 @@
 
         if (selection === 'last') {
             players = await loadLastWeek();
-            /* Calculer les dates de la semaine passée */
-            var now = new Date();
-            var day = now.getDay();
-            var diffToMonday = (day === 0 ? -6 : 1) - day;
-            var thisMonday = new Date(now);
-            thisMonday.setDate(now.getDate() + diffToMonday);
-            var lastMonday = new Date(thisMonday);
-            lastMonday.setDate(thisMonday.getDate() - 7);
-            var lastSunday = new Date(thisMonday);
-            lastSunday.setDate(thisMonday.getDate() - 1);
-            var thisSunday = new Date(thisMonday);
-            thisSunday.setDate(thisMonday.getDate() + 6);
-            periodText = 'Points du ' + formatDate(lastMonday) + ' au ' + formatDate(lastSunday) + ' — Droits du ' + formatDate(thisMonday) + ' au ' + formatDate(thisSunday);
+            /* Dates de la quinzaine passée (points) et de la quinzaine en cours (droits) */
+            var debut = debutPeriodePvp();
+            var lastStart = addDays(debut, -14);
+            var lastEnd = addDays(debut, -1);
+            var curEnd = addDays(debut, 13);
+            periodText = 'Points du ' + formatDate(lastStart) + ' au ' + formatDate(lastEnd) + ' — Droits du ' + formatDate(debut) + ' au ' + formatDate(curEnd);
         } else if (selection === 'current') {
             players = await loadCurrentWeek();
-            /* Calculer les dates de la semaine en cours */
-            var now = new Date();
-            var day = now.getDay();
-            var diffToMonday = (day === 0 ? -6 : 1) - day;
-            var monday = new Date(now);
-            monday.setDate(now.getDate() + diffToMonday);
-            var sunday = new Date(monday);
-            sunday.setDate(monday.getDate() + 6);
-            var nextMonday = new Date(sunday);
-            nextMonday.setDate(sunday.getDate() + 1);
-            var nextSunday = new Date(nextMonday);
-            nextSunday.setDate(nextMonday.getDate() + 6);
-            periodText = 'Points du ' + formatDate(monday) + ' au ' + formatDate(sunday) + ' — Droits du ' + formatDate(nextMonday) + ' au ' + formatDate(nextSunday);
+            /* Dates de la quinzaine en cours (points) et de la suivante (droits) */
+            var debutCur = debutPeriodePvp();
+            var curFin = addDays(debutCur, 13);
+            var nextStart = addDays(debutCur, 14);
+            var nextEnd = addDays(debutCur, 27);
+            periodText = 'Points du ' + formatDate(debutCur) + ' au ' + formatDate(curFin) + ' — Droits du ' + formatDate(nextStart) + ' au ' + formatDate(nextEnd);
         } else {
             var sem = semaines.find(function (s) { return s.id === parseInt(selection); });
             players = await loadArchivedWeek(parseInt(selection));
@@ -224,7 +210,24 @@
         renderTable(players, tableWrap);
     }
 
-    /* === SEMAINE PASSÉE === */
+    /* === QUINZAINE : debut de la periode PvP en cours === */
+    /* Ancre : lundi 27/07/2026, periodes de 14 jours (miroir de debut_periode_pvp() en SQL) */
+    function debutPeriodePvp() {
+        var anchor = new Date(2026, 6, 27);
+        anchor.setHours(0, 0, 0, 0);
+        var days = Math.floor((Date.now() - anchor.getTime()) / 86400000);
+        var start = new Date(anchor.getTime());
+        start.setDate(anchor.getDate() + Math.floor(days / 14) * 14);
+        return start;
+    }
+
+    function addDays(d, n) {
+        var r = new Date(d.getTime());
+        r.setDate(r.getDate() + n);
+        return r;
+    }
+
+    /* === PÉRIODE PASSÉE === */
     async function loadLastWeek() {
         try {
             var [pvpRes, pepitesRes] = await Promise.all([
