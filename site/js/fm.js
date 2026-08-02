@@ -1772,7 +1772,7 @@
 
         /* Screen de fin */
         if (s.screenshot_apres_url) {
-            html += '<a href="' + esc(s.screenshot_apres_url) + '" target="_blank" rel="noopener" class="fm-modal__screen" title="Ouvrir en grand">'
+            html += '<a href="' + esc(s.screenshot_apres_url) + '" target="_blank" rel="noopener" class="fm-modal__screen js-lightbox" title="Ouvrir en grand">'
                 + '<img src="' + esc(s.screenshot_apres_url) + '" alt="Item final">'
                 + '</a>';
         }

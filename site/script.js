@@ -262,6 +262,54 @@
         return '';
     };
 
+    /* === LIGHTBOX PARTAGEE (screenshots de preuve, item FM...) === */
+    /* Reutilise les styles .build-lightbox. Les liens marques a.js-lightbox */
+    /* s'ouvrent sur place ; le clic molette garde l'ouverture en onglet.   */
+    window.REN.openLightbox = function (src, alt) {
+        var safeSrc = window.REN.sanitizeUrl(src);
+        if (!safeSrc) return;
+
+        var existing = document.getElementById('build-lightbox');
+        if (existing) existing.remove();
+
+        var div = document.createElement('div');
+        div.id = 'build-lightbox';
+        div.className = 'build-lightbox';
+        div.innerHTML = '<div class="build-lightbox__inner">'
+            + '<button class="build-lightbox__close" type="button" aria-label="Fermer">'
+                + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+            + '</button>'
+            + '<img src="' + window.REN.escapeHtml(safeSrc) + '" alt="' + window.REN.escapeHtml(alt || '') + '">'
+            + '</div>';
+        document.body.appendChild(div);
+        document.body.style.overflow = 'hidden';
+
+        function close() {
+            div.classList.remove('build-lightbox--visible');
+            document.body.style.overflow = '';
+            setTimeout(function () { if (div.parentNode) div.remove(); }, 200);
+            document.removeEventListener('keydown', onEsc);
+        }
+        function onEsc(e) { if (e.key === 'Escape') close(); }
+
+        div.addEventListener('click', function (e) {
+            if (e.target === div || e.target.closest('.build-lightbox__close')) close();
+        });
+        document.addEventListener('keydown', onEsc);
+
+        requestAnimationFrame(function () {
+            div.classList.add('build-lightbox--visible');
+        });
+    };
+
+    /* Delegation globale : tout lien a.js-lightbox ouvre la visionneuse */
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest ? e.target.closest('a.js-lightbox') : null;
+        if (!link) return;
+        e.preventDefault();
+        window.REN.openLightbox(link.getAttribute('href'), link.getAttribute('title') || '');
+    });
+
     /* === FORMAT HELPERS === */
     window.REN.formatKamas = function (value) {
         if (!value || value === 0) return '0 K';

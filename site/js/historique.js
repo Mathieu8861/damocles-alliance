@@ -143,7 +143,7 @@
                 [c.preuve_url_1, c.preuve_url_2].forEach(function (u, idx) {
                     if (!u) return;
                     var su = window.REN.sanitizeUrl ? window.REN.sanitizeUrl(u) : u;
-                    html += '<a class="history-card__preuve-thumb" href="' + esc(su) + '" target="_blank" rel="noopener" title="Screenshot ' + (idx + 1) + '">'
+                    html += '<a class="history-card__preuve-thumb js-lightbox" href="' + esc(su) + '" target="_blank" rel="noopener" title="Screenshot ' + (idx + 1) + '">'
                         + '<img src="' + esc(su) + '" alt="Screenshot ' + (idx + 1) + '" loading="lazy">'
                         + '</a>';
                 });

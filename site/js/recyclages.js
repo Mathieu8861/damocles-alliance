@@ -845,7 +845,7 @@
                 : '';
 
             var preuveBadge = r.preuve_url
-                ? '<a class="recyc-history__preuve" href="' + window.REN.escapeHtml(r.preuve_url) + '" target="_blank" rel="noopener" title="Voir la preuve">'
+                ? '<a class="recyc-history__preuve js-lightbox" href="' + window.REN.escapeHtml(r.preuve_url) + '" target="_blank" rel="noopener" title="Voir la preuve">'
                     + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
                     + 'Vérifié'
                   + '</a>'

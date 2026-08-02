@@ -242,7 +242,7 @@
                 [c.preuve_url_1, c.preuve_url_2].forEach(function (u, idx) {
                     if (!u) return;
                     var su = window.REN.sanitizeUrl ? window.REN.sanitizeUrl(u) : u;
-                    preuvesStr += ' <a class="activity__preuve" href="' + su + '" target="_blank" rel="noopener" title="Voir le screenshot ' + (idx + 1) + '">&#128247;' + (idx + 1) + '</a>';
+                    preuvesStr += ' <a class="activity__preuve js-lightbox" href="' + su + '" target="_blank" rel="noopener" title="Voir le screenshot ' + (idx + 1) + '">&#128247;' + (idx + 1) + '</a>';
                 });
 
                 html += '<div class="activity__item">';
