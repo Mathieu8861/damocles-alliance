@@ -8,6 +8,7 @@
     var currentFilter = 'tous';
     var searchAlliance = '';
     var searchZone = '';
+    var searchJoueur = '';
     var allCombats = [];
 
     document.addEventListener('ren:ready', init);
@@ -45,6 +46,13 @@
         if (zoneInput) {
             zoneInput.addEventListener('input', function () {
                 searchZone = zoneInput.value.trim().toLowerCase();
+                renderCombats();
+            });
+        }
+        var joueurInput = document.getElementById('history-search-joueur');
+        if (joueurInput) {
+            joueurInput.addEventListener('input', function () {
+                searchJoueur = joueurInput.value.trim().toLowerCase();
                 renderCombats();
             });
         }
@@ -92,6 +100,19 @@
             if (searchZone) {
                 var comment = (c.commentaire || '').toLowerCase();
                 if (comment.indexOf(searchZone) === -1) return false;
+            }
+            /* Filtre joueur (auteur, participants ou invites hors site) */
+            if (searchJoueur) {
+                var noms = [];
+                if (c.auteur && c.auteur.username) noms.push(c.auteur.username);
+                (c.participants || []).forEach(function (p) {
+                    if (p.user && p.user.username) noms.push(p.user.username);
+                });
+                (c.invites || []).forEach(function (n) { if (n) noms.push(n); });
+                var joueurTrouve = noms.some(function (n) {
+                    return n.toLowerCase().indexOf(searchJoueur) !== -1;
+                });
+                if (!joueurTrouve) return false;
             }
             return true;
         });

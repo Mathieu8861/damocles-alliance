@@ -25,6 +25,7 @@
         setupResultButtons();
         setupSubmit();
         renderAlliesList();
+        offerLastTeam();
         /* Autocomplete zones+donjons sur le champ "Zone" */
         var zoneInput = document.getElementById('input-commentaire');
         if (zoneInput && window.REN.attachZoneAutocomplete) {
@@ -268,6 +269,90 @@
         }
     }
 
+    /* === "MEME EQUIPE QU'AVANT ?" === */
+    /* Les joueurs enchainent souvent plusieurs combats avec la meme equipe : */
+    /* apres chaque combat enregistre, l'equipe est memorisee en localStorage */
+    /* puis reproposee via un bandeau (rien d'automatique, un clic pour reprendre) */
+    var LASTTEAM_KEY = 'dmo_last_team';
+    var LASTTEAM_TTL = 12 * 60 * 60 * 1000; /* 12h : au-dela, la session de jeu est finie */
+
+    function saveLastTeam() {
+        try {
+            var rows = [];
+            document.querySelectorAll('#allies-list .ally-autocomplete').forEach(function (wrap) {
+                var id = wrap.querySelector('.ally-value').value;
+                var invite = wrap.querySelector('.ally-invite').value;
+                var label = wrap.querySelector('.ally-search').value;
+                if (id || invite) rows.push({ id: id || null, invite: invite || null, label: label });
+            });
+            localStorage.setItem(LASTTEAM_KEY, JSON.stringify({
+                userId: window.REN.currentProfile.id,
+                ts: Date.now(),
+                nbAllies: nbAllies,
+                rows: rows
+            }));
+        } catch (e) { /* localStorage indisponible : pas bloquant */ }
+    }
+
+    function offerLastTeam() {
+        var saved = null;
+        try { saved = JSON.parse(localStorage.getItem(LASTTEAM_KEY) || 'null'); } catch (e) { return; }
+        if (!saved || saved.userId !== window.REN.currentProfile.id) return;
+        if (!saved.ts || Date.now() - saved.ts > LASTTEAM_TTL) return;
+        if (!saved.rows || !saved.rows.length) return;
+
+        /* On ne garde que les joueurs toujours inscrits (les invites passent toujours) */
+        var validIds = {};
+        allProfiles.forEach(function (p) { validIds[p.id] = true; });
+        var rows = saved.rows.filter(function (r) { return r.invite || validIds[r.id]; });
+        if (!rows.length) return;
+
+        var esc = window.REN.escapeHtml;
+        var names = rows.map(function (r) {
+            return esc((r.label || r.invite || '').replace('↳ ', ''));
+        }).join(', ');
+
+        var form = document.getElementById('combat-form');
+        if (!form) return;
+        var banner = document.createElement('div');
+        banner.className = 'lastteam-banner';
+        banner.innerHTML =
+            '<div class="lastteam-banner__text">Même équipe que ton dernier combat ?' +
+            '<span class="lastteam-banner__names">' + esc(window.REN.currentProfile.username) + ', ' + names + '</span></div>' +
+            '<div class="lastteam-banner__actions">' +
+            '<button type="button" class="lastteam-banner__btn" id="lastteam-apply">Reprendre l\'équipe</button>' +
+            '<button type="button" class="lastteam-banner__close" id="lastteam-close" title="Ignorer">&times;</button>' +
+            '</div>';
+        form.insertBefore(banner, form.firstChild);
+
+        banner.querySelector('#lastteam-close').addEventListener('click', function () {
+            banner.remove();
+        });
+
+        banner.querySelector('#lastteam-apply').addEventListener('click', function () {
+            /* Effectif allie : celui du dernier combat, au minimum de quoi loger l'equipe */
+            var count = Math.min(Math.max(rows.length + 1, saved.nbAllies || 1), 5);
+            document.querySelectorAll('#count-allies .count-btn').forEach(function (b) {
+                b.classList.toggle('active', parseInt(b.getAttribute('data-value')) === count);
+            });
+            nbAllies = count;
+            renderAlliesList();
+
+            var wraps = document.querySelectorAll('#allies-list .ally-autocomplete');
+            rows.forEach(function (r, i) {
+                var wrap = wraps[i];
+                if (!wrap) return;
+                wrap.querySelector('.ally-search').value = r.label || r.invite || '';
+                wrap.querySelector('.ally-value').value = r.id || '';
+                wrap.querySelector('.ally-invite').value = r.invite || '';
+                wrap.classList.toggle('ally-autocomplete--invite', !!r.invite);
+            });
+            updateSelectedAllies();
+            banner.remove();
+            window.REN.toast('Équipe reprise ! Vérifie le reste du formulaire.', 'success');
+        });
+    }
+
     /* === SUBMIT === */
     function setupSubmit() {
         var btn = document.getElementById('btn-submit-combat');
@@ -346,6 +431,9 @@
                 }).select().single();
 
                 if (combatRes.error) throw combatRes.error;
+
+                /* Memoriser l'equipe pour la reproposer au prochain combat */
+                saveLastTeam();
 
                 /* Inserer les participants : un joueur present avec ses mules ne compte qu'UNE fois */
                 /* (l'id d'une mule est celui de son proprietaire ; sans dedoublonnage, l'insert */
