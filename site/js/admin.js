@@ -18,6 +18,28 @@
         setupTabs();
         setupLogout();
         loadTab(currentTab);
+        updateValidationBadge();
+    }
+
+    /* Badge rouge sur l'onglet Validation : inscriptions en attente */
+    async function updateValidationBadge() {
+        try {
+            var res = await window.REN.supabase
+                .from('profiles')
+                .select('id', { count: 'exact', head: true })
+                .eq('is_validated', false);
+            var n = res.count || 0;
+            var btn = document.querySelector('.admin-sidebar__btn[data-tab="validation"]');
+            if (!btn) return;
+            var old = btn.querySelector('.notif-badge--inline');
+            if (old) old.remove();
+            if (n > 0) {
+                var b = document.createElement('span');
+                b.className = 'notif-badge notif-badge--inline';
+                b.textContent = n > 9 ? '9+' : n;
+                btn.appendChild(b);
+            }
+        } catch (e) { /* silencieux */ }
     }
 
     function setupLogout() {
@@ -44,6 +66,7 @@
             btn.classList.add('active');
             currentTab = btn.getAttribute('data-tab');
             loadTab(currentTab);
+            updateValidationBadge();
 
             /* Fermer sidebar sur mobile */
             if (window.innerWidth <= 768) {
@@ -1278,100 +1301,86 @@
 
     /* === TAB: BARÈME PERCO (config récompenses) === */
     async function tabBaremePerco(content) {
-        var { data: config } = await window.REN.supabase
-            .from('recompenses_config')
-            .select('*')
-            .order('ordre');
+        var [paliersRes, toursRes] = await Promise.all([
+            window.REN.supabase.from('paliers_percos').select('*').order('rang_min'),
+            window.REN.supabase.from('site_config').select('valeur').eq('cle', 'perco_resa_tours').maybeSingle()
+        ]);
+        var paliers = paliersRes.data || [];
+        var tours = toursRes.data ? (parseInt(toursRes.data.valeur, 10) || 1) : 1;
+        var esc = window.REN.escapeHtml;
 
-        var rows = config || [];
+        var html = '<div class="admin-panel__title">Droits Percos par rang</div>';
+        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Paliers selon la position au classement de la quinzaine écoulée. « Percos » = poses classiques, « Percos 150- » = poses en zones de niveau 150 maximum.</p>';
 
-        var html = '<div class="admin-panel__title">Barème Percepteurs & Récompenses</div>';
-        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Définir les paliers de récompenses en fonction des points hebdomadaires</p>';
-
-        html += '<table class="admin-table" style="width:100%;"><thead><tr>';
-        html += '<th style="text-align:center;">Palier</th><th style="text-align:center;">Emoji</th><th style="text-align:center;">Pts min</th><th style="text-align:center;">Pts max</th><th style="text-align:center;">Percos</th><th style="text-align:center;">Pépites</th><th style="text-align:center;">Jetons</th><th style="text-align:center;">Actions</th>';
-        html += '</tr></thead><tbody>';
-
-        rows.forEach(function (r) {
-            html += '<tr data-id="' + r.id + '">';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:90px;text-align:center;" value="' + r.label + '" data-field="label"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:45px;text-align:center;" value="' + (r.emoji || '') + '" data-field="emoji"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:65px;text-align:center;" type="number" value="' + r.seuil_min + '" data-field="seuil_min"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:65px;text-align:center;" type="number" value="' + (r.seuil_max !== null ? r.seuil_max : '') + '" placeholder="∞" data-field="seuil_max"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:65px;text-align:center;" type="number" value="' + r.percepteurs_bonus + '" data-field="percepteurs_bonus"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:70px;text-align:center;" type="number" value="' + r.pepites + '" data-field="pepites"></td>';
-            html += '<td style="text-align:center;"><input class="form-input" style="width:65px;text-align:center;" type="number" value="' + (r.jetons_reward || 0) + '" data-field="jetons_reward"></td>';
-            html += '<td style="text-align:center;"><button class="btn btn--danger btn--small btn-delete-tier" data-id="' + r.id + '">✕</button></td>';
+        html += '<div class="table-wrapper"><table class="table">';
+        html += '<thead><tr><th>Emoji</th><th>Rang min</th><th>Rang max</th><th>Percos</th><th>Percos 150-</th><th>Actions</th></tr></thead><tbody>';
+        paliers.forEach(function (p) {
+            html += '<tr data-id="' + p.id + '">';
+            html += '<td><input class="form-input" style="width:70px;" data-field="emoji" value="' + esc(p.emoji || '') + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:80px;" data-field="rang_min" min="1" value="' + p.rang_min + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:80px;" data-field="rang_max" min="1" value="' + p.rang_max + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:80px;" data-field="percos" min="0" value="' + p.percos + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:80px;" data-field="percos_150" min="0" value="' + p.percos_150 + '"></td>';
+            html += '<td><button class="btn btn--secondary btn--small" data-action="save-palier">Enregistrer</button> ';
+            html += '<button class="btn btn--danger btn--small" data-action="del-palier">Suppr.</button></td>';
             html += '</tr>';
         });
+        html += '</tbody></table></div>';
 
-        html += '</tbody></table>';
+        html += '<button class="btn btn--primary btn--small" id="btn-add-palier" style="margin-top:var(--spacing-md);">+ Ajouter un palier</button>';
 
-        html += '<div style="display:flex;gap:var(--spacing-sm);margin-top:var(--spacing-md);">';
-        html += '<button class="btn btn--primary" id="btn-save-bareme">Sauvegarder</button>';
-        html += '<button class="btn btn--secondary" id="btn-add-tier">+ Ajouter un palier</button>';
-        html += '</div>';
+        html += '<div class="admin-panel__title" style="margin-top:var(--spacing-2xl);">Attribution des zones</div>';
+        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-md);">Réservations par joueur : <strong>' + tours + '</strong> tour(s) (site_config.perco_resa_tours). L\'attribution se calcule automatiquement au passage de quinzaine ; le recalcul écrase celle de la période courante avec les préférences actuelles.</p>';
+        html += '<button class="btn btn--secondary" id="btn-recalc-attribution">Recalculer l\'attribution de la période</button>';
+        html += '<span id="recalc-result" class="text-muted" style="margin-left:var(--spacing-md);font-size:0.8125rem;"></span>';
 
         content.innerHTML = html;
 
-        /* Save */
-        document.getElementById('btn-save-bareme').addEventListener('click', async function () {
-            var tableRows = content.querySelectorAll('tbody tr');
-            var updates = [];
-
-            tableRows.forEach(function (tr) {
-                var id = parseInt(tr.getAttribute('data-id'));
-                if (!id) return;
-                var inputs = tr.querySelectorAll('input');
-                var label = inputs[0].value.trim();
-                var emoji = inputs[1].value.trim();
-                var seuil_min = parseInt(inputs[2].value) || 0;
-                var seuil_max = inputs[3].value.trim() === '' ? null : parseInt(inputs[3].value);
-                var percepteurs_bonus = parseInt(inputs[4].value) || 0;
-                var pepites = parseInt(inputs[5].value) || 0;
-                var jetons_reward = parseInt(inputs[6].value) || 0;
-
-                updates.push(
-                    window.REN.supabase.from('recompenses_config').update({
-                        label: label, emoji: emoji, seuil_min: seuil_min, seuil_max: seuil_max,
-                        percepteurs_bonus: percepteurs_bonus, pepites: pepites, jetons_reward: jetons_reward
-                    }).eq('id', id)
-                );
+        content.querySelectorAll('[data-action="save-palier"]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                var tr = btn.closest('tr');
+                var payload = {};
+                tr.querySelectorAll('input[data-field]').forEach(function (inp) {
+                    payload[inp.dataset.field] = inp.dataset.field === 'emoji' ? inp.value : (parseInt(inp.value, 10) || 0);
+                });
+                var { error } = await window.REN.supabase.from('paliers_percos').update(payload).eq('id', parseInt(tr.dataset.id, 10));
+                if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+                window.REN.toast('Palier enregistré.', 'success');
             });
-
-            await Promise.all(updates);
-            window.REN.toast('Barème sauvegardé !', 'success');
         });
 
-        /* Add tier */
-        document.getElementById('btn-add-tier').addEventListener('click', async function () {
-            var maxOrdre = rows.length ? Math.max.apply(null, rows.map(function (r) { return r.ordre; })) : 0;
-            var { error } = await window.REN.supabase.from('recompenses_config').insert({
-                label: 'Nouveau', emoji: '🏅', seuil_min: 0, seuil_max: null,
-                percepteurs_bonus: 0, pepites: 0, jetons_reward: 0, ordre: maxOrdre + 1
-            });
-            if (error) {
-                console.error('[REN-ADMIN] Erreur ajout palier:', error);
-                window.REN.toast('Erreur : ' + error.message, 'error');
-                return;
-            }
-            window.REN.toast('Palier ajouté !', 'success');
-            loadTab('bareme-perco');
-        });
-
-        /* Delete tier */
-        content.querySelectorAll('.btn-delete-tier').forEach(function (btn) {
+        content.querySelectorAll('[data-action="del-palier"]').forEach(function (btn) {
             btn.addEventListener('click', async function () {
                 if (!confirm('Supprimer ce palier ?')) return;
-                await window.REN.supabase.from('recompenses_config').delete().eq('id', parseInt(btn.getAttribute('data-id')));
-                loadTab('bareme-perco');
+                var tr = btn.closest('tr');
+                var { error } = await window.REN.supabase.from('paliers_percos').delete().eq('id', parseInt(tr.dataset.id, 10));
+                if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+                window.REN.toast('Palier supprimé.', 'success');
+                tabBaremePerco(content);
             });
+        });
+
+        var addBtn = document.getElementById('btn-add-palier');
+        if (addBtn) addBtn.addEventListener('click', async function () {
+            var maxRang = paliers.length ? Math.max.apply(null, paliers.map(function (p) { return p.rang_max; })) : 0;
+            var { error } = await window.REN.supabase.from('paliers_percos').insert({ rang_min: maxRang + 1, rang_max: maxRang + 10, percos: 0, percos_150: 0, emoji: '' });
+            if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+            tabBaremePerco(content);
+        });
+
+        var recalcBtn = document.getElementById('btn-recalc-attribution');
+        if (recalcBtn) recalcBtn.addEventListener('click', async function () {
+            if (!confirm('Recalculer l\'attribution de la période courante ? Les réservations actuelles seront remplacées.')) return;
+            recalcBtn.disabled = true;
+            var { data, error } = await window.REN.supabase.rpc('attribuer_percos_periode', { p_force: true });
+            recalcBtn.disabled = false;
+            var out = document.getElementById('recalc-result');
+            if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+            if (out && data) out.textContent = (data.message || '') + ' (' + (data.nouvelles || 0) + ' réservation(s), source : ' + (data.source || '?') + ')';
+            window.REN.toast('Attribution recalculée.', 'success');
         });
     }
 
-    /* ============================================ */
-    /* ONGLET BOUTIQUE (gestion catalogue + achats) */
-    /* ============================================ */
     async function tabBoutique(container) {
         var results = await Promise.all([
             window.REN.supabase.from('boutique_items').select('*').order('created_at', { ascending: false }),

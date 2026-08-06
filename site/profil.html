@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260731b">
+    <link rel="stylesheet" href="style.css?v=20260805">
 </head>
 <body>
 
@@ -122,7 +122,38 @@
                     <p class="text-muted" style="font-size: 0.8125rem; margin-bottom: var(--spacing-md);">Vos personnages secondaires. Ils apparaitront dans les recherches et les formulaires de combat.</p>
                     <div class="profil-mule-add">
                         <input type="text" id="profil-mule-input" class="form-input" placeholder="Nom de la mule..." maxlength="30">
+                        <select id="profil-mule-classe" class="form-select">
+                            <option value="">Classe...</option>
+                            <option value="Cra">Cra</option>
+                            <option value="Ecaflip">Ecaflip</option>
+                            <option value="Eliotrope">Eliotrope</option>
+                            <option value="Eniripsa">Eniripsa</option>
+                            <option value="Enutrof">Enutrof</option>
+                            <option value="Feca">Feca</option>
+                            <option value="Forge">Forge</option>
+                            <option value="Huppermage">Huppermage</option>
+                            <option value="Iop">Iop</option>
+                            <option value="Osamodas">Osamodas</option>
+                            <option value="Ouginak">Ouginak</option>
+                            <option value="Pandawa">Pandawa</option>
+                            <option value="Roublard">Roublard</option>
+                            <option value="Sacrieur">Sacrieur</option>
+                            <option value="Sadida">Sadida</option>
+                            <option value="Sram">Sram</option>
+                            <option value="Steamer">Steamer</option>
+                            <option value="Xelor">Xelor</option>
+                            <option value="Zobal">Zobal</option>
+                        </select>
                         <button type="button" class="btn btn--primary" id="profil-mule-add-btn">Ajouter</button>
+                    </div>
+                    <div class="mule-elements mule-elements--add" id="profil-mule-add-elements">
+                        <button type="button" class="elem-chip" data-elem="Terre">Terre</button>
+                        <button type="button" class="elem-chip" data-elem="Feu">Feu</button>
+                        <button type="button" class="elem-chip" data-elem="Eau">Eau</button>
+                        <button type="button" class="elem-chip" data-elem="Air">Air</button>
+                        <button type="button" class="elem-chip" data-elem="Multi">Multi</button>
+                        <button type="button" class="elem-chip" data-elem="Do Pou">Do Pou</button>
+                        <button type="button" class="elem-chip" data-elem="Do Cri">Do Cri</button>
                     </div>
                     <div class="profil-mules-list" id="profil-mules-list">
                         <!-- Rempli par JS -->
@@ -197,7 +228,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js?v=20260803b"></script>
-    <script src="js/profil.js?v=20260731"></script>
+    <script src="script.js?v=20260805"></script>
+    <script src="js/profil.js?v=20260805"></script>
 </body>
 </html>

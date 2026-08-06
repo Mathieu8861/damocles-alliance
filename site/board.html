@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260731b">
+    <link rel="stylesheet" href="style.css?v=20260805">
 </head>
 <body>
 
@@ -59,21 +59,43 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     Zones BDA
                 </button>
-                <select class="form-select board-week-select" id="board-week-select">
-                    <option value="last">Quinzaine passée (droits actuels)</option>
-                    <option value="current">Quinzaine en cours (droits prochains)</option>
-                </select>
             </div>
         </div>
 
-        <!-- Barème : légende des paliers -->
-        <div class="board-bareme" id="board-bareme">
-            <div class="loading"><div class="spinner"></div> Chargement...</div>
+        <!-- Onglets -->
+        <div class="tabs" id="board-tabs">
+            <button class="tabs__btn active" data-tab="droits">Droits &amp; réservations</button>
+            <button class="tabs__btn" data-tab="preferences">Mes préférences</button>
         </div>
 
-        <!-- Tableau des droits -->
-        <div class="board-table-wrap" id="board-table-wrap">
-            <div class="loading"><div class="spinner"></div> Chargement...</div>
+        <!-- Onglet 1 : barème + tableau des droits -->
+        <div id="board-tab-droits">
+            <div class="board-bareme" id="board-bareme">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+
+            <div class="board-table-wrap" id="board-table-wrap">
+                <div class="loading"><div class="spinner"></div> Chargement...</div>
+            </div>
+        </div>
+
+        <!-- Onglet 2 : mes préférences de zones -->
+        <div id="board-tab-preferences" hidden>
+            <div class="board-prefs" id="board-prefs">
+                <div class="board-prefs__header">
+                    <h2 class="board-prefs__title">Mes préférences de zones</h2>
+                    <p class="text-muted board-prefs__hint">Classe tes zones par ordre de préférence. Au reset de la quinzaine, chacun reçoit automatiquement, dans l'ordre du classement, sa zone la mieux placée encore libre.</p>
+                </div>
+                <div id="board-prefs-list"></div>
+                <div class="board-prefs__add">
+                    <input type="text" id="board-prefs-filter" class="form-input" placeholder="Filtrer les zones...">
+                    <select id="board-prefs-select" class="form-select"></select>
+                    <button type="button" class="btn btn--secondary" id="board-prefs-add">Ajouter</button>
+                </div>
+                <div class="board-prefs__footer">
+                    <button type="button" class="btn btn--primary" id="board-prefs-save" hidden>Enregistrer mes préférences</button>
+                </div>
+            </div>
         </div>
 
         <!-- Modal Zones BDA -->
@@ -93,7 +115,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js?v=20260803b"></script>
-    <script src="js/board.js?v=20260803"></script>
+    <script src="script.js?v=20260805"></script>
+    <script src="js/board.js?v=20260805"></script>
 </body>
 </html>

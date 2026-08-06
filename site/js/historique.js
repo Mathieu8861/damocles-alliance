@@ -54,7 +54,7 @@
         try {
             var { data, error } = await window.REN.supabase
                 .from('combats')
-                .select('*, auteur:profiles!auteur_id(username), alliance:alliances(nom, tag), participants:combat_participants(user:profiles(username))')
+                .select('*, auteur:profiles!auteur_id(username), alliance:alliances(nom, tag), participants:combat_participants(user:profiles(id, username))')
                 .order('created_at', { ascending: false })
                 .limit(100);
 
@@ -196,8 +196,21 @@
         }
     }
 
-    /* === MODIFICATION COMBAT (admin) === */
+    /* === MODIFICATION COMBAT (admin ou auteur < 3h) === */
     var editingCombat = null;
+    var editingParticipants = [];
+    var editAlliances = null;
+    var editProfiles = null;
+
+    async function ensureEditData() {
+        if (editAlliances && editProfiles) return;
+        var results = await Promise.all([
+            window.REN.supabase.from('alliances').select('id, nom, tag').order('nom'),
+            window.REN.supabase.from('profiles').select('id, username').eq('is_validated', true).order('username')
+        ]);
+        editAlliances = results[0].data || [];
+        editProfiles = results[1].data || [];
+    }
 
     function ensureEditModal() {
         if (document.getElementById('history-edit-modal')) return;
@@ -205,26 +218,43 @@
         overlay.className = 'modal-overlay';
         overlay.id = 'history-edit-modal';
         overlay.innerHTML =
-            '<div class="modal" style="max-width:520px;">'
+            '<div class="modal" style="max-width:560px;">'
             + '<div class="modal__header">'
             +   '<h2 class="modal__title">Modifier le combat</h2>'
             +   '<button class="modal__close" id="history-edit-close">&times;</button>'
             + '</div>'
             + '<div class="form-row">'
             +   '<div class="form-group"><label class="form-label">Type</label>'
-            +     '<select id="edit-combat-type" class="form-select"><option value="attaque">Attaque</option><option value="defense">Défense</option></select></div>'
-            +   '<div class="form-group"><label class="form-label">Résultat</label>'
-            +     '<select id="edit-combat-resultat" class="form-select"><option value="victoire">Victoire</option><option value="defaite">Défaite</option></select></div>'
+            +     '<select id="edit-combat-type" class="form-select"><option value="attaque">Attaque</option><option value="defense">D\u00e9fense</option></select></div>'
+            +   '<div class="form-group"><label class="form-label">R\u00e9sultat</label>'
+            +     '<select id="edit-combat-resultat" class="form-select"><option value="victoire">Victoire</option><option value="defaite">D\u00e9faite</option></select></div>'
             + '</div>'
             + '<div class="form-row">'
-            +   '<div class="form-group"><label class="form-label">Alliés</label><select id="edit-combat-allies" class="form-select"></select></div>'
+            +   '<div class="form-group"><label class="form-label">Alli\u00e9s</label><select id="edit-combat-allies" class="form-select"></select></div>'
             +   '<div class="form-group"><label class="form-label">Ennemis</label><select id="edit-combat-ennemis" class="form-select"></select></div>'
             + '</div>'
             + '<div class="form-row">'
+            +   '<div class="form-group"><label class="form-label">Alliance ennemie</label><select id="edit-combat-alliance" class="form-select"></select></div>'
             +   '<div class="form-group"><label class="form-label">Butin (kamas)</label><input type="number" id="edit-combat-butin" class="form-input" min="0" step="1"></div>'
-            +   '<div class="form-group"><label class="form-label">Zone / commentaire</label><input type="text" id="edit-combat-commentaire" class="form-input" maxlength="120"></div>'
             + '</div>'
-            + '<p class="text-muted" style="font-size:0.78rem;margin:4px 0 14px;">Les points sont recalculés automatiquement selon le barème (butin remis à 0 en cas de défaite).</p>'
+            + '<div class="form-group" id="edit-combat-alliance-custom-wrap" hidden>'
+            +   '<label class="form-label">Nom de l\'alliance (libre)</label>'
+            +   '<input type="text" id="edit-combat-alliance-custom" class="form-input" maxlength="60" placeholder="Nom de l\'alliance...">'
+            + '</div>'
+            + '<div class="form-group"><label class="form-label">Zone / commentaire</label><input type="text" id="edit-combat-commentaire" class="form-input" maxlength="120"></div>'
+            + '<div class="form-group">'
+            +   '<label class="form-label">Participants</label>'
+            +   '<div class="edit-participants" id="edit-combat-participants"></div>'
+            +   '<div class="edit-participants__add">'
+            +     '<select id="edit-combat-participant-select" class="form-select"></select>'
+            +     '<button type="button" class="btn btn--secondary btn--small" id="edit-combat-participant-add">Ajouter</button>'
+            +   '</div>'
+            + '</div>'
+            + '<div class="form-group">'
+            +   '<label class="form-label">Invit\u00e9s hors site (s\u00e9par\u00e9s par des virgules)</label>'
+            +   '<input type="text" id="edit-combat-invites" class="form-input" placeholder="Ex : pseudo1, pseudo2">'
+            + '</div>'
+            + '<p class="text-muted" style="font-size:0.78rem;margin:4px 0 14px;">Les points sont recalcul\u00e9s automatiquement selon le bar\u00e8me (butin remis \u00e0 0 en cas de d\u00e9faite).</p>'
             + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
             +   '<button class="btn btn--secondary" id="history-edit-cancel">Annuler</button>'
             +   '<button class="btn btn--primary" id="history-edit-save">Enregistrer</button>'
@@ -242,18 +272,97 @@
         overlay.addEventListener('click', function (e) { if (e.target === overlay) closeEditModal(); });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeEditModal(); });
         document.getElementById('history-edit-save').addEventListener('click', saveEditCombat);
+
+        document.getElementById('edit-combat-alliance').addEventListener('change', function () {
+            var wrap = document.getElementById('edit-combat-alliance-custom-wrap');
+            if (wrap) wrap.hidden = this.value !== 'autre';
+        });
+
+        document.getElementById('edit-combat-participant-add').addEventListener('click', function () {
+            var sel = document.getElementById('edit-combat-participant-select');
+            var uid = sel && sel.value;
+            if (!uid) return;
+            var already = editingParticipants.some(function (p) { return p.id === uid; });
+            if (already) return;
+            var prof = editProfiles.find(function (p) { return p.id === uid; });
+            if (prof) editingParticipants.push({ id: prof.id, username: prof.username });
+            renderEditParticipants();
+        });
+
+        document.getElementById('edit-combat-participants').addEventListener('click', function (e) {
+            var btn = e.target.closest('.edit-participant-chip__remove');
+            if (!btn) return;
+            var uid = btn.getAttribute('data-id');
+            editingParticipants = editingParticipants.filter(function (p) { return p.id !== uid; });
+            renderEditParticipants();
+        });
     }
 
-    function openEditModal(combatId) {
+    function renderEditParticipants() {
+        var wrap = document.getElementById('edit-combat-participants');
+        var sel = document.getElementById('edit-combat-participant-select');
+        if (!wrap) return;
+        var esc = window.REN.escapeHtml;
+
+        wrap.innerHTML = editingParticipants.length
+            ? editingParticipants.map(function (p) {
+                return '<span class="edit-participant-chip notranslate">' + esc(p.username)
+                    + '<button type="button" class="edit-participant-chip__remove" data-id="' + p.id + '" title="Retirer">&times;</button></span>';
+            }).join('')
+            : '<span class="text-muted" style="font-size:0.8rem;">Aucun participant.</span>';
+
+        if (sel) {
+            var taken = {};
+            editingParticipants.forEach(function (p) { taken[p.id] = true; });
+            sel.innerHTML = '<option value="">Ajouter un membre...</option>'
+                + editProfiles.filter(function (p) { return !taken[p.id]; })
+                    .map(function (p) { return '<option value="' + p.id + '">' + esc(p.username) + '</option>'; }).join('');
+        }
+    }
+
+    async function openEditModal(combatId) {
         editingCombat = allCombats.find(function (c) { return c.id === combatId; });
         if (!editingCombat) return;
         ensureEditModal();
+        try { await ensureEditData(); } catch (e) { editAlliances = editAlliances || []; editProfiles = editProfiles || []; }
+
         document.getElementById('edit-combat-type').value = editingCombat.type;
         document.getElementById('edit-combat-resultat').value = editingCombat.resultat;
         document.getElementById('edit-combat-allies').value = editingCombat.nb_allies;
         document.getElementById('edit-combat-ennemis').value = editingCombat.nb_ennemis;
         document.getElementById('edit-combat-butin').value = editingCombat.butin_kamas || 0;
         document.getElementById('edit-combat-commentaire').value = editingCombat.commentaire || '';
+
+        var esc = window.REN.escapeHtml;
+        var allianceSel = document.getElementById('edit-combat-alliance');
+        allianceSel.innerHTML = '<option value="">Aucune</option>'
+            + editAlliances.map(function (a) {
+                return '<option value="' + a.id + '">' + esc(a.nom) + (a.tag ? ' [' + esc(a.tag) + ']' : '') + '</option>';
+            }).join('')
+            + '<option value="autre">Autre (nom libre)</option>';
+        var customWrap = document.getElementById('edit-combat-alliance-custom-wrap');
+        var customInput = document.getElementById('edit-combat-alliance-custom');
+        if (editingCombat.alliance_ennemie_id) {
+            allianceSel.value = String(editingCombat.alliance_ennemie_id);
+            customWrap.hidden = true;
+            customInput.value = '';
+        } else if (editingCombat.alliance_ennemie_nom) {
+            allianceSel.value = 'autre';
+            customWrap.hidden = false;
+            customInput.value = editingCombat.alliance_ennemie_nom;
+        } else {
+            allianceSel.value = '';
+            customWrap.hidden = true;
+            customInput.value = '';
+        }
+
+        editingParticipants = (editingCombat.participants || [])
+            .filter(function (p) { return p.user && p.user.id; })
+            .map(function (p) { return { id: p.user.id, username: p.user.username }; });
+        renderEditParticipants();
+
+        document.getElementById('edit-combat-invites').value = (editingCombat.invites || []).join(', ');
+
         document.getElementById('history-edit-modal').classList.add('active');
     }
 
@@ -273,6 +382,20 @@
         var butin = resultat === 'defaite' ? 0 : (parseInt(document.getElementById('edit-combat-butin').value, 10) || 0);
         var commentaire = document.getElementById('edit-combat-commentaire').value.trim() || null;
 
+        var allianceSel = document.getElementById('edit-combat-alliance');
+        var allianceId = null;
+        var allianceNom = null;
+        if (allianceSel.value === 'autre') {
+            allianceNom = document.getElementById('edit-combat-alliance-custom').value.trim() || null;
+        } else if (allianceSel.value) {
+            allianceId = parseInt(allianceSel.value, 10);
+        }
+
+        var invites = document.getElementById('edit-combat-invites').value
+            .split(',')
+            .map(function (s) { return s.trim(); })
+            .filter(function (s) { return s.length >= 2 && s.length <= 30; });
+
         btn.disabled = true;
         btn.textContent = 'Enregistrement...';
         try {
@@ -281,7 +404,7 @@
                 p_nb_allies: nbAllies,
                 p_nb_ennemis: nbEnnemis,
                 p_resultat: resultat,
-                p_alliance_id: editingCombat.alliance_ennemie_id || null,
+                p_alliance_id: allianceId,
                 p_type: type
             });
             if (pointsRes.error) throw pointsRes.error;
@@ -294,16 +417,50 @@
                 nb_ennemis: nbEnnemis,
                 butin_kamas: butin,
                 commentaire: commentaire,
+                alliance_ennemie_id: allianceId,
+                alliance_ennemie_nom: allianceNom,
+                invites: invites.length ? invites : null,
                 points_gagnes: points
             }).eq('id', editingCombat.id).select().single();
             if (upd.error) throw upd.error;
 
-            /* Maj locale (on garde les jointures auteur/alliance/participants) puis re-render */
+            /* Synchronisation des participants (ajouts / retraits) */
+            var beforeIds = (editingCombat.participants || [])
+                .filter(function (p) { return p.user && p.user.id; })
+                .map(function (p) { return p.user.id; });
+            var afterIds = editingParticipants.map(function (p) { return p.id; });
+            var toRemove = beforeIds.filter(function (id) { return afterIds.indexOf(id) === -1; });
+            var toAdd = afterIds.filter(function (id) { return beforeIds.indexOf(id) === -1; });
+
+            if (toRemove.length) {
+                var delRes = await window.REN.supabase.from('combat_participants')
+                    .delete().eq('combat_id', editingCombat.id).in('user_id', toRemove);
+                if (delRes.error) throw delRes.error;
+            }
+            if (toAdd.length) {
+                var insRes = await window.REN.supabase.from('combat_participants')
+                    .insert(toAdd.map(function (uid) { return { combat_id: editingCombat.id, user_id: uid }; }));
+                if (insRes.error) throw insRes.error;
+            }
+
+            /* Maj locale (jointures reconstruites) puis re-render */
             var idx = allCombats.findIndex(function (c) { return c.id === editingCombat.id; });
-            if (idx !== -1) allCombats[idx] = Object.assign({}, allCombats[idx], upd.data);
+            if (idx !== -1) {
+                var updated = Object.assign({}, allCombats[idx], upd.data);
+                updated.participants = editingParticipants.map(function (p) {
+                    return { user: { id: p.id, username: p.username } };
+                });
+                var allianceObj = null;
+                if (allianceId) {
+                    var al = editAlliances.find(function (x) { return x.id === allianceId; });
+                    if (al) allianceObj = { nom: al.nom, tag: al.tag };
+                }
+                updated.alliance = allianceObj;
+                allCombats[idx] = updated;
+            }
             closeEditModal();
             renderCombats();
-            window.REN.toast('Combat modifié (' + (points > 0 ? '+' : '') + points + ' pts recalculés).', 'success');
+            window.REN.toast('Combat modifi\u00e9 (' + (points > 0 ? '+' : '') + points + ' pts recalcul\u00e9s).', 'success');
         } catch (err) {
             console.error('[REN] Erreur modification combat:', err);
             window.REN.toast('Erreur : ' + err.message, 'error');

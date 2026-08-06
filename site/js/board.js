@@ -1,226 +1,58 @@
 /* ============================================ */
-/* Damoclès     - Droits Percepteurs            */
-/* Points semaine passée → droits semaine       */
+/* Damoclès - Droits Percepteurs                */
+/* Paliers par RANG + réservations automatiques */
+/* de zones par ordre de préférence             */
 /* ============================================ */
 (function () {
     'use strict';
 
-    var recompensesConfig = [];
-    var semaines = [];
-    var preferencesMap = {};
-    var zonesMap = {};
-    var zoneEligibleMap = {};
-    var kamatrixMap = {};
+    var paliers = [];
+    var ladder = [];            /* classement de référence (période écoulée, ou courante au lancement) */
+    var ladderSource = 'passee';
+    var reservations = [];      /* attribution figée de la période courante */
     var zonesBda = [];
-    var currentSelection = 'last';
+    var allZones = [];          /* zones actives (hors BDA) pour le sélecteur */
+    var myPrefs = [];           /* ma liste ordonnée [{zone_id, nom, niveau_zone, type}] */
+    var prefsDirty = false;
 
     document.addEventListener('ren:ready', init);
 
     async function init() {
         if (!window.REN.supabase || !window.REN.currentProfile) return;
-        await loadRecompensesConfig();
-        await loadPreferences();
-        await loadZoneEligibility();
-        await loadKamatrix();
-        await loadSemaines();
-        await loadZonesBda();
-        setupWeekSelect();
-        setupBdaModal();
+
+        /* Secours : si l'attribution de la période n'existe pas encore, la calculer */
+        try { await window.REN.supabase.rpc('attribuer_percos_periode'); } catch (e) { /* silencieux */ }
+
+        await Promise.all([
+            loadPaliers(), loadLadder(), loadReservations(),
+            loadZonesBda(), loadZones(), loadMyPrefs()
+        ]);
+
+        renderPeriode();
         renderBareme();
-        loadBoard(currentSelection);
+        renderTable();
+        renderPrefs();
+        setupBdaModal();
+        setupTabs();
     }
 
-    /* === CHARGER CONFIG RÉCOMPENSES === */
-    async function loadRecompensesConfig() {
-        try {
-            var { data } = await window.REN.supabase
-                .from('recompenses_config')
-                .select('*')
-                .order('ordre', { ascending: true });
-            recompensesConfig = data || [];
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur config:', err);
-        }
-    }
-
-    /* === CHARGER PRÉFÉRENCES JOUEURS (percos vs pépites vs jetons) === */
-    async function loadPreferences() {
-        try {
-            var { data } = await window.REN.supabase
-                .from('profiles')
-                .select('id, preference_recompense, zone_reservee')
-                .eq('is_validated', true);
-            preferencesMap = {};
-            zonesMap = {};
-            (data || []).forEach(function (p) {
-                preferencesMap[p.id] = p.preference_recompense || 'percos';
-                if (p.zone_reservee) zonesMap[p.id] = p.zone_reservee;
+    /* === ONGLETS === */
+    function setupTabs() {
+        var btns = document.querySelectorAll('#board-tabs .tabs__btn');
+        btns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                btns.forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                var tab = btn.getAttribute('data-tab');
+                var tabDroits = document.getElementById('board-tab-droits');
+                var tabPrefs = document.getElementById('board-tab-preferences');
+                if (tabDroits) tabDroits.hidden = tab !== 'droits';
+                if (tabPrefs) tabPrefs.hidden = tab !== 'preferences';
             });
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur preferences:', err);
-        }
-    }
-
-    /* === CALCULER ÉLIGIBILITÉ ZONE (>=75 pts sur l'une des 2 semaines live) === */
-    async function loadZoneEligibility() {
-        zoneEligibleMap = {};
-        try {
-            var [lastRes, currentRes] = await Promise.all([
-                window.REN.supabase.from('classement_pvp_semaine_passee').select('id, points'),
-                window.REN.supabase.from('classement_pvp_semaine').select('id, points')
-            ]);
-            (lastRes.data || []).forEach(function (p) {
-                if (p.points >= 75) zoneEligibleMap[p.id] = true;
-            });
-            (currentRes.data || []).forEach(function (p) {
-                if (p.points >= 75) zoneEligibleMap[p.id] = true;
-            });
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur zone eligibility:', err);
-        }
-    }
-
-    /* === CHARGER KAMATRIX GAGNÉS SUR LA SEMAINE === */
-    async function loadKamatrix() {
-        kamatrixMap = {};
-        try {
-            /* Lundi de la semaine en cours */
-            var now = new Date();
-            var day = now.getDay();
-            var diff = day === 0 ? 6 : day - 1;
-            var monday = new Date(now);
-            monday.setDate(now.getDate() - diff);
-            monday.setHours(0, 0, 0, 0);
-
-            var { data } = await window.REN.supabase
-                .from('kamatrix_semaine')
-                .select('id, kamatrix');
-
-            (data || []).forEach(function (row) {
-                kamatrixMap[row.id] = row.kamatrix || 0;
-            });
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur chargement kamatrix:', err);
-        }
-    }
-
-    /* === CHARGER LISTE DES SEMAINES ARCHIVÉES === */
-    async function loadSemaines() {
-        try {
-            var { data } = await window.REN.supabase
-                .from('semaines')
-                .select('*')
-                .order('date_debut', { ascending: false });
-            semaines = data || [];
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur semaines:', err);
-        }
-    }
-
-    /* === SETUP SELECT SEMAINES === */
-    function setupWeekSelect() {
-        var select = document.getElementById('board-week-select');
-        if (!select) return;
-
-        semaines.forEach(function (s) {
-            var opt = document.createElement('option');
-            opt.value = s.id;
-            opt.textContent = formatWeekLabel(s.date_debut, s.date_fin);
-            select.appendChild(opt);
-        });
-
-        select.addEventListener('change', function () {
-            currentSelection = select.value;
-            loadBoard(currentSelection);
         });
     }
 
-    /* === RENDER BARÈME (légende des paliers) === */
-    function renderBareme() {
-        var container = document.getElementById('board-bareme');
-        if (!container || !recompensesConfig.length) {
-            if (container) container.innerHTML = '';
-            return;
-        }
-
-        var html = '<p class="text-muted" style="font-size:0.8rem;margin-bottom:var(--spacing-sm);text-align:center;">Choisissez votre récompense préférée dans votre <strong style="color:var(--color-text-primary);">Espace Profil</strong></p>';
-        html += '<div class="board-bareme__grid">';
-        recompensesConfig.forEach(function (r) {
-            var range = r.seuil_min + (r.seuil_max ? '-' + r.seuil_max : '+') + ' pts';
-
-            html += '<div class="board-bareme__item">';
-            html += '<span class="board-bareme__emoji">' + r.emoji + '</span>';
-            html += '<div class="board-bareme__info">';
-            html += '<span class="board-bareme__label">' + r.label + '</span>';
-            html += '<span class="board-bareme__range">' + range + '</span>';
-            html += '</div>';
-            html += '<div class="board-bareme__rewards">';
-            if (r.percepteurs_bonus > 0) html += '<span class="board-bareme__perco">' + r.percepteurs_bonus + ' <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="percos"></span>';
-            if (r.pepites > 0) html += '<span class="board-bareme__pepites">' + formatNumber(r.pepites) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="pépites"></span>';
-            if ((r.jetons_reward || 0) > 0) html += '<span class="board-bareme__jetons">' + r.jetons_reward + ' <img class="icon-inline" src="assets/images/jeton.png" alt="jetons"></span>';
-            html += '</div>';
-            html += '</div>';
-        });
-        html += '</div>';
-
-        container.innerHTML = html;
-    }
-
-    var autoSwitched = false;
-
-    /* === CHARGER LE BOARD === */
-    async function loadBoard(selection) {
-        var tableWrap = document.getElementById('board-table-wrap');
-        var periodEl = document.getElementById('board-period');
-        if (!tableWrap) return;
-
-        tableWrap.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement...</div>';
-
-        var players = [];
-        var periodText = '';
-
-        if (selection === 'last') {
-            players = await loadLastWeek();
-            /* Quinzaine passée vide (ex: premiere periode apres le lancement) : bascule sur la quinzaine en cours */
-            if (!players.length && !autoSwitched) {
-                autoSwitched = true;
-                var weekSel = document.getElementById('board-week-select');
-                if (weekSel) weekSel.value = 'current';
-                return loadBoard('current');
-            }
-            /* Dates de la quinzaine passée (points) et de la quinzaine en cours (droits) */
-            var debut = debutPeriodePvp();
-            var lastStart = addDays(debut, -14);
-            var lastEnd = addDays(debut, -1);
-            var curEnd = addDays(debut, 13);
-            periodText = 'Points du ' + formatDate(lastStart) + ' au ' + formatDate(lastEnd) + ' — Droits du ' + formatDate(debut) + ' au ' + formatDate(curEnd);
-        } else if (selection === 'current') {
-            players = await loadCurrentWeek();
-            /* Dates de la quinzaine en cours (points) et de la suivante (droits) */
-            var debutCur = debutPeriodePvp();
-            var curFin = addDays(debutCur, 13);
-            var nextStart = addDays(debutCur, 14);
-            var nextEnd = addDays(debutCur, 27);
-            periodText = 'Points du ' + formatDate(debutCur) + ' au ' + formatDate(curFin) + ' — Droits du ' + formatDate(nextStart) + ' au ' + formatDate(nextEnd);
-        } else {
-            var sem = semaines.find(function (s) { return s.id === parseInt(selection); });
-            players = await loadArchivedWeek(parseInt(selection));
-            if (sem) {
-                var nextMonday = new Date(sem.date_fin);
-                nextMonday.setDate(nextMonday.getDate() + 1);
-                var nextSunday = new Date(nextMonday);
-                nextSunday.setDate(nextMonday.getDate() + 6);
-                periodText = 'Points du ' + formatDate(new Date(sem.date_debut)) + ' au ' + formatDate(new Date(sem.date_fin)) + ' — Droits du ' + formatDate(nextMonday) + ' au ' + formatDate(nextSunday);
-            }
-        }
-
-        if (periodEl) periodEl.textContent = periodText;
-
-        renderTable(players, tableWrap);
-    }
-
-    /* === QUINZAINE : debut de la periode PvP en cours === */
-    /* Ancre : lundi 27/07/2026, periodes de 14 jours (miroir de debut_periode_pvp() en SQL) */
+    /* === QUINZAINE (miroir de debut_periode_pvp() en SQL) === */
     function debutPeriodePvp() {
         var anchor = new Date(2026, 6, 27);
         anchor.setHours(0, 0, 0, 0);
@@ -236,176 +68,200 @@
         return r;
     }
 
-    /* === PÉRIODE PASSÉE === */
-    async function loadLastWeek() {
-        try {
-            var [pvpRes, pepitesRes] = await Promise.all([
-                window.REN.supabase.from('classement_pvp_semaine_passee').select('id, username, points'),
-                window.REN.supabase.from('pepites_semaine_passee').select('id, pepites')
-            ]);
-            var data = pvpRes.data || [];
-            var pepitesMap = {};
-            (pepitesRes.data || []).forEach(function (p) { pepitesMap[p.id] = p.pepites; });
-
-            data.sort(function (a, b) { return b.points - a.points; });
-
-            return data.map(function (p, i) {
-                var reward = getReward(p.points);
-                return {
-                    user_id: p.id,
-                    username: p.username,
-                    points: p.points,
-                    rang: i + 1,
-                    recompense_pepites: reward.pepites,
-                    recompense_percepteurs: reward.percepteurs_bonus,
-                    jetons_reward: reward.jetons_reward || 0,
-                    tier_label: reward.label,
-                    tier_emoji: reward.emoji,
-                    pepites_jeu: pepitesMap[p.id] || 0,
-                    kamatrix: kamatrixMap[p.id] || 0,
-                    preference_recompense: preferencesMap[p.id] || 'percos',
-                    zone_reservee: zonesMap[p.id] || null,
-                    is_live: true
-                };
-            });
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur semaine passée:', err);
-            return [];
-        }
+    function formatDate(date) {
+        var mois = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+        return date.getDate() + ' ' + mois[date.getMonth()];
     }
 
-    /* === SEMAINE EN COURS === */
-    async function loadCurrentWeek() {
-        try {
-            var [pvpRes, pepitesRes] = await Promise.all([
-                window.REN.supabase.from('classement_pvp_semaine').select('id, username, points'),
-                window.REN.supabase.from('pepites_semaine_courante').select('id, pepites')
-            ]);
-            var data = pvpRes.data || [];
-            var pepitesMap = {};
-            (pepitesRes.data || []).forEach(function (p) { pepitesMap[p.id] = p.pepites; });
-
-            data.sort(function (a, b) { return b.points - a.points; });
-
-            return data.map(function (p, i) {
-                var reward = getReward(p.points);
-                return {
-                    user_id: p.id,
-                    username: p.username,
-                    points: p.points,
-                    rang: i + 1,
-                    recompense_pepites: reward.pepites,
-                    recompense_percepteurs: reward.percepteurs_bonus,
-                    jetons_reward: reward.jetons_reward || 0,
-                    tier_label: reward.label,
-                    tier_emoji: reward.emoji,
-                    pepites_jeu: pepitesMap[p.id] || 0,
-                    kamatrix: kamatrixMap[p.id] || 0,
-                    preference_recompense: preferencesMap[p.id] || 'percos',
-                    zone_reservee: zonesMap[p.id] || null,
-                    is_live: true
-                };
-            });
-        } catch (err) {
-            console.error('[REN-BOARD] Erreur semaine en cours:', err);
-            return [];
-        }
-    }
-
-    /* === SEMAINE ARCHIVÉE === */
-    async function loadArchivedWeek(semaineId) {
+    /* === CHARGEMENTS === */
+    async function loadPaliers() {
         try {
             var { data } = await window.REN.supabase
-                .from('semaine_snapshots')
-                .select('*')
-                .eq('semaine_id', semaineId)
-                .order('rang', { ascending: true });
-            if (!data) return [];
+                .from('paliers_percos').select('*').order('rang_min');
+            paliers = data || [];
+        } catch (err) {
+            console.error('[REN-BOARD] Erreur paliers:', err);
+        }
+    }
 
-            return data.map(function (p) {
-                var reward = getReward(p.points);
+    async function loadLadder() {
+        try {
+            var res = await window.REN.supabase.from('classement_pvp_semaine_passee').select('id, username, points');
+            var rows = res.data || [];
+            if (!rows.length) {
+                ladderSource = 'courante';
+                res = await window.REN.supabase.from('classement_pvp_semaine').select('id, username, points');
+                rows = res.data || [];
+            }
+            /* Même ordre déterministe que l'attribution SQL : points desc, pseudo asc */
+            rows.sort(function (a, b) { return b.points - a.points || a.username.localeCompare(b.username); });
+            ladder = rows.map(function (r, i) {
+                return { user_id: r.id, username: r.username, points: r.points, rang: i + 1 };
+            });
+        } catch (err) {
+            console.error('[REN-BOARD] Erreur classement:', err);
+        }
+    }
+
+    async function loadReservations() {
+        try {
+            var { data } = await window.REN.supabase
+                .from('perco_reservations')
+                .select('*, zone:zones_reservation!zone_id(nom, sous_titre)')
+                .order('periode_debut', { ascending: false })
+                .order('tour', { ascending: true })
+                .order('rang', { ascending: true });
+            var rows = data || [];
+            if (!rows.length) { reservations = []; return; }
+            /* Ne garder que la période la plus récente (comparaison timezone-proof) */
+            var latest = rows[0].periode_debut;
+            reservations = rows.filter(function (r) { return r.periode_debut === latest; });
+        } catch (err) {
+            console.error('[REN-BOARD] Erreur réservations:', err);
+        }
+    }
+
+    async function loadZonesBda() {
+        try {
+            var { data } = await window.REN.supabase
+                .from('zones_bda').select('*').order('created_at', { ascending: true });
+            zonesBda = data || [];
+        } catch (err) {
+            console.error('[REN-BOARD] Erreur zones BDA:', err);
+        }
+    }
+
+    async function loadZones() {
+        try {
+            /* Catalogue dédié réservations : 1 entrée = le couple donjon + zone associée */
+            var { data } = await window.REN.supabase
+                .from('zones_reservation')
+                .select('id, nom, sous_titre, categorie, ordre')
+                .eq('actif', true)
+                .order('categorie')
+                .order('ordre');
+            var bdaNames = {};
+            zonesBda.forEach(function (z) { bdaNames[z.nom_zone.trim().toLowerCase()] = true; });
+            allZones = (data || []).filter(function (z) {
+                return !bdaNames[z.nom.trim().toLowerCase()];
+            });
+        } catch (err) {
+            console.error('[REN-BOARD] Erreur zones:', err);
+        }
+    }
+
+    async function loadMyPrefs() {
+        try {
+            var { data } = await window.REN.supabase
+                .from('perco_preferences')
+                .select('zone_id, ordre, zone:zones_reservation!zone_id(nom, sous_titre)')
+                .eq('user_id', window.REN.currentProfile.id)
+                .order('ordre');
+            myPrefs = (data || []).map(function (p) {
                 return {
-                    user_id: p.user_id,
-                    username: p.username,
-                    points: p.points,
-                    rang: p.rang,
-                    recompense_pepites: p.recompense_pepites,
-                    recompense_percepteurs: p.recompense_percepteurs,
-                    tier_label: reward.label,
-                    tier_emoji: reward.emoji,
-                    pepites_jeu: 0,
-                    kamatrix: 0,
-                    prefere_pepites: preferencesMap[p.user_id] || false,
-                    is_live: false
+                    zone_id: p.zone_id,
+                    nom: p.zone ? p.zone.nom : '?',
+                    sous_titre: p.zone ? (p.zone.sous_titre || '') : ''
                 };
             });
         } catch (err) {
-            console.error('[REN-BOARD] Erreur semaine archivée:', err);
-            return [];
+            console.error('[REN-BOARD] Erreur préférences:', err);
         }
     }
 
-    /* === TROUVER LA RÉCOMPENSE SELON LES POINTS === */
-    function getReward(points) {
-        for (var i = 0; i < recompensesConfig.length; i++) {
-            var r = recompensesConfig[i];
-            var min = r.seuil_min;
-            var max = r.seuil_max !== null ? r.seuil_max : 999999;
-            if (points >= min && points <= max) {
-                return r;
-            }
-        }
-        return { pepites: 0, percepteurs_bonus: 0, label: 'Aucun', emoji: '' };
+    /* === PÉRIODE === */
+    function renderPeriode() {
+        var el = document.getElementById('board-period');
+        if (!el) return;
+        var debut = debutPeriodePvp();
+        var fin = addDays(debut, 13);
+        var txt = 'Droits du ' + formatDate(debut) + ' au ' + formatDate(fin);
+        txt += ladderSource === 'courante'
+            ? ' — période de lancement : classement en cours'
+            : ' — attribution calculée sur le classement de la quinzaine précédente';
+        el.textContent = txt;
     }
 
-    /* === RENDER TABLEAU === */
-    function renderTable(players, container) {
-        if (!players.length) {
-            container.innerHTML = '<p class="text-muted text-center" style="padding:2rem;">Aucune donnée pour cette semaine.</p>';
+    /* === BARÈME (paliers par rang) === */
+    function renderBareme() {
+        var container = document.getElementById('board-bareme');
+        if (!container) return;
+        var esc = window.REN.escapeHtml;
+        var html = '';
+        paliers.forEach(function (p) {
+            var label = p.rang_min === p.rang_max ? 'Top ' + p.rang_min : 'Top ' + p.rang_min + '-' + p.rang_max;
+            var droits = [];
+            if (p.percos > 0) droits.push(p.percos + ' perco' + (p.percos > 1 ? 's' : ''));
+            if (p.percos_150 > 0) droits.push(p.percos_150 + ' perco' + (p.percos_150 > 1 ? 's' : '') + ' niv 150-');
+            html += '<div class="board-bareme__item">'
+                + '<span class="board-bareme__emoji">' + esc(p.emoji || '') + '</span>'
+                + '<span class="board-bareme__label">' + esc(label) + '</span>'
+                + '<span class="board-bareme__reward">' + esc(droits.join(' + ') || '—') + '</span>'
+                + '</div>';
+        });
+        container.innerHTML = html || '<p class="text-muted">Aucun palier configuré.</p>';
+    }
+
+    function palierFor(rang) {
+        for (var i = 0; i < paliers.length; i++) {
+            if (rang >= paliers[i].rang_min && rang <= paliers[i].rang_max) return paliers[i];
+        }
+        return null;
+    }
+
+    /* === TABLEAU === */
+    function renderTable() {
+        var container = document.getElementById('board-table-wrap');
+        if (!container) return;
+
+        if (!ladder.length) {
+            container.innerHTML = '<p class="text-muted text-center" style="padding:2rem;">Aucun combat sur la période de référence.</p>';
             return;
         }
 
+        /* Réservations par joueur (tours dans l'ordre) */
+        var resaByUser = {};
+        reservations.forEach(function (r) {
+            if (!resaByUser[r.user_id]) resaByUser[r.user_id] = [];
+            resaByUser[r.user_id].push(r);
+        });
+
+        var esc = window.REN.escapeHtml;
+        var myId = window.REN.currentProfile.id;
         var html = '<table class="board-table">';
         html += '<thead><tr>';
         html += '<th class="board-table__th board-table__th--rank">#</th>';
         html += '<th class="board-table__th board-table__th--name">Joueur</th>';
         html += '<th class="board-table__th board-table__th--points">Points</th>';
-        html += '<th class="board-table__th board-table__th--tier">Palier</th>';
-        html += '<th class="board-table__th board-table__th--zone">Zone r\u00e9serv\u00e9e</th>';
-        html += '<th class="board-table__th board-table__th--reward">R\u00e9compense PVP</th>';
-        html += '<th class="board-table__th board-table__th--pepjeu">Pépites jeu</th>';
-        html += '<th class="board-table__th board-table__th--kamatrix">Kamatrix</th>';
-        html += '</tr></thead>';
-        html += '<tbody>';
+        html += '<th class="board-table__th board-table__th--tier">Droits percos</th>';
+        html += '<th class="board-table__th board-table__th--zone">Zone réservée</th>';
+        html += '</tr></thead><tbody>';
 
-        var esc = window.REN.escapeHtml;
-        players.forEach(function (p) {
-            /* Récompense PVP : affiche le choix du joueur (percos, pépites ou jetons) */
-            var rewardPvp = '\u2014';
-            var pref = p.preference_recompense || 'percos';
-            if (pref === 'pepites' && p.recompense_pepites > 0) {
-                rewardPvp = formatNumber(p.recompense_pepites) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="">';
-            } else if (pref === 'jetons' && (p.jetons_reward || 0) > 0) {
-                rewardPvp = '+' + p.jetons_reward + ' <img class="icon-inline" src="assets/images/jeton.png" alt="">';
-            } else if (p.recompense_percepteurs > 0) {
-                rewardPvp = '+' + p.recompense_percepteurs + ' <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="">';
-            } else if (p.recompense_pepites > 0) {
-                rewardPvp = formatNumber(p.recompense_pepites) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="">';
+        ladder.forEach(function (p) {
+            var palier = palierFor(p.rang);
+            var droits = '—';
+            if (palier) {
+                var parts = [];
+                if (palier.percos > 0) parts.push('<strong>' + palier.percos + '</strong> <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="perco">');
+                if (palier.percos_150 > 0) parts.push('<strong>' + palier.percos_150 + '</strong> <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="perco"> <span class="board-table__lvl">niv 150-</span>');
+                droits = (palier.emoji ? esc(palier.emoji) + ' ' : '') + (parts.join(' + ') || '—');
             }
 
-            var pepJeuText = p.pepites_jeu > 0 ? formatNumber(p.pepites_jeu) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="">' : '—';
-            var kamatrixText = p.kamatrix > 0 ? formatNumber(p.kamatrix) + ' <img class="icon-inline" src="assets/images/kamatrix.png" alt="">' : '—';
+            var resas = resaByUser[p.user_id] || [];
+            var zoneTxt = resas.length
+                ? resas.map(function (r) {
+                    var nom = r.zone ? r.zone.nom : '?';
+                    var sub = r.zone && r.zone.sous_titre ? ' <span class="board-table__lvl">' + esc(r.zone.sous_titre) + '</span>' : '';
+                    return '<strong>' + esc(nom) + '</strong>' + sub;
+                }).join(' <span class="text-muted">·</span> ')
+                : '—';
 
-            html += '<tr class="board-table__row">';
+            html += '<tr class="board-table__row' + (p.user_id === myId ? ' board-table__row--me' : '') + '">';
             html += '<td class="board-table__td board-table__td--rank">' + p.rang + '</td>';
-            html += '<td class="board-table__td board-table__td--name">' + esc(p.username) + '</td>';
+            html += '<td class="board-table__td board-table__td--name notranslate">' + esc(p.username) + '</td>';
             html += '<td class="board-table__td board-table__td--points">' + p.points + '</td>';
-            html += '<td class="board-table__td board-table__td--tier">' + esc(p.tier_emoji) + ' ' + esc(p.tier_label) + '</td>';
-            var showZone = p.zone_reservee && (p.is_live ? zoneEligibleMap[p.user_id] : p.points >= 75);
-            html += '<td class="board-table__td board-table__td--zone">' + (showZone ? esc(p.zone_reservee) : '—') + '</td>';
-            html += '<td class="board-table__td board-table__td--reward">' + rewardPvp + '</td>';
-            html += '<td class="board-table__td board-table__td--pepjeu" style="color:var(--color-warning);">' + pepJeuText + '</td>';
-            html += '<td class="board-table__td board-table__td--kamatrix" style="color:var(--color-warning);">' + kamatrixText + '</td>';
+            html += '<td class="board-table__td board-table__td--tier">' + droits + '</td>';
+            html += '<td class="board-table__td board-table__td--zone">' + zoneTxt + '</td>';
             html += '</tr>';
         });
 
@@ -413,19 +269,141 @@
         container.innerHTML = html;
     }
 
-    /* === ZONES BDA === */
-    async function loadZonesBda() {
+    /* === MES PRÉFÉRENCES === */
+    function renderPrefs() {
+        var listEl = document.getElementById('board-prefs-list');
+        var saveBtn = document.getElementById('board-prefs-save');
+        if (!listEl) return;
+
+        var esc = window.REN.escapeHtml;
+        if (!myPrefs.length) {
+            listEl.innerHTML = '<p class="text-muted" style="padding:var(--spacing-sm) 0;">Aucune zone dans ta liste. Ajoute tes zones préférées ci-dessous : au reset, tu recevras la mieux placée encore libre.</p>';
+        } else {
+            var html = '';
+            myPrefs.forEach(function (p, i) {
+                html += '<div class="pref-row">';
+                html += '<span class="pref-row__ordre">' + (i + 1) + '</span>';
+                html += '<span class="pref-row__nom notranslate">' + esc(p.nom)
+                    + (p.sous_titre ? ' <span class="pref-row__lvl">' + esc(p.sous_titre) + '</span>' : '') + '</span>';
+                html += '<span class="pref-row__actions">';
+                html += '<button class="pref-row__btn" data-action="up" data-i="' + i + '" title="Monter"' + (i === 0 ? ' disabled' : '') + '>&#9650;</button>';
+                html += '<button class="pref-row__btn" data-action="down" data-i="' + i + '" title="Descendre"' + (i === myPrefs.length - 1 ? ' disabled' : '') + '>&#9660;</button>';
+                html += '<button class="pref-row__btn pref-row__btn--del" data-action="del" data-i="' + i + '" title="Retirer">&times;</button>';
+                html += '</span>';
+                html += '</div>';
+            });
+            listEl.innerHTML = html;
+        }
+
+        listEl.querySelectorAll('.pref-row__btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var i = parseInt(btn.dataset.i, 10);
+                var action = btn.dataset.action;
+                if (action === 'up' && i > 0) {
+                    var tmp = myPrefs[i - 1]; myPrefs[i - 1] = myPrefs[i]; myPrefs[i] = tmp;
+                } else if (action === 'down' && i < myPrefs.length - 1) {
+                    var tmp2 = myPrefs[i + 1]; myPrefs[i + 1] = myPrefs[i]; myPrefs[i] = tmp2;
+                } else if (action === 'del') {
+                    myPrefs.splice(i, 1);
+                }
+                prefsDirty = true;
+                renderPrefs();
+            });
+        });
+
+        renderZoneSelect();
+        if (saveBtn) saveBtn.hidden = !prefsDirty;
+        bindPrefsControls();
+    }
+
+    function renderZoneSelect() {
+        var select = document.getElementById('board-prefs-select');
+        var filterInput = document.getElementById('board-prefs-filter');
+        if (!select) return;
+
+        var filter = (filterInput && filterInput.value || '').trim().toLowerCase();
+        var taken = {};
+        myPrefs.forEach(function (p) { taken[p.zone_id] = true; });
+
+        var options = allZones.filter(function (z) {
+            if (taken[z.id]) return false;
+            if (filter && (z.nom + ' ' + z.sous_titre).toLowerCase().indexOf(filter) === -1) return false;
+            return true;
+        });
+
+        var esc = window.REN.escapeHtml;
+        function optHtml(z) {
+            return '<option value="' + z.id + '">' + esc(z.nom)
+                + (z.sous_titre ? ' • ' + esc(z.sous_titre) : '') + '</option>';
+        }
+        var principales = options.filter(function (z) { return z.categorie === 'principale'; });
+        var secondaires = options.filter(function (z) { return z.categorie === 'secondaire'; });
+
+        var html = '<option value="">Choisir une zone... (' + options.length + ')</option>';
+        if (principales.length) html += '<optgroup label="Zones principales">' + principales.map(optHtml).join('') + '</optgroup>';
+        if (secondaires.length) html += '<optgroup label="Zones secondaires">' + secondaires.map(optHtml).join('') + '</optgroup>';
+        select.innerHTML = html;
+    }
+
+    var prefsControlsBound = false;
+    function bindPrefsControls() {
+        if (prefsControlsBound) return;
+        prefsControlsBound = true;
+
+        var filterInput = document.getElementById('board-prefs-filter');
+        var addBtn = document.getElementById('board-prefs-add');
+        var saveBtn = document.getElementById('board-prefs-save');
+
+        if (filterInput) filterInput.addEventListener('input', renderZoneSelect);
+
+        if (addBtn) {
+            addBtn.addEventListener('click', function () {
+                var select = document.getElementById('board-prefs-select');
+                var zoneId = parseInt(select && select.value, 10);
+                if (!zoneId) return;
+                if (myPrefs.length >= 50) {
+                    window.REN.toast('50 zones maximum dans la liste.', 'error');
+                    return;
+                }
+                var zone = allZones.find(function (z) { return z.id === zoneId; });
+                if (!zone) return;
+                myPrefs.push({ zone_id: zone.id, nom: zone.nom, niveau_zone: zone.niveau_zone, type: zone.type });
+                prefsDirty = true;
+                renderPrefs();
+            });
+        }
+
+        if (saveBtn) saveBtn.addEventListener('click', savePrefs);
+    }
+
+    async function savePrefs() {
+        var saveBtn = document.getElementById('board-prefs-save');
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Enregistrement...'; }
         try {
-            var { data } = await window.REN.supabase
-                .from('zones_bda')
-                .select('*')
-                .order('created_at', { ascending: true });
-            zonesBda = data || [];
+            var me = window.REN.currentProfile.id;
+            var del = await window.REN.supabase.from('perco_preferences').delete().eq('user_id', me);
+            if (del.error) throw del.error;
+
+            if (myPrefs.length) {
+                var rows = myPrefs.map(function (p, i) {
+                    return { user_id: me, zone_id: p.zone_id, ordre: i + 1 };
+                });
+                var ins = await window.REN.supabase.from('perco_preferences').insert(rows);
+                if (ins.error) throw ins.error;
+            }
+
+            prefsDirty = false;
+            renderPrefs();
+            window.REN.toast('Préférences enregistrées. Elles seront utilisées au prochain calcul d\'attribution.', 'success');
         } catch (err) {
-            console.error('[REN-BOARD] Erreur zones BDA:', err);
+            console.error('[REN-BOARD] Erreur sauvegarde préférences:', err);
+            window.REN.toast('Erreur : ' + err.message, 'error');
+        } finally {
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer mes préférences'; }
         }
     }
 
+    /* === ZONES BDA === */
     function setupBdaModal() {
         var btn = document.getElementById('btn-zones-bda');
         var overlay = document.getElementById('modal-zones-bda');
@@ -433,7 +411,6 @@
         var listEl = document.getElementById('zones-bda-list');
         if (!btn || !overlay) return;
 
-        /* Badge count on button */
         if (zonesBda.length > 0) {
             btn.innerHTML += ' <span class="bda-badge">' + zonesBda.length + '</span>';
         }
@@ -470,23 +447,6 @@
         });
         html += '</div>';
         container.innerHTML = html;
-    }
-
-    /* === UTILS === */
-    function formatNumber(n) {
-        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    }
-
-    function formatWeekLabel(debut, fin) {
-        var d = new Date(debut);
-        var f = new Date(fin);
-        var mois = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
-        return d.getDate() + ' ' + mois[d.getMonth()] + ' — ' + f.getDate() + ' ' + mois[f.getMonth()] + ' ' + f.getFullYear();
-    }
-
-    function formatDate(date) {
-        var mois = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
-        return date.getDate() + ' ' + mois[date.getMonth()];
     }
 
 })();

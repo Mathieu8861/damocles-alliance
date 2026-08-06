@@ -6,6 +6,7 @@
     'use strict';
 
     var allMembers = [];
+    var mulesInfosByUser = {};
 
     document.addEventListener('ren:ready', init);
 
@@ -29,9 +30,16 @@
         if (!grid) return;
 
         try {
-            var { data, error } = await window.REN.supabase.rpc('get_member_stats');
-            if (error) throw error;
-            allMembers = data || [];
+            var [statsRes, infosRes] = await Promise.all([
+                window.REN.supabase.rpc('get_member_stats'),
+                window.REN.supabase.from('profiles').select('username, mules_infos').eq('is_validated', true)
+            ]);
+            if (statsRes.error) throw statsRes.error;
+            allMembers = statsRes.data || [];
+            mulesInfosByUser = {};
+            (infosRes.data || []).forEach(function (p) {
+                mulesInfosByUser[p.username] = p.mules_infos || {};
+            });
             renderMembers('');
         } catch (err) {
             console.error('[REN] Erreur membres:', err);
@@ -78,7 +86,12 @@
 
             if (m.mules && m.mules.length > 0) {
                 html += '<div class="member-card__mules"><span class="member-card__mules-label">Mules</span>'
-                    + m.mules.map(function (mu) { return '<span class="member-card__mule-chip notranslate">' + esc(mu) + '</span>'; }).join('')
+                    + m.mules.map(function (mu) {
+                        var info = (mulesInfosByUser[m.username] || {})[mu] || {};
+                        var det = [info.classe, (info.elements || []).join('/')].filter(Boolean).join(' ');
+                        return '<span class="member-card__mule-chip notranslate">' + esc(mu)
+                            + (det ? ' <span class="member-card__mule-det">' + esc(det) + '</span>' : '') + '</span>';
+                    }).join('')
                     + '</div>';
             }
 

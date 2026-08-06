@@ -140,6 +140,31 @@
         if (appAdminLink) {
             appAdminLink.style.display = (profile && profile.is_admin) ? '' : 'none';
         }
+        updatePendingBadge(profile);
+    }
+
+    /* Badge rouge sur les liens Admin : inscriptions en attente de validation */
+    async function updatePendingBadge(profile) {
+        if (!profile || !profile.is_admin || !window.REN.supabase) return;
+        try {
+            var res = await window.REN.supabase
+                .from('profiles')
+                .select('id', { count: 'exact', head: true })
+                .eq('is_validated', false);
+            var n = res.count || 0;
+            ['nav-admin-link', 'app-admin-link'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                var old = el.querySelector('.notif-badge');
+                if (old) old.remove();
+                if (n > 0) {
+                    var b = document.createElement('span');
+                    b.className = 'notif-badge';
+                    b.textContent = n > 9 ? '9+' : n;
+                    el.appendChild(b);
+                }
+            });
+        } catch (e) { /* silencieux */ }
     }
 
     async function updateMemberCount() {

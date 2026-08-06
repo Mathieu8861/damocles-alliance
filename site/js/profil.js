@@ -84,6 +84,13 @@
     }
 
     /* === MULES === */
+    var MULE_CLASSES = ['Cra', 'Ecaflip', 'Eliotrope', 'Eniripsa', 'Enutrof', 'Feca', 'Forge', 'Huppermage', 'Iop', 'Osamodas', 'Ouginak', 'Pandawa', 'Roublard', 'Sacrieur', 'Sadida', 'Sram', 'Steamer', 'Xelor', 'Zobal'];
+    var MULE_ELEMENTS = ['Terre', 'Feu', 'Eau', 'Air', 'Multi', 'Do Pou', 'Do Cri'];
+
+    function muleInfos() {
+        return window.REN.currentProfile.mules_infos || {};
+    }
+
     function populateMules() {
         var container = document.getElementById('profil-mules-list');
         if (!container) return;
@@ -95,15 +102,51 @@
             return;
         }
 
+        var esc = window.REN.escapeHtml;
+        var infosMap = muleInfos();
         var html = '';
         mules.forEach(function (mule, index) {
-            html += '<div class="profil-mule-item">';
-            html += '<span class="profil-mule-item__name">' + mule + '</span>';
+            var info = infosMap[mule] || {};
+            var elems = info.elements || [];
+            html += '<div class="profil-mule-item profil-mule-item--rich">';
+            html += '<div class="profil-mule-item__head">';
+            html += '<span class="profil-mule-item__name notranslate">' + esc(mule) + '</span>';
             html += '<button type="button" class="profil-mule-item__remove" data-index="' + index + '" title="Supprimer">&times;</button>';
+            html += '</div>';
+            html += '<div class="profil-mule-item__opts">';
+            html += '<select class="form-select mule-classe" data-mule="' + esc(mule) + '"><option value="">Classe...</option>'
+                + MULE_CLASSES.map(function (c) { return '<option value="' + c + '"' + (info.classe === c ? ' selected' : '') + '>' + c + '</option>'; }).join('')
+                + '</select>';
+            html += '<div class="mule-elements">'
+                + MULE_ELEMENTS.map(function (el) {
+                    var active = elems.indexOf(el) !== -1;
+                    return '<button type="button" class="elem-chip' + (active ? ' elem-chip--active' : '') + '" data-mule="' + esc(mule) + '" data-elem="' + el + '">' + el + '</button>';
+                }).join('')
+                + '</div>';
+            html += '</div>';
             html += '</div>';
         });
 
         container.innerHTML = html;
+    }
+
+    /* Sauvegarde (debounce) des infos classe/elements des mules */
+    var saveInfosTimer = null;
+    function saveMulesInfos(infosMap) {
+        window.REN.currentProfile.mules_infos = infosMap;
+        clearTimeout(saveInfosTimer);
+        saveInfosTimer = setTimeout(async function () {
+            try {
+                var { error } = await window.REN.supabase
+                    .from('profiles')
+                    .update({ mules_infos: infosMap })
+                    .eq('id', window.REN.currentUser.id);
+                if (error) throw error;
+            } catch (err) {
+                console.error('[REN] Erreur infos mules:', err);
+                window.REN.toast('Erreur : ' + err.message, 'error');
+            }
+        }, 500);
     }
 
     function setupMulesForm() {
@@ -124,13 +167,48 @@
             }
         });
 
-        /* Supprimer une mule (delegation) */
+        /* Supprimer une mule ou toggler un element (delegation) */
         listEl.addEventListener('click', function (e) {
             var removeBtn = e.target.closest('.profil-mule-item__remove');
-            if (!removeBtn) return;
-            var index = parseInt(removeBtn.getAttribute('data-index'));
-            removeMule(index);
+            if (removeBtn) {
+                removeMule(parseInt(removeBtn.getAttribute('data-index')));
+                return;
+            }
+            var chip = e.target.closest('.elem-chip');
+            if (chip) {
+                var muleName = chip.getAttribute('data-mule');
+                var elem = chip.getAttribute('data-elem');
+                var infosMap = muleInfos();
+                var info = infosMap[muleName] || {};
+                var elems = (info.elements || []).slice();
+                var i = elems.indexOf(elem);
+                if (i === -1) elems.push(elem); else elems.splice(i, 1);
+                info.elements = elems;
+                infosMap[muleName] = info;
+                saveMulesInfos(infosMap);
+                chip.classList.toggle('elem-chip--active');
+            }
         });
+
+        /* Classe d'une mule */
+        listEl.addEventListener('change', function (e) {
+            var sel = e.target.closest('.mule-classe');
+            if (!sel) return;
+            var infosMap = muleInfos();
+            var info = infosMap[sel.getAttribute('data-mule')] || {};
+            info.classe = sel.value || null;
+            infosMap[sel.getAttribute('data-mule')] = info;
+            saveMulesInfos(infosMap);
+        });
+
+        /* Chips elements du formulaire d'ajout : simple toggle visuel */
+        var addElems = document.getElementById('profil-mule-add-elements');
+        if (addElems) {
+            addElems.addEventListener('click', function (e) {
+                var chip = e.target.closest('.elem-chip');
+                if (chip) chip.classList.toggle('elem-chip--active');
+            });
+        }
     }
 
     async function addMule() {
@@ -152,22 +230,40 @@
 
         mules.push(name);
 
+        /* Classe + elements choisis dans le formulaire d'ajout */
+        var claSel = document.getElementById('profil-mule-classe');
+        var addElems = document.getElementById('profil-mule-add-elements');
+        var selElems = [];
+        if (addElems) {
+            addElems.querySelectorAll('.elem-chip--active').forEach(function (c) {
+                selElems.push(c.getAttribute('data-elem'));
+            });
+        }
+        var infosMap = muleInfos();
+        if ((claSel && claSel.value) || selElems.length) {
+            infosMap[name] = { classe: (claSel && claSel.value) || null, elements: selElems };
+        }
+
         try {
             var { error } = await window.REN.supabase
                 .from('profiles')
-                .update({ mules: mules })
+                .update({ mules: mules, mules_infos: infosMap })
                 .eq('id', window.REN.currentUser.id);
 
             if (error) throw error;
 
             window.REN.currentProfile.mules = mules;
+            window.REN.currentProfile.mules_infos = infosMap;
             input.value = '';
+            if (claSel) claSel.value = '';
+            if (addElems) addElems.querySelectorAll('.elem-chip--active').forEach(function (c) { c.classList.remove('elem-chip--active'); });
             populateMules();
             populateInfos();
             window.REN.toast('Mule "' + name + '" ajoutee !', 'success');
         } catch (err) {
             console.error('[REN] Erreur ajout mule:', err);
             mules.pop();
+            delete infosMap[name];
             window.REN.toast('Erreur lors de l\'ajout.', 'error');
         }
     }
@@ -175,16 +271,19 @@
     async function removeMule(index) {
         var mules = (window.REN.currentProfile.mules || []).slice();
         var removed = mules.splice(index, 1)[0];
+        var infosMap = muleInfos();
+        delete infosMap[removed];
 
         try {
             var { error } = await window.REN.supabase
                 .from('profiles')
-                .update({ mules: mules })
+                .update({ mules: mules, mules_infos: infosMap })
                 .eq('id', window.REN.currentUser.id);
 
             if (error) throw error;
 
             window.REN.currentProfile.mules = mules;
+            window.REN.currentProfile.mules_infos = infosMap;
             populateMules();
             populateInfos();
             window.REN.toast('Mule "' + removed + '" supprimee.', 'success');
@@ -622,26 +721,11 @@
             html += '</div>';
             html += '</div>';
 
-            /* Zone réservée (75+ pts semaine en cours OU semaine passée) */
+            /* Zone réservée : attribuée automatiquement par le système de préférences (board) */
             html += '<div class="profil-droits__separator"></div>';
-            if (pointsCurrent >= 75 || pointsLast >= 75) {
-                var currentZone = window.REN.currentProfile.zone_reservee || '';
-                html += '<div class="profil-droits__zone">';
-                html += '<label class="profil-droits__toggle-label">Zone r\u00e9serv\u00e9e</label>';
-                html += '<div class="profil-droits__zone-row">';
-                html += '<input type="text" class="form-input" id="profil-zone" placeholder="Ex: Bonta centre" value="' + currentZone + '">';
-                html += '<button class="profil-droits__zone-btn" id="btn-save-zone">OK</button>';
-                html += '</div>';
-                html += '</div>';
-            } else {
-                html += '<div class="profil-droits__zone profil-droits__zone--locked">';
-                html += '<span class="text-muted" style="font-size:0.8125rem;">Zone r\u00e9serv\u00e9e — disponible \u00e0 partir de 75 pts/semaine</span>';
-                html += '</div>';
-            }
-
-            container.innerHTML = html;
-            setupPreferenceToggle();
-            setupZoneReservee();
+            html += '<div class="profil-droits__zone">';
+            html += '<span class="text-muted" style="font-size:0.8125rem;">Les zones réservées sont attribuées automatiquement à chaque quinzaine selon le classement. <a href="board.html" style="color:var(--color-accent-light);">Définis tes préférences de zones ici</a>.</span>';
+            html += '</div>';
 
         } catch (err) {
             console.error('[REN] Erreur droits hebdo:', err);
@@ -739,33 +823,6 @@
                     window.REN.toast('Erreur lors de la sauvegarde.', 'error');
                 }
             });
-        });
-    }
-
-    function setupZoneReservee() {
-        var btn = document.getElementById('btn-save-zone');
-        var input = document.getElementById('profil-zone');
-        if (!btn || !input) return;
-
-        btn.addEventListener('click', async function () {
-            var zone = input.value.trim() || null;
-            btn.disabled = true;
-            btn.textContent = '...';
-            try {
-                var { error } = await window.REN.supabase
-                    .from('profiles')
-                    .update({ zone_reservee: zone })
-                    .eq('id', window.REN.currentUser.id);
-                if (error) throw error;
-                window.REN.currentProfile.zone_reservee = zone;
-                window.REN.toast(zone ? 'Zone enregistr\u00e9e : ' + zone : 'Zone retir\u00e9e', 'success');
-            } catch (err) {
-                console.error('[REN] Erreur zone reservee:', err);
-                window.REN.toast('Erreur : ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'OK';
-            }
         });
     }
 

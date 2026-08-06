@@ -8573,3 +8573,293 @@ body.app-has-sidebar {
 .combat-form--attaque.combat-form--attaque { border-top-color: var(--color-accent); }
 .combat-form--defense.combat-form--defense { border-top-color: #3498db; }
 .fm-session-card--ongoing.fm-session-card--ongoing { border-color: rgba(243, 156, 18, 0.45); }
+
+/* ================================================================== */
+/* DROITS PERCO : panneau "Mes préférences de zones" + tableau (03/08) */
+/* ================================================================== */
+.board-prefs {
+    background: linear-gradient(135deg,
+        rgba(84, 52, 189, 0.26) 0%,
+        rgba(34, 24, 66, 0.5) 48%,
+        rgba(15, 13, 28, 0.65) 100%);
+    border: 1px solid rgba(140, 110, 255, 0.24);
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.board-prefs__title {
+    font-family: var(--font-title);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.board-prefs__hint {
+    font-size: 0.8125rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.pref-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 8px 12px;
+    border: 1px solid rgba(140, 110, 255, 0.18);
+    border-radius: var(--radius-md);
+    background: rgba(10, 8, 22, 0.35);
+    margin-bottom: 6px;
+}
+
+.pref-row__ordre {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(125, 95, 247, 0.25);
+    color: var(--color-accent-light);
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.pref-row__nom {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.pref-row__lvl {
+    color: var(--color-text-muted);
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+.pref-row__actions {
+    display: flex;
+    gap: 4px;
+}
+
+.pref-row__btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.pref-row__btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent-light);
+}
+
+.pref-row__btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.pref-row__btn--del:hover:not(:disabled) {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.board-prefs__add {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.board-prefs__footer {
+    margin-top: var(--spacing-md);
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    .board-prefs__add { grid-template-columns: 1fr; }
+}
+
+/* Tableau : ma ligne + badges */
+.board-table__row--me .board-table__td {
+    background: rgba(125, 95, 247, 0.10);
+}
+
+.board-table__dj {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(212, 175, 55, 0.18);
+    color: var(--color-warning);
+    font-size: 0.65rem;
+    font-weight: 700;
+    vertical-align: 1px;
+}
+
+.board-table__lvl {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+/* ================================================================== */
+/* BADGE NOTIFICATION (inscriptions en attente de validation)         */
+/* ================================================================== */
+.header__icon,
+.app-sidebar__user-icon {
+    position: relative;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px var(--color-bg-primary);
+    pointer-events: none;
+}
+
+.notif-badge--inline {
+    position: static;
+    display: inline-flex;
+    margin-left: 6px;
+    vertical-align: 1px;
+    box-shadow: none;
+}
+
+/* ================================================================== */
+/* MULES : classe + elements joues par mule (profil + cartes membres) */
+/* ================================================================== */
+.profil-mule-add .form-select {
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.mule-elements {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mule-elements--add {
+    margin: calc(-1 * var(--spacing-sm)) 0 var(--spacing-md);
+}
+
+.elem-chip {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(10, 8, 22, 0.4);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.elem-chip:hover {
+    border-color: var(--color-accent);
+}
+
+.elem-chip--active {
+    background: rgba(125, 95, 247, 0.22);
+    border-color: var(--color-accent);
+    color: var(--color-accent-light);
+}
+
+.profil-mule-item--rich {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.profil-mule-item__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profil-mule-item__opts {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.profil-mule-item__opts .mule-classe {
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.member-card__mule-det {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 400;
+}
+
+/* ================================================================== */
+/* EDITION COMBAT : chips participants dans la modale                 */
+/* ================================================================== */
+.edit-participants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.edit-participant-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px 3px 10px;
+    border-radius: 999px;
+    background: rgba(125, 95, 247, 0.15);
+    border: 1px solid rgba(140, 110, 255, 0.3);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.edit-participant-chip__remove {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-radius: 50%;
+}
+
+.edit-participant-chip__remove:hover {
+    color: var(--color-danger);
+}
+
+.edit-participants__add {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-sm);
+}
