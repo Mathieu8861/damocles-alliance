@@ -671,10 +671,16 @@
                 window.REN.supabase
                     .from('pepites_semaine_courante')
                     .select('id, pepites')
-                    .eq('id', userId)
+                    .eq('id', userId),
+                window.REN.supabase
+                    .from('site_config')
+                    .select('valeur')
+                    .eq('cle', 'perco_mode')
+                    .maybeSingle()
             ]);
 
             var recompensesConfig = results[0].data || [];
+            var percoMode = results[5] && results[5].data && results[5].data.valeur === 'rang' ? 'rang' : 'points';
 
             /* Semaine passee */
             var pvpLast = (results[1].data && results[1].data[0]) ? results[1].data[0] : null;
@@ -721,11 +727,32 @@
             html += '</div>';
             html += '</div>';
 
-            /* Zone réservée : attribuée automatiquement par le système de préférences (board) */
+            /* Zone réservée : selon le modèle actif (Admin > Barème Perco) */
             html += '<div class="profil-droits__separator"></div>';
-            html += '<div class="profil-droits__zone">';
-            html += '<span class="text-muted" style="font-size:0.8125rem;">Les zones réservées sont attribuées automatiquement à chaque quinzaine selon le classement. <a href="board.html" style="color:var(--color-accent-light);">Définis tes préférences de zones ici</a>.</span>';
-            html += '</div>';
+            if (percoMode === 'rang') {
+                /* Modèle avancé : zones attribuées automatiquement via les préférences (board) */
+                html += '<div class="profil-droits__zone">';
+                html += '<span class="text-muted" style="font-size:0.8125rem;">Les zones réservées sont attribuées automatiquement à chaque quinzaine selon le classement. <a href="board.html" style="color:var(--color-accent-light);">Définis tes préférences de zones ici</a>.</span>';
+                html += '</div>';
+            } else if (pointsCurrent >= 75 || pointsLast >= 75) {
+                /* Modèle simple : réservation libre dès 75 pts sur l'une des 2 quinzaines */
+                var currentZone = window.REN.currentProfile.zone_reservee || '';
+                html += '<div class="profil-droits__zone">';
+                html += '<label class="profil-droits__toggle-label">Zone réservée</label>';
+                html += '<div class="profil-droits__zone-row">';
+                html += '<input type="text" class="form-input" id="profil-zone" placeholder="Ex: Bonta centre" value="' + window.REN.escapeHtml(currentZone) + '">';
+                html += '<button class="profil-droits__zone-btn" id="btn-save-zone">OK</button>';
+                html += '</div>';
+                html += '</div>';
+            } else {
+                html += '<div class="profil-droits__zone profil-droits__zone--locked">';
+                html += '<span class="text-muted" style="font-size:0.8125rem;">Zone réservée : disponible à partir de 75 pts sur la quinzaine</span>';
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+            setupPreferenceToggle();
+            setupZoneReservee();
 
         } catch (err) {
             console.error('[REN] Erreur droits hebdo:', err);
@@ -823,6 +850,34 @@
                     window.REN.toast('Erreur lors de la sauvegarde.', 'error');
                 }
             });
+        });
+    }
+
+    /* Sauvegarde de la zone reservee (modele simple par points uniquement) */
+    function setupZoneReservee() {
+        var btn = document.getElementById('btn-save-zone');
+        var input = document.getElementById('profil-zone');
+        if (!btn || !input) return;
+
+        btn.addEventListener('click', async function () {
+            var zone = input.value.trim() || null;
+            btn.disabled = true;
+            btn.textContent = '...';
+            try {
+                var { error } = await window.REN.supabase
+                    .from('profiles')
+                    .update({ zone_reservee: zone })
+                    .eq('id', window.REN.currentUser.id);
+                if (error) throw error;
+                window.REN.currentProfile.zone_reservee = zone;
+                window.REN.toast(zone ? 'Zone enregistrée : ' + zone : 'Zone retirée', 'success');
+            } catch (err) {
+                console.error('[REN] Erreur zone reservee:', err);
+                window.REN.toast('Erreur : ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'OK';
+            }
         });
     }
 

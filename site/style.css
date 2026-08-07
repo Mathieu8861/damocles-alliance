@@ -8939,3 +8939,144 @@ body.app-has-sidebar {
     color: var(--color-text-primary);
     background: rgba(255, 255, 255, 0.06);
 }
+
+/* ============================================ */
+/* ADMIN - SELECTEUR DE MODELE DROITS PERCO     */
+/* ============================================ */
+.perco-mode-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.perco-mode-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.perco-mode-card strong {
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+}
+
+.perco-mode-card:hover {
+    border-color: var(--color-border-light);
+}
+
+.perco-mode-card--active {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.10);
+    cursor: default;
+}
+
+.perco-mode-card--active strong {
+    color: var(--color-accent-light);
+}
+
+@media (max-width: 640px) {
+    .perco-mode-switch {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Fil d'activite : badge format du combat (5v4...) + espacement des badges */
+.activity__text .badge {
+    margin-right: 10px;
+}
+
+.badge--format {
+    background-color: var(--color-accent);
+    color: #fff;
+}
+
+/* Board : encart "ta zone attribuee" dans l'onglet preferences */
+.board-prefs__mine {
+    padding: 10px 14px;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-accent);
+    background: rgba(var(--color-accent-rgb), 0.10);
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.board-prefs__mine strong {
+    color: var(--color-accent-light);
+}
+
+.board-prefs__mine--none {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+}
+
+/* Board : liste complete des zones, reordonnable (drag & drop) */
+.board-prefs__search {
+    margin-bottom: var(--spacing-sm);
+}
+
+.board-prefs__search .form-input {
+    max-width: 340px;
+}
+
+.board-prefs__list {
+    max-height: 62vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.board-prefs__footer {
+    gap: var(--spacing-sm);
+}
+
+.pref-row--drag {
+    cursor: grab;
+}
+
+.pref-row--dragging {
+    opacity: 0.45;
+    cursor: grabbing;
+}
+
+.pref-row--hit {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.12);
+}
+
+.pref-row__grip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted);
+}
+
+.pref-row__cat {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+
+.pref-row__base {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}

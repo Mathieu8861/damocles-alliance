@@ -1300,7 +1300,118 @@
     }
 
     /* === TAB: BARÈME PERCO (config récompenses) === */
+    /* === Selecteur de modele de droits perco (points = simple / rang = reservations) === */
+    function percoModeSelectorHtml(active) {
+        var html = '<div class="admin-panel__title">Modèle de droits perco</div>';
+        html += '<div class="perco-mode-switch">';
+        html += '<button type="button" class="perco-mode-card' + (active === 'points' ? ' perco-mode-card--active' : '') + '" data-perco-mode="points">';
+        html += '<strong>Paliers de points</strong>';
+        html += '<span>Simple : les points PvP de la quinzaine donnent droit à des percos. Pas de réservation de zones.</span>';
+        html += '</button>';
+        html += '<button type="button" class="perco-mode-card' + (active === 'rang' ? ' perco-mode-card--active' : '') + '" data-perco-mode="rang">';
+        html += '<strong>Classement + réservations</strong>';
+        html += '<span>Avancé : droits selon le rang au classement + attribution automatique des zones par préférences.</span>';
+        html += '</button>';
+        html += '</div>';
+        return html;
+    }
+
+    function bindPercoModeSelector(content) {
+        content.querySelectorAll('[data-perco-mode]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                if (btn.classList.contains('perco-mode-card--active')) return;
+                var mode = btn.getAttribute('data-perco-mode');
+                var { error } = await window.REN.supabase.from('site_config')
+                    .upsert({ cle: 'perco_mode', valeur: mode }, { onConflict: 'cle' });
+                if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+                window.REN.toast(mode === 'points'
+                    ? 'Modèle « paliers de points » activé.'
+                    : 'Modèle « classement + réservations » activé.', 'success');
+                tabBaremePerco(content);
+            });
+        });
+    }
+
+    /* === Editeur du bareme par paliers de points (recompenses_config) === */
+    async function renderBaremePoints(content) {
+        var { data: config } = await window.REN.supabase
+            .from('recompenses_config').select('*').order('ordre');
+        var rows = config || [];
+        var esc = window.REN.escapeHtml;
+
+        var html = percoModeSelectorHtml('points');
+        html += '<div class="admin-panel__title">Barème par paliers de points</div>';
+        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Récompenses selon les points PvP de la quinzaine écoulée. Laisser « Pts max » vide pour un palier sans plafond.</p>';
+
+        html += '<div class="table-wrapper"><table class="table">';
+        html += '<thead><tr><th>Palier</th><th>Emoji</th><th>Pts min</th><th>Pts max</th><th>Percos</th><th>Pépites</th><th>Jetons</th><th>Actions</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+            html += '<tr data-id="' + r.id + '">';
+            html += '<td><input class="form-input" style="width:110px;" data-field="label" value="' + esc(r.label) + '"></td>';
+            html += '<td><input class="form-input" style="width:55px;text-align:center;" data-field="emoji" value="' + esc(r.emoji || '') + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:75px;" data-field="seuil_min" min="0" value="' + r.seuil_min + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:75px;" data-field="seuil_max" min="0" placeholder="&#8734;" value="' + (r.seuil_max !== null ? r.seuil_max : '') + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:75px;" data-field="percepteurs_bonus" min="0" value="' + r.percepteurs_bonus + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:80px;" data-field="pepites" min="0" value="' + r.pepites + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:75px;" data-field="jetons_reward" min="0" value="' + (r.jetons_reward || 0) + '"></td>';
+            html += '<td><button class="btn btn--secondary btn--small" data-action="save-tier">Enregistrer</button> ';
+            html += '<button class="btn btn--danger btn--small" data-action="del-tier">Suppr.</button></td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        html += '<button class="btn btn--primary btn--small" id="btn-add-tier" style="margin-top:var(--spacing-md);">+ Ajouter un palier</button>';
+
+        content.innerHTML = html;
+        bindPercoModeSelector(content);
+
+        content.querySelectorAll('[data-action="save-tier"]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                var tr = btn.closest('tr');
+                var payload = {};
+                tr.querySelectorAll('input[data-field]').forEach(function (inp) {
+                    var f = inp.dataset.field;
+                    if (f === 'label' || f === 'emoji') payload[f] = inp.value.trim();
+                    else if (f === 'seuil_max') payload[f] = inp.value.trim() === '' ? null : (parseInt(inp.value, 10) || 0);
+                    else payload[f] = parseInt(inp.value, 10) || 0;
+                });
+                var { error } = await window.REN.supabase.from('recompenses_config').update(payload).eq('id', parseInt(tr.dataset.id, 10));
+                if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+                window.REN.toast('Palier enregistré.', 'success');
+            });
+        });
+
+        content.querySelectorAll('[data-action="del-tier"]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                if (!confirm('Supprimer ce palier ?')) return;
+                var tr = btn.closest('tr');
+                var { error } = await window.REN.supabase.from('recompenses_config').delete().eq('id', parseInt(tr.dataset.id, 10));
+                if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+                window.REN.toast('Palier supprimé.', 'success');
+                tabBaremePerco(content);
+            });
+        });
+
+        var addBtn = document.getElementById('btn-add-tier');
+        if (addBtn) addBtn.addEventListener('click', async function () {
+            var maxOrdre = rows.length ? Math.max.apply(null, rows.map(function (r) { return r.ordre; })) : 0;
+            var { error } = await window.REN.supabase.from('recompenses_config').insert({
+                label: 'Nouveau', emoji: '', seuil_min: 0, seuil_max: null,
+                percepteurs_bonus: 0, pepites: 0, jetons_reward: 0, ordre: maxOrdre + 1
+            });
+            if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
+            tabBaremePerco(content);
+        });
+    }
+
     async function tabBaremePerco(content) {
+        var modeRes = await window.REN.supabase.from('site_config').select('valeur').eq('cle', 'perco_mode').maybeSingle();
+        var percoMode = modeRes.data && modeRes.data.valeur === 'rang' ? 'rang' : 'points';
+
+        if (percoMode === 'points') {
+            await renderBaremePoints(content);
+            return;
+        }
+
         var [paliersRes, toursRes] = await Promise.all([
             window.REN.supabase.from('paliers_percos').select('*').order('rang_min'),
             window.REN.supabase.from('site_config').select('valeur').eq('cle', 'perco_resa_tours').maybeSingle()
@@ -1309,7 +1420,8 @@
         var tours = toursRes.data ? (parseInt(toursRes.data.valeur, 10) || 1) : 1;
         var esc = window.REN.escapeHtml;
 
-        var html = '<div class="admin-panel__title">Droits Percos par rang</div>';
+        var html = percoModeSelectorHtml('rang');
+        html += '<div class="admin-panel__title">Droits Percos par rang</div>';
         html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Paliers selon la position au classement de la quinzaine écoulée. « Percos » = poses classiques, « Percos 150- » = poses en zones de niveau 150 maximum.</p>';
 
         html += '<div class="table-wrapper"><table class="table">';
@@ -1335,6 +1447,7 @@
         html += '<span id="recalc-result" class="text-muted" style="margin-left:var(--spacing-md);font-size:0.8125rem;"></span>';
 
         content.innerHTML = html;
+        bindPercoModeSelector(content);
 
         content.querySelectorAll('[data-action="save-palier"]').forEach(function (btn) {
             btn.addEventListener('click', async function () {

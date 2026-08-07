@@ -245,8 +245,9 @@
                     preuvesStr += ' <a class="activity__preuve js-lightbox" href="' + su + '" target="_blank" rel="noopener" title="Voir le screenshot ' + (idx + 1) + '">&#128247;' + (idx + 1) + '</a>';
                 });
 
+                var formatBadge = (c.nb_allies && c.nb_ennemis) ? '<span class="badge badge--format">' + c.nb_allies + 'v' + c.nb_ennemis + '</span>' : '';
                 html += '<div class="activity__item">';
-                html += '<div class="activity__text"><span class="badge ' + badgeClass + '">' + badgeText + '</span> ';
+                html += '<div class="activity__text"><span class="badge ' + badgeClass + '">' + badgeText + '</span>' + formatBadge;
                 html += '<strong>' + auteurName + '</strong>' + matesStr + ' ' + actionVerb + ' ' + actionType + ' contre ' + allianceName + butinStr + pointsStr + preuvesStr;
                 html += '</div>';
                 html += '<span class="activity__time">' + window.REN.formatDate(c.created_at) + '</span>';
