@@ -1737,11 +1737,10 @@ table {
     cursor: pointer;
     border-radius: 50%;
     transition: background var(--transition-fast), color var(--transition-fast);
-    opacity: 0;
-}
-
-.history-card:hover .history-card__delete {
+    /* Toujours visible pour ceux qui ont le droit de supprimer (le JS ne
+       cree le bouton que pour eux) */
     opacity: 1;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .history-card__delete:hover {
@@ -1766,11 +1765,9 @@ table {
     cursor: pointer;
     border-radius: 50%;
     transition: background var(--transition-fast), color var(--transition-fast);
-    opacity: 0;
-}
-
-.history-card:hover .history-card__edit {
+    /* Toujours visible pour ceux qui peuvent modifier (admin, ou auteur < 3h) */
     opacity: 1;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .history-card__edit:hover {
