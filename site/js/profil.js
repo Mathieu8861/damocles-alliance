@@ -806,9 +806,12 @@
         } else if (points > 0 && prefRecompense === 'jetons' && (reward.jetons_reward || 0) > 0) {
             html += '<span class="profil-droits__stat-label">R\u00e9compense PVP</span>';
             html += '<span class="profil-droits__stat-value profil-droits__stat-value--accent">+' + reward.jetons_reward + ' <img class="icon-inline" src="assets/images/jeton.png" alt=""></span>';
-        } else if (points > 0 && reward.percepteurs_bonus > 0) {
+        } else if (points > 0 && (reward.percepteurs_bonus > 0 || (reward.resa || 0) > 0)) {
             html += '<span class="profil-droits__stat-label">R\u00e9compense PVP</span>';
-            html += '<span class="profil-droits__stat-value profil-droits__stat-value--accent">+' + reward.percepteurs_bonus + ' <img class="icon-inline icon-inline--lg" src="assets/images/percepteur.png" alt=""></span>';
+            var totalPercos = reward.percepteurs_bonus + (reward.resa || 0);
+            html += '<span class="profil-droits__stat-value profil-droits__stat-value--accent">+' + totalPercos + ' <img class="icon-inline icon-inline--lg" src="assets/images/percepteur.png" alt="">'
+                + ((reward.resa || 0) > 0 ? ' <span style="font-size:0.7rem;color:var(--color-accent-light);font-weight:600;">(dont ' + reward.resa + ' résa)</span>' : '')
+                + '</span>';
         } else {
             html += '<span class="profil-droits__stat-label">R\u00e9compense PVP</span>';
             html += '<span class="profil-droits__stat-value text-muted">Aucune</span>';

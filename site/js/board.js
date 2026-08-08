@@ -189,6 +189,9 @@
             if ((r.resa || 0) > 0) { hasReward = true; html += '<span class="board-bareme__resa">+ ' + r.resa + ' résa de zone</span>'; }
             if (r.pepites > 0) { hasReward = true; html += '<span class="board-bareme__pepites">' + formatNumber(r.pepites) + ' pépites</span>'; }
             if ((r.jetons_reward || 0) > 0) { hasReward = true; html += '<span class="board-bareme__pepites">' + r.jetons_reward + ' jetons</span>'; }
+            if ((r.resa || 0) > 0 && r.percepteurs_bonus > 0) {
+                html += '<span class="board-bareme__total">= ' + (r.percepteurs_bonus + r.resa) + ' percos au total</span>';
+            }
             if (!hasReward) html += '<span class="text-muted">—</span>';
             html += '</div></div>';
         });
@@ -269,8 +272,13 @@
                     reward = formatNumber(r.pepites) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="pépites">';
                 } else if (pref === 'jetons' && (r.jetons_reward || 0) > 0) {
                     reward = '+' + r.jetons_reward + ' <img class="icon-inline" src="assets/images/jeton.png" alt="jetons">';
-                } else if (r.percepteurs_bonus > 0) {
-                    reward = '<strong>' + r.percepteurs_bonus + '</strong> <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="perco">';
+                } else if (r.percepteurs_bonus > 0 || (r.resa || 0) > 0) {
+                    /* Total des poses = percos du palier + perco de la zone reservee */
+                    var totalPercos = r.percepteurs_bonus + (r.resa || 0);
+                    reward = '<strong>' + totalPercos + '</strong> <img class="icon-inline icon-inline--perco" src="assets/images/percepteur.png" alt="perco">';
+                    if ((r.resa || 0) > 0) {
+                        reward += ' <span class="board-table__resa-note">(dont ' + r.resa + ' résa)</span>';
+                    }
                 } else if (r.pepites > 0) {
                     reward = formatNumber(r.pepites) + ' <img class="icon-inline" src="assets/images/pepite.png" alt="pépites">';
                 }

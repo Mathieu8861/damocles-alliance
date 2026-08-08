@@ -9085,6 +9085,18 @@ body.app-has-sidebar {
     color: var(--color-accent-light);
 }
 
+.board-bareme__total {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+.board-table__resa-note {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-accent-light);
+    white-space: nowrap;
+}
+
 .board-resa {
     display: flex;
     align-items: center;
