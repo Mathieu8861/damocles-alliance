@@ -18,7 +18,7 @@
     var pointsConfig = [];      /* paliers par points (recompenses_config), mode simple */
     var prefRecompenseMap = {}; /* user_id -> preference (percos / pepites / jetons) */
     var zoneReserveeMap = {};   /* user_id -> zone_reservee (saisie libre au profil, modele points) */
-    var zoneEligible75 = {};    /* user_id -> true si >= 75 pts sur l'une des 2 quinzaines */
+    var pointsQuinzaines = {};  /* user_id -> {passee, courante} pour l'eligibilite resa */
     var myList = [];            /* liste complete des zones dans MON ordre (drag & drop) */
 
     document.addEventListener('ren:ready', init);
@@ -38,9 +38,10 @@
             var tabDroitsEl = document.getElementById('board-tab-droits');
             if (tabDroitsEl) tabDroitsEl.hidden = false;
 
-            await Promise.all([loadPointsConfig(), loadLadder(), loadZonesBda(), loadPrefRecompense(), loadZoneEligibility75()]);
+            await Promise.all([loadPointsConfig(), loadLadder(), loadZonesBda(), loadPrefRecompense(), loadPointsQuinzaines()]);
             renderPeriodePoints();
             renderBaremePoints();
+            renderResaPoints();
             renderTablePoints();
             setupBdaModal();
             return;
@@ -114,21 +115,34 @@
         }
     }
 
-    async function loadZoneEligibility75() {
-        zoneEligible75 = {};
+    async function loadPointsQuinzaines() {
+        pointsQuinzaines = {};
         try {
             var res = await Promise.all([
                 window.REN.supabase.from('classement_pvp_semaine_passee').select('id, points'),
                 window.REN.supabase.from('classement_pvp_semaine').select('id, points')
             ]);
-            res.forEach(function (r) {
-                (r.data || []).forEach(function (p) {
-                    if (p.points >= 75) zoneEligible75[p.id] = true;
-                });
+            (res[0].data || []).forEach(function (p) {
+                pointsQuinzaines[p.id] = pointsQuinzaines[p.id] || {};
+                pointsQuinzaines[p.id].passee = p.points;
+            });
+            (res[1].data || []).forEach(function (p) {
+                pointsQuinzaines[p.id] = pointsQuinzaines[p.id] || {};
+                pointsQuinzaines[p.id].courante = p.points;
             });
         } catch (err) {
-            console.error('[REN-BOARD] Erreur eligibilite zone:', err);
+            console.error('[REN-BOARD] Erreur points quinzaines:', err);
         }
+    }
+
+    /* Droit de reserver une zone : le palier de points atteint (quinzaine
+       passee OU en cours) doit inclure au moins 1 resa (colonne du bareme) */
+    function canResaPoints(userId) {
+        var pts = pointsQuinzaines[userId];
+        if (!pts) return false;
+        var rPassee = pts.passee !== undefined ? rewardForPoints(pts.passee) : null;
+        var rCourante = pts.courante !== undefined ? rewardForPoints(pts.courante) : null;
+        return !!((rPassee && (rPassee.resa || 0) > 0) || (rCourante && (rCourante.resa || 0) > 0));
     }
 
     function rewardForPoints(points) {
@@ -163,17 +177,65 @@
         var html = '';
         pointsConfig.forEach(function (r) {
             var range = r.seuil_max !== null ? r.seuil_min + '-' + r.seuil_max + ' pts' : r.seuil_min + '+ pts';
-            var rewards = [];
-            if (r.percepteurs_bonus > 0) rewards.push(r.percepteurs_bonus + ' perco' + (r.percepteurs_bonus > 1 ? 's' : ''));
-            if (r.pepites > 0) rewards.push(formatNumber(r.pepites) + ' pépites');
-            if ((r.jetons_reward || 0) > 0) rewards.push(r.jetons_reward + ' jetons');
             html += '<div class="board-bareme__item">'
                 + '<span class="board-bareme__emoji">' + esc(r.emoji || '') + '</span>'
-                + '<span class="board-bareme__label">' + esc(r.label) + ' <span class="text-muted">(' + esc(range) + ')</span></span>'
-                + '<span class="board-bareme__reward">' + esc(rewards.join(' + ') || '—') + '</span>'
-                + '</div>';
+                + '<div class="board-bareme__info">'
+                    + '<span class="board-bareme__label">' + esc(r.label) + '</span>'
+                    + '<span class="board-bareme__range">' + esc(range) + '</span>'
+                + '</div>'
+                + '<div class="board-bareme__rewards">';
+            var hasReward = false;
+            if (r.percepteurs_bonus > 0) { hasReward = true; html += '<span class="board-bareme__perco">' + r.percepteurs_bonus + ' perco' + (r.percepteurs_bonus > 1 ? 's' : '') + '</span>'; }
+            if ((r.resa || 0) > 0) { hasReward = true; html += '<span class="board-bareme__resa">+ ' + r.resa + ' résa de zone</span>'; }
+            if (r.pepites > 0) { hasReward = true; html += '<span class="board-bareme__pepites">' + formatNumber(r.pepites) + ' pépites</span>'; }
+            if ((r.jetons_reward || 0) > 0) { hasReward = true; html += '<span class="board-bareme__pepites">' + r.jetons_reward + ' jetons</span>'; }
+            if (!hasReward) html += '<span class="text-muted">—</span>';
+            html += '</div></div>';
         });
-        container.innerHTML = html || '<p class="text-muted">Aucun palier configuré.</p>';
+        container.innerHTML = html ? '<div class="board-bareme__grid">' + html + '</div>' : '<p class="text-muted">Aucun palier configuré.</p>';
+    }
+
+    /* Encart de reservation de zone sur le board (mode points) : le joueur
+       eligible reserve directement ici, sans passer par son profil */
+    function renderResaPoints() {
+        var box = document.getElementById('board-resa-points');
+        if (!box) return;
+        var me = window.REN.currentProfile.id;
+        if (!canResaPoints(me)) {
+            box.setAttribute('hidden', '');
+            box.innerHTML = '';
+            return;
+        }
+        box.removeAttribute('hidden');
+        var esc = window.REN.escapeHtml;
+        var current = window.REN.currentProfile.zone_reservee || '';
+        box.innerHTML = '<div class="board-resa">'
+            + '<div class="board-resa__label">&#128205; Ton palier te donne droit à une réservation de zone</div>'
+            + '<div class="board-resa__row">'
+            + '<input type="text" class="form-input" id="board-resa-input" maxlength="80" placeholder="Ex: Bonta centre" value="' + esc(current) + '">'
+            + '<button type="button" class="btn btn--primary" id="board-resa-save">' + (current ? 'Modifier' : 'Réserver') + '</button>'
+            + '</div>'
+            + '</div>';
+
+        document.getElementById('board-resa-save').addEventListener('click', async function () {
+            var input = document.getElementById('board-resa-input');
+            var zone = input.value.trim() || null;
+            var btn = this;
+            btn.disabled = true;
+            try {
+                var { error } = await window.REN.supabase.from('profiles')
+                    .update({ zone_reservee: zone }).eq('id', me);
+                if (error) throw error;
+                window.REN.currentProfile.zone_reservee = zone;
+                if (zone) zoneReserveeMap[me] = zone; else delete zoneReserveeMap[me];
+                renderTablePoints();
+                window.REN.toast(zone ? 'Zone réservée : ' + zone : 'Zone retirée', 'success');
+            } catch (err) {
+                window.REN.toast('Erreur : ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
     }
 
     function renderTablePoints() {
@@ -220,7 +282,7 @@
             html += '<td class="board-table__td board-table__td--points">' + p.points + '</td>';
             html += '<td class="board-table__td board-table__td--tier">' + palierTxt + '</td>';
             html += '<td class="board-table__td board-table__td--reward">' + reward + '</td>';
-            var zoneTxt = (zoneReserveeMap[p.user_id] && zoneEligible75[p.user_id])
+            var zoneTxt = (zoneReserveeMap[p.user_id] && canResaPoints(p.user_id))
                 ? '<strong>' + esc(zoneReserveeMap[p.user_id]) + '</strong>'
                 : '—';
             html += '<td class="board-table__td board-table__td--zone">' + zoneTxt + '</td>';
@@ -390,11 +452,15 @@
             if (p.percos_150 > 0) droits.push(p.percos_150 + ' perco' + (p.percos_150 > 1 ? 's' : '') + ' niv 150-');
             html += '<div class="board-bareme__item">'
                 + '<span class="board-bareme__emoji">' + esc(p.emoji || '') + '</span>'
-                + '<span class="board-bareme__label">' + esc(label) + '</span>'
-                + '<span class="board-bareme__reward">' + esc(droits.join(' + ') || '—') + '</span>'
+                + '<div class="board-bareme__info">'
+                    + '<span class="board-bareme__label">' + esc(label) + '</span>'
+                + '</div>'
+                + '<div class="board-bareme__rewards">'
+                    + '<span class="board-bareme__perco">' + esc(droits.join(' + ') || '—') + '</span>'
+                + '</div>'
                 + '</div>';
         });
-        container.innerHTML = html || '<p class="text-muted">Aucun palier configuré.</p>';
+        container.innerHTML = html ? '<div class="board-bareme__grid">' + html + '</div>' : '<p class="text-muted">Aucun palier configuré.</p>';
     }
 
     function palierFor(rang) {

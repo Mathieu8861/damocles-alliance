@@ -1341,10 +1341,10 @@
 
         var html = percoModeSelectorHtml('points');
         html += '<div class="admin-panel__title">Barème par paliers de points</div>';
-        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Récompenses selon les points PvP de la quinzaine écoulée. Laisser « Pts max » vide pour un palier sans plafond.</p>';
+        html += '<p class="text-muted" style="font-size:0.8125rem;margin-bottom:var(--spacing-lg);">Récompenses selon les points PvP de la quinzaine écoulée. Laisser « Pts max » vide pour un palier sans plafond. « Résa » = droit de réserver une zone de percepteur (depuis la page Droits Perco ou le profil).</p>';
 
         html += '<div class="table-wrapper"><table class="table">';
-        html += '<thead><tr><th>Palier</th><th>Emoji</th><th>Pts min</th><th>Pts max</th><th>Percos</th><th>Pépites</th><th>Jetons</th><th>Actions</th></tr></thead><tbody>';
+        html += '<thead><tr><th>Palier</th><th>Emoji</th><th>Pts min</th><th>Pts max</th><th>Percos</th><th>Résa</th><th>Pépites</th><th>Jetons</th><th>Actions</th></tr></thead><tbody>';
         rows.forEach(function (r) {
             html += '<tr data-id="' + r.id + '">';
             html += '<td><input class="form-input" style="width:110px;" data-field="label" value="' + esc(r.label) + '"></td>';
@@ -1352,6 +1352,7 @@
             html += '<td><input type="number" class="form-input" style="width:75px;" data-field="seuil_min" min="0" value="' + r.seuil_min + '"></td>';
             html += '<td><input type="number" class="form-input" style="width:75px;" data-field="seuil_max" min="0" placeholder="&#8734;" value="' + (r.seuil_max !== null ? r.seuil_max : '') + '"></td>';
             html += '<td><input type="number" class="form-input" style="width:75px;" data-field="percepteurs_bonus" min="0" value="' + r.percepteurs_bonus + '"></td>';
+            html += '<td><input type="number" class="form-input" style="width:65px;" data-field="resa" min="0" value="' + (r.resa || 0) + '"></td>';
             html += '<td><input type="number" class="form-input" style="width:80px;" data-field="pepites" min="0" value="' + r.pepites + '"></td>';
             html += '<td><input type="number" class="form-input" style="width:75px;" data-field="jetons_reward" min="0" value="' + (r.jetons_reward || 0) + '"></td>';
             html += '<td><button class="btn btn--secondary btn--small" data-action="save-tier">Enregistrer</button> ';
@@ -1396,7 +1397,7 @@
             var maxOrdre = rows.length ? Math.max.apply(null, rows.map(function (r) { return r.ordre; })) : 0;
             var { error } = await window.REN.supabase.from('recompenses_config').insert({
                 label: 'Nouveau', emoji: '', seuil_min: 0, seuil_max: null,
-                percepteurs_bonus: 0, pepites: 0, jetons_reward: 0, ordre: maxOrdre + 1
+                percepteurs_bonus: 0, resa: 0, pepites: 0, jetons_reward: 0, ordre: maxOrdre + 1
             });
             if (error) { window.REN.toast('Erreur : ' + error.message, 'error'); return; }
             tabBaremePerco(content);

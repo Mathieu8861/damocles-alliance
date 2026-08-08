@@ -727,6 +727,13 @@
             html += '</div>';
             html += '</div>';
 
+            /* Droit de resa : porte par le palier de points (colonne resa du bareme) */
+            var canResa = ((rewardLast && rewardLast.resa) || 0) > 0 || ((rewardCurrent && rewardCurrent.resa) || 0) > 0;
+            var minSeuilResa = null;
+            recompensesConfig.forEach(function (rc) {
+                if ((rc.resa || 0) > 0 && (minSeuilResa === null || rc.seuil_min < minSeuilResa)) minSeuilResa = rc.seuil_min;
+            });
+
             /* Zone réservée : selon le modèle actif (Admin > Barème Perco) */
             html += '<div class="profil-droits__separator"></div>';
             if (percoMode === 'rang') {
@@ -734,8 +741,8 @@
                 html += '<div class="profil-droits__zone">';
                 html += '<span class="text-muted" style="font-size:0.8125rem;">Les zones réservées sont attribuées automatiquement à chaque quinzaine selon le classement. <a href="board.html" style="color:var(--color-accent-light);">Définis tes préférences de zones ici</a>.</span>';
                 html += '</div>';
-            } else if (pointsCurrent >= 75 || pointsLast >= 75) {
-                /* Modèle simple : réservation libre dès 75 pts sur l'une des 2 quinzaines */
+            } else if (canResa) {
+                /* Modèle simple : le palier de points atteint inclut un droit de résa */
                 var currentZone = window.REN.currentProfile.zone_reservee || '';
                 html += '<div class="profil-droits__zone">';
                 html += '<label class="profil-droits__toggle-label">Zone réservée</label>';
@@ -746,7 +753,10 @@
                 html += '</div>';
             } else {
                 html += '<div class="profil-droits__zone profil-droits__zone--locked">';
-                html += '<span class="text-muted" style="font-size:0.8125rem;">Zone réservée : disponible à partir de 75 pts sur la quinzaine</span>';
+                var lockTxt = minSeuilResa !== null
+                    ? 'Zone réservée : disponible à partir de ' + minSeuilResa + ' pts sur la quinzaine'
+                    : 'Zone réservée : aucun palier du barème n\'inclut de réservation pour le moment';
+                html += '<span class="text-muted" style="font-size:0.8125rem;">' + lockTxt + '</span>';
                 html += '</div>';
             }
 
