@@ -126,6 +126,7 @@
 
         await loadCurrentSession();
         renderSessionPanel();
+        restoreAchatDraft();
 
         /* Guide première session : replié si l'utilisateur a déjà FM */
         try {
@@ -161,14 +162,33 @@
             runes = data || [];
             runesById = {};
             runesByNorm = {};
+            runesByTokens = {};
             runes.forEach(function (r) {
                 runesById[r.id] = r;
                 runesByNorm[norm(r.nom)] = r;
+                runesByTokens[tokenKey(r.nom)] = r;
             });
         } catch (err) {
             console.error('[REN-FM] Erreur runes:', err);
             window.REN.toast('Erreur chargement catalogue runes', 'error');
         }
+    }
+
+    /* Index insensible a l'ordre des mots ("Pa Vit Rune" = "Rune Pa Vit"),
+       "rune" ignore, alias des abreviations des clients etrangers.
+       Les tokens FR (vi, age, fo, ine, sa, po...) ne sont jamais des cles
+       d'alias : la meme fonction sert pour indexer le catalogue FR. */
+    var RUNE_TOKEN_ALIAS = {
+        vit: 'vi', agi: 'age', str: 'fo', int: 'ine', wis: 'sa',
+        range: 'po', summo: 'invo', crit: 'cri', power: 'puis', dam: 'do'
+    };
+    var runesByTokens = {};
+
+    function tokenKey(nom) {
+        return norm(nom).split(' ')
+            .filter(function (t) { return t && t !== 'rune'; })
+            .map(function (t) { return RUNE_TOKEN_ALIAS[t] || t; })
+            .sort().join(' ');
     }
 
     function matchRune(nom) {
@@ -178,6 +198,9 @@
         if (runesByNorm['rune ' + n]) return runesByNorm['rune ' + n];
         var stripped = n.replace(/^rune\s+/, '');
         if (runesByNorm['rune ' + stripped]) return runesByNorm['rune ' + stripped];
+        /* Clients EN/DE : "[Pa Vit Rune]" = "Rune Pa Vi" */
+        var k = tokenKey(nom);
+        if (k && runesByTokens[k]) return runesByTokens[k];
         return null;
     }
 
@@ -799,7 +822,43 @@
         ta.addEventListener('input', function () {
             pendingAchats = parseAchats(ta.value);
             renderPendingAchats();
+            saveAchatDraft(ta.value);
         });
+    }
+
+    /* Brouillon persistant : les lignes collees mais pas encore validees
+       survivent a la fermeture du site (sinon elles etaient perdues) */
+    function draftKey() {
+        return currentSession ? 'dmo_fm_achat_draft_' + currentSession.id : null;
+    }
+
+    function saveAchatDraft(text) {
+        var k = draftKey();
+        if (!k) return;
+        try {
+            if (text && text.trim()) localStorage.setItem(k, text);
+            else localStorage.removeItem(k);
+        } catch (e) { /* stockage indisponible : pas bloquant */ }
+    }
+
+    function restoreAchatDraft() {
+        var k = draftKey();
+        if (!k) return;
+        var ta = document.getElementById('fm-achat-paste');
+        if (!ta || ta.value) return;
+        var saved = null;
+        try { saved = localStorage.getItem(k); } catch (e) { return; }
+        if (!saved) return;
+        ta.value = saved;
+        pendingAchats = parseAchats(saved);
+        renderPendingAchats();
+        window.REN.toast('Des achats collés non validés ont été restaurés : pense à les valider !', 'info');
+    }
+
+    function clearAchatDraft() {
+        var k = draftKey();
+        if (!k) return;
+        try { localStorage.removeItem(k); } catch (e) { /* rien */ }
     }
 
     /* Parse le bloc collé : une ligne par achat. */
@@ -959,6 +1018,7 @@
             window.REN.toast(pendingAchats.length + ' achat(s) enregistré(s)', 'success');
             pendingAchats = [];
             document.getElementById('fm-achat-paste').value = '';
+            clearAchatDraft();
             renderPendingAchats();
 
             await loadCurrentSession();
